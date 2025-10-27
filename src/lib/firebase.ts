@@ -60,16 +60,13 @@ export const getUIErrorFromFirebaseError = (
   }
 };
 
-export const createUser = async (
-  email: string,
-  userId: string
-) => {
+export const createUser = async (email: string, userId: string) => {
   const userRef = doc(db, "users", userId);
 
   const userData = {
     id: userId,
     email: email,
-    role: "Customer",
+    role: "customer" as const,
     address: {
       line1: "",
       line2: "",
@@ -79,7 +76,7 @@ export const createUser = async (
     },
     billingAddress: {},
     theme: "light",
-    createdAt: new Date(),
+    createdAt: new Date().toISOString(),
     discounts: [],
   };
 
@@ -104,6 +101,7 @@ export const createProduct = async (productData: {
   serialNumber: string;
   price: number;
   currency: string;
+  taxRate: string;
   image?: string;
   category: string;
   stock: number;
@@ -119,11 +117,10 @@ export const createProduct = async (productData: {
       amount: productData.price,
       currency: productData.currency,
     },
-    taxRate: 20,
     image: productData.image || "",
-    draft: false,
-    createdAt: new Date(),
-    updatedAt: new Date(),
+    draft: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
   };
 
   if (productData.discount !== undefined && productData.discount !== null) {
@@ -132,7 +129,10 @@ export const createProduct = async (productData: {
 
   console.log("Product object before saving:", product);
   const { currency, ...productWithoutCurrency } = product;
-  console.log("Product object after removing currency:", productWithoutCurrency);
+  console.log(
+    "Product object after removing currency:",
+    productWithoutCurrency
+  );
 
   try {
     const docRef = await addDoc(productsRef, productWithoutCurrency);

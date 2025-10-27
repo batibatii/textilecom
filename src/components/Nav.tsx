@@ -21,7 +21,7 @@ export function Navbar() {
             <Link href="/user/signup">SIGN IN</Link>
           </li>
         )}
-        {user && (user.role === "Admin" || user.role === "SuperAdmin") && (
+        {user && (user.role === "admin" || user.role === "superAdmin") && (
           <li className="p-2">
             <Link href="/admin">ADMIN PANEL</Link>
           </li>

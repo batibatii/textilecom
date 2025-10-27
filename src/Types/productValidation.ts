@@ -16,9 +16,53 @@ export const ProductFormSchema = z.object({
   image: z.string().optional(),
   category: z.string().min(1, "Category is required"),
   stock: z
-    .union([z.number().nonnegative("Stock must be a positive number"), z.nan()])
+    .union([
+      z
+        .number()
+        .min(0, "Stock must be at least 0")
+        .max(9999, "Stock cannot exceed 9999"),
+      z.nan(),
+    ])
     .refine((val) => !isNaN(val), { message: "Stock is required" }),
-  discount: z.union([z.number(), z.nan()]).optional(),
+  discount: z
+    .union([
+      z
+        .number()
+        .min(0, "Discount must be at least 0")
+        .max(30, "Discount cannot exceed 30"),
+      z.nan(),
+    ])
+    .optional(),
+  taxRate: z.string().min(1, "Tax rate is required"),
 });
 
 export type ProductFormData = z.infer<typeof ProductFormSchema>;
+
+export const ProductSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  description: z.string(),
+  brand: z.string(),
+  serialNumber: z.string(),
+  price: z.object({
+    amount: z.number(),
+    currency: z.string(),
+  }),
+  taxRate: z.string(),
+  image: z.string(),
+  category: z.string(),
+  stock: z.number(),
+  draft: z.boolean(),
+  discount: z
+    .object({
+      rate: z.number(),
+    })
+    .optional(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+  createdBy: z.string(),
+});
+
+export type Product = z.infer<typeof ProductSchema>;
+
+export type NewProduct = Omit<Product, "id" | "createdAt" | "updatedAt">;

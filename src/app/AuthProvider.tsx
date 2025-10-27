@@ -20,11 +20,15 @@ import {
 } from "firebase/auth";
 import { TailChase } from "ldrs/react";
 import "ldrs/react/TailChase.css";
-
-export interface User extends FirebaseUser {
+interface BaseUser extends FirebaseUser {
   id: string;
-  role: string; // Admin, Customer, SuperAdmin
+  role: "admin" | "customer" | "superAdmin";
   email: string;
+  theme?: string;
+  createdAt: Date;
+}
+export interface CustomerUser extends BaseUser {
+  role: "customer";
   address: {
     line1: string;
     line2: string;
@@ -32,16 +36,22 @@ export interface User extends FirebaseUser {
     postalCode: string;
     country: string;
   };
-  billingAddress?: {};
-  theme?: string;
-  createdAt: Date;
-  discounts: [
-    {
-      code: string;
-      validUntil: Date;
-    }
-  ];
+  billingAddress?: {
+    line1: string;
+    line2: string;
+    city: string;
+    postalCode: string;
+    country: string;
+  };
+  discounts: Array<{
+    code: string;
+    validUntil: Date;
+  }>;
 }
+export interface AdminUser extends BaseUser {
+  role: "admin" | "superAdmin";
+}
+export type User = CustomerUser | AdminUser;
 
 type AuthContextType = {
   user: User | null;
@@ -66,7 +76,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
-        // Fetch user data from Firestore to get role and other info
         const userData = await getUserData(firebaseUser.uid);
         if (userData) {
           setUser({ ...firebaseUser, ...userData } as User);

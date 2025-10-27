@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Playfair_Display, Merriweather } from "next/font/google";
 import "./globals.css";
-import { Navbar } from "../components/Nav";
+import { ConditionalNavbar } from "../components/ConditionalNavbar";
 import { AuthProvider } from "./AuthProvider";
 
 const playfairDisplay = Playfair_Display({
@@ -31,7 +31,10 @@ export default function RootLayout({
       <body
         className={`${playfairDisplay.variable} ${merriweather.variable} antialiased font-extralight`}
       >
-        <AuthProvider> {children}</AuthProvider>
+        <AuthProvider>
+          <ConditionalNavbar />
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );

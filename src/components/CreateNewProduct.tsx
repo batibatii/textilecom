@@ -66,14 +66,6 @@ export function CreateNewProduct() {
     }
   };
 
-  const generateProductNumber = () => {
-    const randomDigits = Math.floor(Math.random() * 1000000000000)
-      .toString()
-      .padStart(12, "0");
-    const generatedNumber = `TM-${randomDigits}`;
-    setValue("serialNumber", generatedNumber);
-  };
-
   const onSubmit = async (data: ProductFormData) => {
     try {
       setError(undefined);
@@ -98,7 +90,7 @@ export function CreateNewProduct() {
   };
 
   const innerCard = (
-    <Card className="h-fit w-90  sm:w-150  border shadow-sm md:w-200">
+    <Card className="h-fit w-90  sm:w-150  border shadow-sm md:w-200 ">
       <CardHeader className="p-3 pb-2 md:p-6">
         <CardTitle className="text-base md:text-2xl">
           Create New Product
@@ -116,7 +108,7 @@ export function CreateNewProduct() {
                   <Label className="text-xs md:text-sm">Title</Label>
                   <Input
                     {...register("title")}
-                    className="h-8 md:h-9 text-sm"
+                    className="h-8 md:h-9 text-sm border-b border-b-ring rounded-none"
                   />
                   {errors.title && (
                     <span className="text-destructive text-[10px] md:text-xs mt-2">
@@ -127,7 +119,7 @@ export function CreateNewProduct() {
                 <div className="flex flex-col gap-0.5">
                   <Label className="text-xs md:text-sm">Description</Label>
                   <Textarea
-                    className="resize-none text-sm min-h-[60px] md:min-h-20"
+                    className="resize-none text-sm min-h-[60px] md:min-h-20 border-b border-b-ring "
                     {...register("description")}
                   />
                   {errors.description && (
@@ -140,7 +132,7 @@ export function CreateNewProduct() {
                   <Label className="text-xs md:text-sm">Brand</Label>
                   <Input
                     {...register("brand")}
-                    className="h-8 md:h-9 text-sm"
+                    className="h-8 md:h-9 text-sm border-b border-b-ring rounded-none"
                   />
                   {errors.brand && (
                     <span className="text-destructive text-[10px] md:text-xs mt-2">
@@ -152,24 +144,14 @@ export function CreateNewProduct() {
                   <div className="flex flex-col gap-0.5 flex-1">
                     <Label className="text-xs md:text-sm">Product Number</Label>
                     <Input
-                      value={productNumber}
-                      readOnly
-                      className="h-8 md:h-9 text-sm"
+                      {...register("serialNumber")}
+                      className="h-8 md:h-9 text-sm border-b border-b-ring rounded-none"
                     />
                     {errors.serialNumber && (
                       <span className="text-destructive text-[10px] md:text-xs mt-2">
                         {errors.serialNumber.message}
                       </span>
                     )}
-                  </div>
-                  <div className="pt-4 md:pt-5">
-                    <Button
-                      type="button"
-                      onClick={generateProductNumber}
-                      className="h-8 md:h-9 px-2 md:px-3 text-xs md:text-sm "
-                    >
-                      Generate
-                    </Button>
                   </div>
                 </div>
               </>
@@ -178,13 +160,13 @@ export function CreateNewProduct() {
             {currentPage === 2 && (
               <>
                 <div className="flex gap-1.5 md:gap-4">
-                  <div className="flex flex-col gap-0.5 flex-1">
+                  <div className="flex flex-col gap-1 flex-1">
                     <Label className="text-xs md:text-sm">Price</Label>
                     <Input
                       type="number"
                       step="0.01"
                       {...register("price", { valueAsNumber: true })}
-                      className="h-8 md:h-9 text-sm"
+                      className="h-8 md:h-9 text-sm border-b border-b-ring rounded-none w-60 sm:w-full"
                     />
                     {errors.price && (
                       <span className="text-destructive text-[10px] md:text-xs mt-2">
@@ -192,12 +174,12 @@ export function CreateNewProduct() {
                       </span>
                     )}
                   </div>
-                  <div className="flex flex-col gap-0.5 w-20 md:w-32">
+                  <div className="flex flex-col gap-1 w-20 md:w-32">
                     <Label className="text-xs md:text-sm">Currency</Label>
                     <NativeSelect
                       defaultValue=""
                       {...register("currency")}
-                      className="h-8 md:h-9 text-xs md:text-sm"
+                      className="h-8 md:h-9 text-xs md:text-sm border border-b-ring rounded-none"
                     >
                       <NativeSelectOption value="" disabled>
                         Select
@@ -219,24 +201,39 @@ export function CreateNewProduct() {
                     )}
                   </div>
                 </div>
-                <div className="flex flex-col gap-0.5">
-                  <Label className="text-xs md:text-sm">Tax Rate</Label>
-                  <Input
-                    value="20%"
-                    disabled
-                    className="cursor-not-allowed h-8 md:h-9 text-sm"
-                  />
-                </div>
-                <div className="flex flex-col gap-0.5">
-                  <Label className="text-xs md:text-sm">
-                    Image URL (Optional)
-                  </Label>
-                  <Input
-                    type="text"
-                    placeholder="https://example.com/image.jpg"
-                    {...register("image")}
-                    className="h-8 md:h-9 text-sm"
-                  />
+                <div className="flex gap-3">
+                  <div className="flex flex-col gap-1">
+                    <Label className="text-xs md:text-sm">Tax Rate</Label>
+                    <NativeSelect
+                      defaultValue=""
+                      {...register("taxRate")}
+                      className="h-8 md:h-9 text-xs md:text-sm border-b border-b-ring rounded-none"
+                    >
+                      <NativeSelectOption value="" disabled>
+                        Select
+                      </NativeSelectOption>
+                      <NativeSelectOption value="%1">%1</NativeSelectOption>
+                      <NativeSelectOption value="%8">%8</NativeSelectOption>
+                      <NativeSelectOption value="%18">%18</NativeSelectOption>
+                      <NativeSelectOption value="%20">%20</NativeSelectOption>
+                    </NativeSelect>
+                    {errors.taxRate && (
+                      <span className="text-destructive text-[10px] md:text-xs mt-2">
+                        {errors.taxRate.message}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <Label className="text-xs md:text-sm">
+                      Image URL (Optional)
+                    </Label>
+                    <Input
+                      type="text"
+                      placeholder="https://example.com/image.jpg"
+                      {...register("image")}
+                      className="h-8 md:h-9 text-sm min-w-59 sm:min-w-110 md:min-w-155 border-b border-b-ring rounded-none"
+                    />
+                  </div>
                 </div>
               </>
             )}
@@ -247,7 +244,7 @@ export function CreateNewProduct() {
                   <Label className="text-xs md:text-sm">Category</Label>
                   <Input
                     {...register("category")}
-                    className="h-8 md:h-9 text-sm"
+                    className="h-8 md:h-9 text-sm border-b border-b-ring rounded-none"
                   />
                   {errors.category && (
                     <span className="text-destructive text-[10px] md:text-xs mt-2">
@@ -260,7 +257,7 @@ export function CreateNewProduct() {
                   <Input
                     type="number"
                     {...register("stock", { valueAsNumber: true })}
-                    className="h-8 md:h-9 text-sm"
+                    className="h-8 md:h-9 text-sm border-b border-b-ring rounded-none"
                   />
                   {errors.stock && (
                     <span className="text-destructive text-[10px] md:text-xs mt-2">
@@ -275,10 +272,10 @@ export function CreateNewProduct() {
                   <Input
                     type="number"
                     {...register("discount", { valueAsNumber: true })}
-                    className="h-8 md:h-9 text-sm"
+                    className="h-8 md:h-9 text-sm border-b border-b-ring rounded-none"
                   />
                   {errors.discount && (
-                    <span className="text-destructive text-[10px] md:text-xs">
+                    <span className="text-destructive text-[10px] md:text-xs mt-1">
                       {errors.discount.message}
                     </span>
                   )}
