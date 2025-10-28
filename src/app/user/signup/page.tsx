@@ -19,7 +19,7 @@ export default function SignUpPage() {
       setFirebaseError(undefined);
       await register(data.email, data.password);
       router.push("/");
-    } catch (err: unknown) {
+    } catch (err) {
       const firebaseError = err as FirebaseError;
       const errorMessage = getUIErrorFromFirebaseError(firebaseError.code);
       setFirebaseError(errorMessage);
@@ -31,7 +31,7 @@ export default function SignUpPage() {
       setFirebaseError(undefined);
       await login(data.email, data.password);
       router.push("/");
-    } catch (err: unknown) {
+    } catch (err) {
       const firebaseError = err as FirebaseError;
       const errorMessage = getUIErrorFromFirebaseError(firebaseError.code, "login");
       setFirebaseError(errorMessage);
@@ -43,7 +43,7 @@ export default function SignUpPage() {
       setFirebaseError(undefined);
       await loginWithGoogle();
       router.push("/");
-    } catch (err: unknown) {
+    } catch (err) {
       const firebaseError = err as FirebaseError;
       const errorMessage = getUIErrorFromFirebaseError(firebaseError.code);
       setFirebaseError(errorMessage);
