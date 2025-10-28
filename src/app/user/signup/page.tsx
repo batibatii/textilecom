@@ -7,7 +7,7 @@ import Image from "next/image";
 import { SignUp } from "@/components/SignUp";
 import { LoginAndSignUpType } from "@/Types/authTypes";
 import { useAuth } from "@/app/AuthProvider";
-import { getUIErrorFromFirebaseError } from "@/lib/firebase";
+import { getUIErrorFromFirebaseError, FirebaseError } from "@/lib/firebase";
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -19,8 +19,9 @@ export default function SignUpPage() {
       setFirebaseError(undefined);
       await register(data.email, data.password);
       router.push("/");
-    } catch (err: any) {
-      const errorMessage = getUIErrorFromFirebaseError(err?.code);
+    } catch (err: unknown) {
+      const firebaseError = err as FirebaseError;
+      const errorMessage = getUIErrorFromFirebaseError(firebaseError.code);
       setFirebaseError(errorMessage);
     }
   };
@@ -30,8 +31,9 @@ export default function SignUpPage() {
       setFirebaseError(undefined);
       await login(data.email, data.password);
       router.push("/");
-    } catch (err: any) {
-      const errorMessage = getUIErrorFromFirebaseError(err.code, "login");
+    } catch (err: unknown) {
+      const firebaseError = err as FirebaseError;
+      const errorMessage = getUIErrorFromFirebaseError(firebaseError.code, "login");
       setFirebaseError(errorMessage);
     }
   };
@@ -41,8 +43,9 @@ export default function SignUpPage() {
       setFirebaseError(undefined);
       await loginWithGoogle();
       router.push("/");
-    } catch (err: any) {
-      const errorMessage = getUIErrorFromFirebaseError(err.code);
+    } catch (err: unknown) {
+      const firebaseError = err as FirebaseError;
+      const errorMessage = getUIErrorFromFirebaseError(firebaseError.code);
       setFirebaseError(errorMessage);
     }
   };

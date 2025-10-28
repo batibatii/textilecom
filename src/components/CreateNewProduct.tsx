@@ -28,7 +28,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { ProductFormSchema, ProductFormData } from "@/Types/productValidation";
-import { createProduct } from "@/lib/firebase";
+import { createProduct, FirebaseError } from "@/lib/firebase";
 import { Alert, AlertTitle } from "./ui/alert";
 import { useAuth } from "@/app/AuthProvider";
 
@@ -83,9 +83,10 @@ export function CreateNewProduct() {
       setTimeout(() => {
         setSuccess(false);
       }, 3000);
-    } catch (err: any) {
+    } catch (err) {
       console.error("Error creating product:", err);
-      setError(err.message || "Failed to create product");
+      const firebaseError = err as FirebaseError;
+      setError(firebaseError.message || "Failed to create product");
     }
   };
 

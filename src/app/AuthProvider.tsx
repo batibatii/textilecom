@@ -102,9 +102,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         password
       );
       await createUser(email, userCredential.user.uid);
-    } catch (err: any) {
-      setError(err);
-      throw err;
+    } catch (err) {
+      const firebaseError = err as FirebaseError;
+      setError(firebaseError);
+      throw firebaseError;
     } finally {
       setLoading(false);
     }
@@ -115,9 +116,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setError(null);
       setLoading(true);
       await signInWithEmailAndPassword(auth, email, password);
-    } catch (err: any) {
-      setError(err);
-      throw err;
+    } catch (err) {
+      const firebaseError = err as FirebaseError;
+      setError(firebaseError);
+      throw firebaseError;
     } finally {
       setLoading(false);
     }
@@ -136,11 +138,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
 
       setError(null);
-    } catch (error: any) {
-      const errorCode = error.code;
-      const errorMessage = error.message;
-      setError({ code: errorCode, message: errorMessage });
-      throw error;
+    } catch (error) {
+      const firebaseError = error as FirebaseError;
+      setError(firebaseError);
+      throw firebaseError;
     } finally {
       setLoading(false);
     }
@@ -150,9 +151,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       setError(null);
       await signOut(auth);
-    } catch (err: any) {
-      setError(err);
-      throw err;
+    } catch (err) {
+      const firebaseError = err as FirebaseError;
+      setError(firebaseError);
+      throw firebaseError;
     }
   };
 
@@ -162,9 +164,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (auth.currentUser) {
         await deleteUser(auth.currentUser);
       }
-    } catch (err: any) {
-      setError(err);
-      throw err;
+    } catch (err) {
+      const firebaseError = err as FirebaseError;
+      setError(firebaseError);
+      throw firebaseError;
     }
   };
 
@@ -175,9 +178,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         await auth.currentUser.reload();
         setUser(auth.currentUser as User);
       }
-    } catch (err: any) {
-      setError(err);
-      throw err;
+    } catch (err) {
+      const firebaseError = err as FirebaseError;
+      setError(firebaseError);
+      throw firebaseError;
     }
   };
 

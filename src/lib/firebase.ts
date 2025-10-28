@@ -17,6 +17,7 @@ import {
   where,
   deleteDoc,
 } from "firebase/firestore";
+import { NewProduct } from "@/Types/productValidation";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY ?? "",
@@ -46,7 +47,6 @@ export const getUIErrorFromFirebaseError = (
       return "An account with this email address is already registered";
     case "auth/invalid-credential":
     case "auth/wrong-password":
-      // Show different message based on context
       if (context === "password-change") {
         return "Current password is incorrect";
       }
@@ -111,33 +111,35 @@ export const createProduct = async (productData: {
   console.log("createProduct called with:", productData);
   const productsRef = collection(db, "products");
 
-  const product: any = {
-    ...productData,
+  const baseProduct = {
+    title: productData.title,
+    description: productData.description,
+    brand: productData.brand,
+    serialNumber: productData.serialNumber,
     price: {
       amount: productData.price,
       currency: productData.currency,
     },
+    taxRate: productData.taxRate,
     image: productData.image || "",
+    category: productData.category,
+    stock: productData.stock,
     draft: true,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
+    createdBy: productData.createdBy,
   };
 
-  if (productData.discount !== undefined && productData.discount !== null) {
-    product.discount = { rate: productData.discount };
-  }
+  const product = productData.discount !== undefined && productData.discount !== null
+    ? { ...baseProduct, discount: { rate: productData.discount } }
+    : baseProduct;
 
   console.log("Product object before saving:", product);
-  const { currency, ...productWithoutCurrency } = product;
-  console.log(
-    "Product object after removing currency:",
-    productWithoutCurrency
-  );
 
   try {
-    const docRef = await addDoc(productsRef, productWithoutCurrency);
+    const docRef = await addDoc(productsRef, product);
     console.log("Document created with ID:", docRef.id);
-    return { id: docRef.id, ...productWithoutCurrency };
+    return { id: docRef.id, ...product };
   } catch (error) {
     console.error("Error adding document:", error);
     throw error;
