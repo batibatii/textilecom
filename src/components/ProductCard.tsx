@@ -154,7 +154,7 @@ export function ProductCard({ product, onDelete, onUpdate }: ProductCardProps) {
                   </DialogTitle>
                   <DialogDescription>
                     This action cannot be undone. This will permanently delete{" "}
-                    <span className="font-semibold">"{product.title}"</span> and
+                    <span className="font-semibold">&quot;{product.title}&quot;</span> and
                     remove all associated data from our servers.
                   </DialogDescription>
                 </DialogHeader>
