@@ -27,15 +27,22 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { ProductFormSchema, ProductFormData } from "@/Types/productValidation";
+import {
+  ProductFormSchema,
+  ProductFormData,
+  PRODUCT_CATEGORIES,
+} from "@/Types/productValidation";
 import { createProduct, FirebaseError } from "@/lib/firebase";
 import { Alert, AlertTitle } from "./ui/alert";
 import { useAuth } from "@/app/AuthProvider";
+import { uploadImages } from "@/app/actions/admin/products/new";
 
 export function CreateNewProduct() {
   const [currentPage, setCurrentPage] = useState(1);
   const [error, setError] = useState<string | undefined>();
   const [success, setSuccess] = useState(false);
+  const [selectedImages, setSelectedImages] = useState<File[]>([]);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
   const { user } = useAuth();
   const totalPages = 3;
 
@@ -69,17 +76,41 @@ export function CreateNewProduct() {
   const onSubmit = async (data: ProductFormData) => {
     try {
       setError(undefined);
-      console.log("Form data:", data);
-      console.log("User ID:", user?.uid);
+      let imageUrls: string[] = [];
+
+      if (selectedImages.length > 0) {
+        setIsUploadingImage(true);
+        const formData = new FormData();
+
+        selectedImages.forEach((file) => {
+          formData.append("images", file);
+        });
+
+        const uploadResult = await uploadImages(formData);
+
+        if (!uploadResult.success) {
+          setError(uploadResult.error.message);
+          setIsUploadingImage(false);
+          return;
+        }
+
+        imageUrls = uploadResult.urls;
+        setIsUploadingImage(false);
+      }
+
       const productData = {
         ...data,
+        images: imageUrls,
         discount: data.discount || 0,
         createdBy: user?.uid || "",
       };
-      console.log("Product data being sent:", productData);
+
       const result = await createProduct(productData);
       console.log("Product created successfully:", result);
+
       setSuccess(true);
+      setSelectedImages([]);
+
       setTimeout(() => {
         setSuccess(false);
       }, 3000);
@@ -87,6 +118,7 @@ export function CreateNewProduct() {
       console.error("Error creating product:", err);
       const firebaseError = err as FirebaseError;
       setError(firebaseError.message || "Failed to create product");
+      setIsUploadingImage(false);
     }
   };
 
@@ -120,7 +152,7 @@ export function CreateNewProduct() {
                 <div className="flex flex-col gap-0.5">
                   <Label className="text-xs md:text-sm">Description</Label>
                   <Textarea
-                    className="resize-none text-sm min-h-[60px] md:min-h-20 border-b border-b-ring "
+                    className="resize-none text-sm min-h-[60px] md:min-h-20 max-h-32 overflow-y-auto border-b border-b-ring "
                     {...register("description")}
                   />
                   {errors.description && (
@@ -226,14 +258,30 @@ export function CreateNewProduct() {
                   </div>
                   <div className="flex flex-col gap-1">
                     <Label className="text-xs md:text-sm">
-                      Image URL (Optional)
+                      Images (Optional)
                     </Label>
                     <Input
-                      type="text"
-                      placeholder="https://example.com/image.jpg"
-                      {...register("image")}
-                      className="h-8 md:h-9 text-sm min-w-59 sm:min-w-110 md:min-w-155 border-b border-b-ring rounded-none"
+                      type="file"
+                      multiple
+                      accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+                      onChange={(e) => {
+                        const files = Array.from(e.target.files || []);
+                        if (files.length > 0) {
+                          setSelectedImages(files);
+                          setError(undefined);
+                        } else {
+                          setSelectedImages([]);
+                        }
+                      }}
+                      disabled={isUploadingImage || isSubmitting}
+                      className="h-8 md:h-9 text-sm min-w-59 sm:min-w-110 md:min-w-155 border-b border-b-ring rounded-none cursor-pointer"
                     />
+                    {selectedImages.length > 0 && (
+                      <span className="text-xs text-muted-foreground mt-1">
+                        Selected: {selectedImages.length} image
+                        {selectedImages.length > 1 ? "s" : ""}
+                      </span>
+                    )}
                   </div>
                 </div>
               </>
@@ -243,10 +291,20 @@ export function CreateNewProduct() {
               <>
                 <div className="flex flex-col gap-0.5">
                   <Label className="text-xs md:text-sm">Category</Label>
-                  <Input
+                  <NativeSelect
+                    defaultValue=""
                     {...register("category")}
-                    className="h-8 md:h-9 text-sm border-b border-b-ring rounded-none"
-                  />
+                    className="h-8 md:h-9 text-xs md:text-sm border-b border-b-ring rounded-none"
+                  >
+                    <NativeSelectOption value="" disabled>
+                      Select a category
+                    </NativeSelectOption>
+                    {PRODUCT_CATEGORIES.map((category) => (
+                      <NativeSelectOption key={category} value={category}>
+                        {category}
+                      </NativeSelectOption>
+                    ))}
+                  </NativeSelect>
                   {errors.category && (
                     <span className="text-destructive text-[10px] md:text-xs mt-2">
                       {errors.category.message}
@@ -337,15 +395,14 @@ export function CreateNewProduct() {
           {currentPage === 3 && (
             <Button
               type="submit"
-              disabled={isSubmitting || success}
+              disabled={isSubmitting || success || isUploadingImage}
               className="w-full h-8 md:h-9 text-xs md:text-sm"
-              onClick={() => {
-                console.log("Button clicked!");
-                console.log("Form errors:", errors);
-                console.log("Is submitting:", isSubmitting);
-              }}
             >
-              {isSubmitting ? "Creating..." : success ? "Created!" : "Create"}
+              {isSubmitting || isUploadingImage
+                ? "Creating..."
+                : success
+                ? "Created!"
+                : "Create"}
             </Button>
           )}
         </CardFooter>

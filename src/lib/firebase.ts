@@ -102,7 +102,7 @@ export const createProduct = async (productData: {
   price: number;
   currency: string;
   taxRate: string;
-  image?: string;
+  images?: string[];
   category: string;
   stock: number;
   discount?: number;
@@ -121,7 +121,7 @@ export const createProduct = async (productData: {
       currency: productData.currency,
     },
     taxRate: productData.taxRate,
-    image: productData.image || "",
+    images: productData.images || [],
     category: productData.category,
     stock: productData.stock,
     draft: true,
@@ -143,5 +143,47 @@ export const createProduct = async (productData: {
   } catch (error) {
     console.error("Error adding document:", error);
     throw error;
+  }
+};
+
+export const getAllProducts = async () => {
+  try {
+    const productsRef = collection(db, "products");
+    const querySnapshot = await getDocs(productsRef);
+
+    const products = querySnapshot.docs.map((doc) => {
+      const data = doc.data();
+
+      return {
+        id: doc.id,
+        ...data,
+        createdAt: data.createdAt?.toDate?.()
+          ? data.createdAt.toDate().toISOString()
+          : data.createdAt,
+        updatedAt: data.updatedAt?.toDate?.()
+          ? data.updatedAt.toDate().toISOString()
+          : data.updatedAt,
+      };
+    });
+
+    return products;
+  } catch (error) {
+    console.error("Error fetching products:", error);
+    throw error;
+  }
+};
+
+export const deleteProduct = async (productId: string) => {
+  try {
+    const productRef = doc(db, "products", productId);
+    await deleteDoc(productRef);
+    return { success: true };
+  } catch (error) {
+    console.error("Error deleting product:", error);
+    const firebaseError = error as FirebaseError;
+    throw {
+      code: firebaseError.code || "firestore/delete-failed",
+      message: firebaseError.message || "Failed to delete product from database.",
+    };
   }
 };
