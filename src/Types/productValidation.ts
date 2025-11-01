@@ -20,7 +20,7 @@ export const ProductSchema = z.object({
     currency: z.string(),
   }),
   taxRate: z.string(),
-  images: z.array(z.string()),
+  images: z.array(z.string()).min(1, "At least one image is required"),
   category: z.enum(PRODUCT_CATEGORIES),
   stock: z.number(),
   draft: z.boolean(),
@@ -82,7 +82,7 @@ export const ImageFileSchema = z.object({
 export type ProductFormData = z.infer<typeof ProductFormSchema>;
 
 export type ProductDataWithImages = ProductFormData & {
-  images?: string[];
+  images: string[];
 };
 
 export type Product = z.infer<typeof ProductSchema>;

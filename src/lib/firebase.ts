@@ -102,13 +102,18 @@ export const createProduct = async (productData: {
   price: number;
   currency: string;
   taxRate: string;
-  images?: string[];
+  images: string[];
   category: string;
   stock: number;
   discount?: number;
   createdBy: string;
 }) => {
   console.log("createProduct called with:", productData);
+
+  if (!productData.images || productData.images.length === 0) {
+    throw new Error("At least one image is required to create a product");
+  }
+
   const productsRef = collection(db, "products");
 
   const baseProduct = {
@@ -121,7 +126,7 @@ export const createProduct = async (productData: {
       currency: productData.currency,
     },
     taxRate: productData.taxRate,
-    images: productData.images || [],
+    images: productData.images,
     category: productData.category,
     stock: productData.stock,
     draft: true,

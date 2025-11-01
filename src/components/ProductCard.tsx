@@ -58,7 +58,7 @@ export function ProductCard({ product, onDelete, onUpdate }: ProductCardProps) {
     setError(undefined);
 
     try {
-      await deleteProduct(product.id, product.images || []);
+      await deleteProduct(product.id, product.images);
 
       setIsDialogOpen(false);
       if (onDelete) {
@@ -115,7 +115,7 @@ export function ProductCard({ product, onDelete, onUpdate }: ProductCardProps) {
             {product.title.toUpperCase()}
           </CardTitle>
         </CardHeader>
-        <CardContent className="pb-4 pl-0 pt-0">
+        <CardContent className="pb-4 pl-0 pr-0 pt-0">
           <div className="flex items-center gap-2 ">
             {hasDiscount && (
               <span className="font-light text-[11px] md:text-[12px] md:font-extralight text-muted-foreground line-through ">
@@ -132,15 +132,15 @@ export function ProductCard({ product, onDelete, onUpdate }: ProductCardProps) {
             <Button
               variant="default"
               size="sm"
-              className="flex-1 h-8 text-xs font-light rounded-none"
+              className="flex-1 rounded-none"
             >
               APPROVE
             </Button>
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-              <DialogTrigger asChild>
+              <DialogTrigger asChild className="flex-1">
                 <Button
                   size="sm"
-                  className="bg-background text-foreground flex-1 h-8 text-xs font-light rounded-none border border-black hover:bg-destructive hover:text-background"
+                  className="flex-1 bg-background text-foreground rounded-none border border-black hover:bg-destructive hover:text-background"
                 >
                   DELETE
                 </Button>
