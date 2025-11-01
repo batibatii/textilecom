@@ -1,5 +1,4 @@
 import { Playfair_Display, Merriweather } from "next/font/google";
-import { AuthProvider } from "../../AuthProvider";
 
 const playfairDisplay = Playfair_Display({
   variable: "--font-playfair",
