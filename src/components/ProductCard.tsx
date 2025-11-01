@@ -6,8 +6,8 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { useState } from "react";
-import { deleteProductImages } from "@/app/actions/admin/products/delete";
 import { deleteProduct } from "@/lib/firebase";
+import { useAuth } from "@/app/AuthProvider";
 import {
   Dialog,
   DialogContent,
@@ -35,6 +35,7 @@ const getCurrencySymbol = (currency: string): string => {
 };
 
 export function ProductCard({ product, onDelete, onUpdate }: ProductCardProps) {
+  const { user } = useAuth();
   const [isDeleting, setIsDeleting] = useState(false);
   const [error, setError] = useState<string | undefined>();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -48,19 +49,16 @@ export function ProductCard({ product, onDelete, onUpdate }: ProductCardProps) {
   const currencySymbol = getCurrencySymbol(product.price.currency);
 
   const handleDelete = async () => {
+    if (!user) {
+      setError("You must be logged in to delete products.");
+      return;
+    }
+
     setIsDeleting(true);
     setError(undefined);
 
     try {
-      const imageDeleteResult = await deleteProductImages(product.images || []);
-
-      if (!imageDeleteResult.success) {
-        setError(imageDeleteResult.error.message);
-        setIsDeleting(false);
-        return;
-      }
-
-      await deleteProduct(product.id);
+      await deleteProduct(product.id, product.images || []);
 
       setIsDialogOpen(false);
       if (onDelete) {

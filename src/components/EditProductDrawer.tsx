@@ -35,6 +35,7 @@ import { useEffect, useState, useRef } from "react";
 import { ArrowLeft } from "lucide-react";
 import { uploadImages } from "@/app/actions/admin/products/new";
 import { deleteProductImages } from "@/app/actions/admin/products/delete";
+import { useAuth } from "@/app/AuthProvider";
 import { db } from "@/lib/firebase";
 import { doc, updateDoc } from "firebase/firestore";
 
@@ -51,6 +52,7 @@ export function EditProductDrawer({
   onOpenChange,
   onUpdate,
 }: EditProductDrawerProps) {
+  const { user } = useAuth();
   const [newImages, setNewImages] = useState<File[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | undefined>();
@@ -130,6 +132,11 @@ export function EditProductDrawer({
   };
 
   const handleDeleteImage = async () => {
+    if (!user) {
+      setDeleteError("You must be logged in to delete images.");
+      return;
+    }
+
     if (!product || productImages.length === 0) return;
 
     setIsDeleting(true);

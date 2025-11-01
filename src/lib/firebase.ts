@@ -13,11 +13,11 @@ import {
   getDocs,
   setDoc,
   getDoc,
+  deleteDoc,
   query,
   where,
-  deleteDoc,
 } from "firebase/firestore";
-import { NewProduct } from "@/Types/productValidation";
+import { deleteProductImages } from "@/app/actions/admin/products/delete";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY ?? "",
@@ -173,13 +173,13 @@ export const getAllProducts = async () => {
   }
 };
 
-export const deleteProduct = async (productId: string) => {
+export const deleteProductFromDB = async (productId: string) => {
   try {
     const productRef = doc(db, "products", productId);
     await deleteDoc(productRef);
     return { success: true };
   } catch (error) {
-    console.error("Error deleting product:", error);
+    console.error("Error deleting product from database:", error);
     const firebaseError = error as FirebaseError;
     throw {
       code: firebaseError.code || "firestore/delete-failed",
@@ -187,3 +187,33 @@ export const deleteProduct = async (productId: string) => {
     };
   }
 };
+
+export const deleteProduct = async (productId: string, imageUrls: string[]) => {
+  try {
+    if (imageUrls && imageUrls.length > 0) {
+      const imageDeleteResult = await deleteProductImages(imageUrls);
+
+      if (!imageDeleteResult.success) {
+        throw {
+          code: imageDeleteResult.error?.code || "storage/delete-failed",
+          message:
+            imageDeleteResult.error?.message ||
+            "Failed to delete product images.",
+        };
+      }
+    }
+
+    await deleteProductFromDB(productId);
+
+    return { success: true };
+  } catch (error) {
+    console.error("Complete product deletion error:", error);
+    const firebaseError = error as FirebaseError;
+    throw {
+      code: firebaseError.code || "product/delete-failed",
+      message:
+        firebaseError.message || "Failed to delete product. Please try again.",
+    };
+  }
+};
+
