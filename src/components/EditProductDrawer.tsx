@@ -139,6 +139,11 @@ export function EditProductDrawer({
 
     if (!product || productImages.length === 0) return;
 
+    if (productImages.length === 1) {
+      setDeleteError("Cannot delete the last image. At least one image is required.");
+      return;
+    }
+
     setIsDeleting(true);
     setDeleteError(undefined);
 
@@ -206,6 +211,12 @@ export function EditProductDrawer({
       }
 
       const allImageUrls = [...productImages, ...uploadedImageUrls];
+
+      if (allImageUrls.length === 0) {
+        setUploadError("At least one image is required");
+        setIsUploading(false);
+        return;
+      }
 
       if (!product) {
         throw new Error("Product not found");

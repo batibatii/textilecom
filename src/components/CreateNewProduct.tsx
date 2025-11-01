@@ -76,27 +76,29 @@ export function CreateNewProduct() {
   const onSubmit = async (data: ProductFormData) => {
     try {
       setError(undefined);
-      let imageUrls: string[] = [];
 
-      if (selectedImages.length > 0) {
-        setIsUploadingImage(true);
-        const formData = new FormData();
-
-        selectedImages.forEach((file) => {
-          formData.append("images", file);
-        });
-
-        const uploadResult = await uploadImages(formData);
-
-        if (!uploadResult.success) {
-          setError(uploadResult.error.message);
-          setIsUploadingImage(false);
-          return;
-        }
-
-        imageUrls = uploadResult.urls;
-        setIsUploadingImage(false);
+      if (selectedImages.length === 0) {
+        setError("At least one image is required");
+        return;
       }
+
+      setIsUploadingImage(true);
+      const formData = new FormData();
+
+      selectedImages.forEach((file) => {
+        formData.append("images", file);
+      });
+
+      const uploadResult = await uploadImages(formData);
+
+      if (!uploadResult.success) {
+        setError(uploadResult.error.message);
+        setIsUploadingImage(false);
+        return;
+      }
+
+      const imageUrls = uploadResult.urls;
+      setIsUploadingImage(false);
 
       const productData = {
         ...data,
@@ -258,11 +260,12 @@ export function CreateNewProduct() {
                   </div>
                   <div className="flex flex-col gap-1">
                     <Label className="text-xs md:text-sm">
-                      Images (Optional)
+                      Images (Required)
                     </Label>
                     <Input
                       type="file"
                       multiple
+                      required
                       accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
                       onChange={(e) => {
                         const files = Array.from(e.target.files || []);
