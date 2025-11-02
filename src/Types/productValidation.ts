@@ -7,6 +7,7 @@ export const PRODUCT_CATEGORIES = [
   "Sweaters",
   "Accessories",
   "Shoes",
+  "Socks",
 ] as const;
 
 export const ProductSchema = z.object({

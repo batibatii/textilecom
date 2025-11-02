@@ -355,7 +355,7 @@ export function CreateNewProduct() {
         )}
 
         <CardFooter className="flex flex-col gap-2 md:gap-4 p-3 md:p-6">
-          <Pagination>
+          <Pagination className="flex justify-center">
             <PaginationContent>
               <PaginationItem>
                 <PaginationPrevious
