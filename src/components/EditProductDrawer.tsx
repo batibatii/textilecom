@@ -296,6 +296,7 @@ export function EditProductDrawer({
                             fill
                             className="object-contain"
                             sizes="(max-width: 1024px) 100vw, 500px"
+                            loading="lazy"
                           />
                         </div>
                       </CarouselItem>

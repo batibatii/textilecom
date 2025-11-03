@@ -23,6 +23,7 @@ interface ProductCardProps {
   product: Product;
   onDelete?: () => void;
   onUpdate?: () => void;
+  priority?: boolean;
 }
 
 const getCurrencySymbol = (currency: string): string => {
@@ -34,7 +35,12 @@ const getCurrencySymbol = (currency: string): string => {
   return symbols[currency] || currency;
 };
 
-export function ProductCard({ product, onDelete, onUpdate }: ProductCardProps) {
+export function ProductCard({
+  product,
+  onDelete,
+  onUpdate,
+  priority = false,
+}: ProductCardProps) {
   const { user } = useAuth();
   const [isDeleting, setIsDeleting] = useState(false);
   const [error, setError] = useState<string | undefined>();
@@ -91,6 +97,8 @@ export function ProductCard({ product, onDelete, onUpdate }: ProductCardProps) {
             fill
             className="object-cover"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw "
+            priority={priority}
+            loading={priority ? undefined : "lazy"}
           />
         ) : (
           <div className="flex items-center justify-center h-full text-muted-foreground">
@@ -111,29 +119,32 @@ export function ProductCard({ product, onDelete, onUpdate }: ProductCardProps) {
       </div>
       <div className="">
         <CardHeader className="pt-2 pl-0 ">
-          <CardTitle className="font-light text-[12px] md:text-[13px] tracking-wider md:font-extralight line-clamp-2 w-100 ">
+          <CardTitle className="font-light text-[12px] md:text-[13px] tracking-wider md:font-extralight w-full truncate">
             {product.title.toUpperCase()}
           </CardTitle>
         </CardHeader>
         <CardContent className="pb-4 pl-0 pr-0 pt-0">
-          <div className="flex items-center gap-2 ">
-            {hasDiscount && (
-              <span className="font-light text-[11px] md:text-[12px] md:font-extralight text-muted-foreground line-through ">
+          <div className="flex items-center justify-between gap-2 ">
+            <div className="flex items-center gap-2">
+              {hasDiscount && (
+                <span className="font-light text-[11px] md:text-[12px] md:font-extralight text-muted-foreground line-through ">
+                  {currencySymbol}
+                  {product.price.amount.toFixed(2)}
+                </span>
+              )}
+              <span className="font-light text-[11px] md:text-[12px]  md:font-extralight">
                 {currencySymbol}
-                {product.price.amount.toFixed(2)}
+                {displayPrice}
+              </span>
+            </div>
+            {hasDiscount && (
+              <span className=" text-[11px] md:text-[12px] font-medium text-green-900">
+                -{product?.discount?.rate}%
               </span>
             )}
-            <span className="font-light text-[11px] md:text-[12px]  md:font-extralight">
-              {currencySymbol}
-              {displayPrice}
-            </span>
           </div>
           <div className="flex gap-2 mt-6">
-            <Button
-              variant="default"
-              size="sm"
-              className="flex-1 rounded-none"
-            >
+            <Button variant="default" size="sm" className="flex-1 rounded-none">
               APPROVE
             </Button>
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -152,8 +163,10 @@ export function ProductCard({ product, onDelete, onUpdate }: ProductCardProps) {
                   </DialogTitle>
                   <DialogDescription>
                     This action cannot be undone. This will permanently delete{" "}
-                    <span className="font-semibold">&quot;{product.title}&quot;</span> and
-                    remove all associated data from our servers.
+                    <span className="font-semibold">
+                      &quot;{product.title}&quot;
+                    </span>{" "}
+                    and remove all associated data from our servers.
                   </DialogDescription>
                 </DialogHeader>
                 {error && (

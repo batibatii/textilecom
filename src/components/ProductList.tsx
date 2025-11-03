@@ -94,12 +94,13 @@ export function ProductList({ products }: ProductListProps) {
       )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-20   ">
-        {currentProducts.map((product) => (
+        {currentProducts.map((product, index) => (
           <ProductCard
             key={product.id}
             product={product}
             onDelete={handleProductUpdate}
             onUpdate={handleProductUpdate}
+            priority={index < 4}
           />
         ))}
       </div>

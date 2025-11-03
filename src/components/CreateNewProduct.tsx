@@ -51,6 +51,7 @@ export function CreateNewProduct() {
     handleSubmit,
     setValue,
     watch,
+    reset,
     formState: { errors, isSubmitting },
   } = useForm<ProductFormData>({
     resolver: zodResolver(ProductFormSchema),
@@ -112,6 +113,10 @@ export function CreateNewProduct() {
 
       setSuccess(true);
       setSelectedImages([]);
+      reset({
+        discount: 0,
+      });
+      setCurrentPage(1);
 
       setTimeout(() => {
         setSuccess(false);

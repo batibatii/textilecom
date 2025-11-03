@@ -79,8 +79,20 @@ export function SignUp({
           <div className="absolute bottom-0 left-1 h-px w-[96%] bg-ring"></div>
         </div>
         {errors.email && (
-          <Alert variant="destructive" className="">
-            <AlertTitle className="text-[11px]">
+          <Alert
+            variant="destructive"
+            className="gap-x-1! items-center! [&>svg]:translate-y-0!"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              fill="currentColor"
+              viewBox="0 0 256 256"
+            >
+              <path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm-8-80V80a8,8,0,0,1,16,0v56a8,8,0,0,1-16,0Zm20,36a12,12,0,1,1-12-12A12,12,0,0,1,140,172Z"></path>
+            </svg>
+            <AlertTitle className="text-[11px] font-extralight">
               {errors.email.message}
             </AlertTitle>
           </Alert>
@@ -102,15 +114,41 @@ export function SignUp({
           <div className="absolute bottom-0 left-1 h-px w-[96%] bg-ring"></div>
         </div>
         {errors.password && (
-          <Alert variant="destructive" className="">
-            <AlertTitle className="text-[11px]">
+          <Alert
+            variant="destructive"
+            className="gap-x-1! items-center! [&>svg]:translate-y-0!"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              fill="currentColor"
+              viewBox="0 0 256 256"
+            >
+              <path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm-8-80V80a8,8,0,0,1,16,0v56a8,8,0,0,1-16,0Zm20,36a12,12,0,1,1-12-12A12,12,0,0,1,140,172Z"></path>
+            </svg>
+            <AlertTitle className="text-[11px] font-extralight">
               {errors.password.message}
             </AlertTitle>
           </Alert>
         )}
         {firebaseError && (
-          <Alert variant="destructive">
-            <AlertTitle className="text-[11px]">{firebaseError}</AlertTitle>
+          <Alert
+            variant="destructive"
+            className="gap-x-1! items-center! [&>svg]:translate-y-0!"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              fill="currentColor"
+              viewBox="0 0 256 256"
+            >
+              <path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm-8-80V80a8,8,0,0,1,16,0v56a8,8,0,0,1-16,0Zm20,36a12,12,0,1,1-12-12A12,12,0,0,1,140,172Z"></path>
+            </svg>
+            <AlertTitle className="text-[11px] font-extralight">
+              {firebaseError}
+            </AlertTitle>
           </Alert>
         )}
       </div>

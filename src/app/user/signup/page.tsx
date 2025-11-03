@@ -77,7 +77,7 @@ export default function SignUpPage() {
           fill
           sizes="50vw"
           className="object-cover"
-          priority
+          loading="lazy"
         />
       </div>
     </div>
