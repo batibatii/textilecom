@@ -18,6 +18,7 @@ import {
   where,
 } from "firebase/firestore";
 import { deleteProductImages } from "@/app/actions/admin/products/delete";
+import { unstable_cache } from "next/cache";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY ?? "",
@@ -151,7 +152,7 @@ export const createProduct = async (productData: {
   }
 };
 
-export const getAllProducts = async () => {
+const fetchAllProductsFromDB = async () => {
   try {
     const productsRef = collection(db, "products");
     const querySnapshot = await getDocs(productsRef);
@@ -177,6 +178,15 @@ export const getAllProducts = async () => {
     throw error;
   }
 };
+
+export const getAllProducts = unstable_cache(
+  fetchAllProductsFromDB,
+  ['products-list'],
+  {
+    tags: ['products'],
+    revalidate: 60, // Cache for 60 seconds
+  }
+);
 
 export const deleteProductFromDB = async (productId: string) => {
   try {
@@ -209,7 +219,6 @@ export const deleteProduct = async (productId: string, imageUrls: string[]) => {
     }
 
     await deleteProductFromDB(productId);
-
     return { success: true };
   } catch (error) {
     console.error("Complete product deletion error:", error);

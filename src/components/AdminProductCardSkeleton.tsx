@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
-export function ProductCardSkeleton() {
+export function AdminProductCardSkeleton() {
   return (
     <Card className="overflow-hidden transition-shadow shadow-none border-none p-0 pb-4 w-full max-w-md mx-auto">
       <Skeleton className="relative w-full aspect-3/4" />

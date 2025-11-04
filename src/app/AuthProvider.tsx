@@ -20,6 +20,7 @@ import {
 } from "firebase/auth";
 import { TailChase } from "ldrs/react";
 import "ldrs/react/TailChase.css";
+import { usePathname } from "next/navigation";
 interface BaseUser extends FirebaseUser {
   id: string;
   role: "admin" | "customer" | "superAdmin";
@@ -72,6 +73,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [initializing, setInitializing] = useState<boolean>(true);
   const [error, setError] = useState<FirebaseError | null>(null);
+  const pathname = usePathname();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -186,6 +188,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   if (initializing) {
+    if (pathname === "/" || pathname === "/admin") {
+      return (
+        <AuthContext.Provider
+          value={{
+            user,
+            loading,
+            error,
+            register,
+            login,
+            loginWithGoogle,
+            logout,
+            deleteAccount,
+            refreshUser,
+          }}
+        >
+          {children}
+        </AuthContext.Provider>
+      );
+    }
+
     return (
       <div className="flex items-center justify-center min-h-screen bg-background">
         <TailChase size="40" speed="1.75" color="black" />

@@ -27,13 +27,18 @@ export function Navbar() {
           </li>
         )}
         {user && (
-          <li className="p-2 cursor-pointer" onClick={handleLogout}>
-            LOG OUT
+          <li className="p-2">
+            <Link href="/">SETTINGS</Link>
           </li>
         )}
         <li className="p-2">
           <Link href="/user/cart">CART</Link>
         </li>
+        {user && (
+          <li className="p-2 cursor-pointer" onClick={handleLogout}>
+            LOG OUT
+          </li>
+        )}
       </ul>
       <div className="text-center mt-4 md:text-start md:pl-40">
         <Link href={"/"}>

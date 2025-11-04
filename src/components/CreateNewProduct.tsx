@@ -32,7 +32,8 @@ import {
   ProductFormData,
   PRODUCT_CATEGORIES,
 } from "@/Types/productValidation";
-import { createProduct, FirebaseError } from "@/lib/firebase";
+import { FirebaseError } from "@/lib/firebase";
+import { createProductWithRevalidation } from "@/app/actions/admin/products/create";
 import { Alert, AlertTitle } from "./ui/alert";
 import { useAuth } from "@/app/AuthProvider";
 import { uploadImages } from "@/app/actions/admin/products/new";
@@ -108,7 +109,7 @@ export function CreateNewProduct() {
         createdBy: user?.uid || "",
       };
 
-      const result = await createProduct(productData);
+      const result = await createProductWithRevalidation(productData);
       console.log("Product created successfully:", result);
 
       setSuccess(true);

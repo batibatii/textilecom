@@ -35,6 +35,7 @@ import { useEffect, useState, useRef } from "react";
 import { ArrowLeft } from "lucide-react";
 import { uploadImages } from "@/app/actions/admin/products/new";
 import { deleteProductImages } from "@/app/actions/admin/products/delete";
+import { revalidateProducts } from "@/app/actions/admin/products/revalidate";
 import { useAuth } from "@/app/AuthProvider";
 import { db } from "@/lib/firebase";
 import { doc, updateDoc } from "firebase/firestore";
@@ -243,6 +244,9 @@ export function EditProductDrawer({
       };
 
       await updateDoc(productRef, updatedData);
+
+      // Revalidate products cache
+      await revalidateProducts();
 
       onOpenChange(false);
       if (onUpdate) {

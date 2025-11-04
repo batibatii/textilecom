@@ -1,12 +1,12 @@
-import { AdminProductGridSkeleton } from "@/components/AdminProductGridSkeleton";
+import { CustomerProductGridSkeleton } from "@/components/CustomerProductGridSkeleton";
 
 export default function Loading() {
   return (
     <main className="container mx-auto px-4 py-8">
       <h1 className="text-3xl text-center font-bold mt-8 mb-25">
-        Product Management
+        All Products
       </h1>
-      <AdminProductGridSkeleton />
+      <CustomerProductGridSkeleton />
     </main>
   );
 }

@@ -6,7 +6,7 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { useState } from "react";
-import { deleteProduct } from "@/lib/firebase";
+import { deleteProductWithRevalidation } from "@/app/actions/admin/products/deleteProduct";
 import { useAuth } from "@/app/AuthProvider";
 import {
   Dialog,
@@ -19,7 +19,7 @@ import {
 import { Alert, AlertTitle } from "@/components/ui/alert";
 import { EditProductDrawer } from "@/components/EditProductDrawer";
 
-interface ProductCardProps {
+interface AdminProductCardProps {
   product: Product;
   onDelete?: () => void;
   onUpdate?: () => void;
@@ -35,12 +35,12 @@ const getCurrencySymbol = (currency: string): string => {
   return symbols[currency] || currency;
 };
 
-export function ProductCard({
+export function AdminProductCard({
   product,
   onDelete,
   onUpdate,
   priority = false,
-}: ProductCardProps) {
+}: AdminProductCardProps) {
   const { user } = useAuth();
   const [isDeleting, setIsDeleting] = useState(false);
   const [error, setError] = useState<string | undefined>();
@@ -64,7 +64,7 @@ export function ProductCard({
     setError(undefined);
 
     try {
-      await deleteProduct(product.id, product.images);
+      await deleteProductWithRevalidation(product.id, product.images);
 
       setIsDialogOpen(false);
       if (onDelete) {
