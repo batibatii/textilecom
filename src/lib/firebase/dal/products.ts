@@ -1,99 +1,9 @@
-import { initializeApp } from "firebase/app";
-import {
-  getAuth,
-  EmailAuthProvider,
-  reauthenticateWithCredential,
-  updatePassword,
-} from "firebase/auth";
-import {
-  getFirestore,
-  collection,
-  doc,
-  addDoc,
-  getDocs,
-  setDoc,
-  getDoc,
-  deleteDoc,
-  query,
-  where,
-} from "firebase/firestore";
-import { deleteProductImages } from "@/app/actions/admin/products/delete";
+"use server";
+
 import { unstable_cache } from "next/cache";
-
-const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY ?? "",
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN ?? "",
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ?? "",
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET ?? "",
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID ?? "",
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID ?? "",
-  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID ?? "",
-};
-
-const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
-export const db = getFirestore(app);
-
-export interface FirebaseError {
-  code: string;
-  message: string;
-}
-
-export const getUIErrorFromFirebaseError = (
-  firebaseErrorCode: string,
-  context?: "login" | "password-change"
-) => {
-  switch (firebaseErrorCode) {
-    case "auth/email-already-in-use":
-      return "An account with this email address is already registered";
-    case "auth/invalid-credential":
-    case "auth/wrong-password":
-      if (context === "password-change") {
-        return "Current password is incorrect";
-      }
-      return "Incorrect email or password";
-    case "auth/weak-password":
-      return "Password should be at least 8 characters";
-    case "auth/requires-recent-login":
-      return "Please log out and log back in before changing your password";
-    default:
-      return "An error occurred";
-  }
-};
-
-export const createUser = async (email: string, userId: string) => {
-  const userRef = doc(db, "users", userId);
-
-  const userData = {
-    id: userId,
-    email: email,
-    role: "customer" as const,
-    address: {
-      line1: "",
-      line2: "",
-      city: "",
-      postalCode: "",
-      country: "",
-    },
-    billingAddress: {},
-    theme: "light",
-    createdAt: new Date().toISOString(),
-    discounts: [],
-  };
-
-  await setDoc(userRef, userData);
-  return userData;
-};
-
-export const getUserData = async (userId: string) => {
-  const userRef = doc(db, "users", userId);
-  const userSnap = await getDoc(userRef);
-
-  if (userSnap.exists()) {
-    return userSnap.data();
-  }
-  return null;
-};
+import { adminDb } from "../admin";
+import type { FirebaseError } from "../config";
+import { deleteProductImages } from "@/app/actions/admin/products/deleteImages";
 
 export const createProduct = async (productData: {
   title: string;
@@ -115,7 +25,7 @@ export const createProduct = async (productData: {
     throw new Error("At least one image is required to create a product");
   }
 
-  const productsRef = collection(db, "products");
+  const productsRef = adminDb.collection("products");
 
   const baseProduct = {
     title: productData.title,
@@ -143,7 +53,7 @@ export const createProduct = async (productData: {
   console.log("Product object before saving:", product);
 
   try {
-    const docRef = await addDoc(productsRef, product);
+    const docRef = await productsRef.add(product);
     console.log("Document created with ID:", docRef.id);
     return { id: docRef.id, ...product };
   } catch (error) {
@@ -154,8 +64,8 @@ export const createProduct = async (productData: {
 
 const fetchAllProductsFromDB = async () => {
   try {
-    const productsRef = collection(db, "products");
-    const querySnapshot = await getDocs(productsRef);
+    const productsRef = adminDb.collection("products");
+    const querySnapshot = await productsRef.get();
 
     const products = querySnapshot.docs.map((doc) => {
       const data = doc.data();
@@ -163,12 +73,8 @@ const fetchAllProductsFromDB = async () => {
       return {
         id: doc.id,
         ...data,
-        createdAt: data.createdAt?.toDate?.()
-          ? data.createdAt.toDate().toISOString()
-          : data.createdAt,
-        updatedAt: data.updatedAt?.toDate?.()
-          ? data.updatedAt.toDate().toISOString()
-          : data.updatedAt,
+        createdAt: data.createdAt,
+        updatedAt: data.updatedAt,
       };
     });
 
@@ -188,10 +94,39 @@ export const getAllProducts = unstable_cache(
   }
 );
 
+const fetchProductsWithLimit = async (limit: number, offset: number) => {
+  try {
+
+    const allProducts = await getAllProducts();
+
+    const approvedProducts = allProducts.filter((product) => (product as { draft?: boolean }).draft === false);
+
+    const fetchedProductsWithLimit = approvedProducts.slice(offset, offset + limit);
+
+    return {
+      products: fetchedProductsWithLimit,
+      hasMore: offset + limit < approvedProducts.length,
+      total: approvedProducts.length,
+    };
+  } catch (error) {
+    console.error("Error fetching products with limit:", error);
+    throw error;
+  }
+};
+
+export const getProductsWithLimit = unstable_cache(
+  async (limit: number, offset: number) => fetchProductsWithLimit(limit, offset),
+  ['products-withLimit'],
+  {
+    tags: ['products'],
+    revalidate: 60, 
+  }
+);
+
 export const deleteProductFromDB = async (productId: string) => {
   try {
-    const productRef = doc(db, "products", productId);
-    await deleteDoc(productRef);
+    const productRef = adminDb.collection("products").doc(productId);
+    await productRef.delete();
     return { success: true };
   } catch (error) {
     console.error("Error deleting product from database:", error);
@@ -230,4 +165,3 @@ export const deleteProduct = async (productId: string, imageUrls: string[]) => {
     };
   }
 };
-

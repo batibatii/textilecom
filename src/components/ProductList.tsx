@@ -51,47 +51,47 @@ export function ProductList({ products }: ProductListProps) {
     router.refresh();
   };
 
+  const renderPagination = () => (
+    <Pagination className="flex justify-end sm:pr-10 md:pr-0 md:justify-end">
+      <PaginationContent>
+        <PaginationItem>
+          <PaginationPrevious
+            onClick={handlePrevious}
+            className={
+              currentPage === 1
+                ? "pointer-events-none opacity-50"
+                : "cursor-pointer"
+            }
+          />
+        </PaginationItem>
+        {getPageNumbers().map((page) => (
+          <PaginationItem key={page}>
+            <PaginationLink
+              onClick={() => setCurrentPage(page)}
+              isActive={currentPage === page}
+              className="cursor-pointer"
+            >
+              {page}
+            </PaginationLink>
+          </PaginationItem>
+        ))}
+        <PaginationItem>
+          <PaginationNext
+            onClick={handleNext}
+            className={
+              currentPage === totalPages
+                ? "pointer-events-none opacity-50"
+                : "cursor-pointer"
+            }
+          />
+        </PaginationItem>
+      </PaginationContent>
+    </Pagination>
+  );
+
   return (
     <>
-      {totalPages > 1 && (
-        <div className="mb-5">
-          <Pagination className="flex justify-end ">
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationPrevious
-                  onClick={handlePrevious}
-                  className={
-                    currentPage === 1
-                      ? "pointer-events-none opacity-50"
-                      : "cursor-pointer"
-                  }
-                />
-              </PaginationItem>
-              {getPageNumbers().map((page) => (
-                <PaginationItem key={page}>
-                  <PaginationLink
-                    onClick={() => setCurrentPage(page)}
-                    isActive={currentPage === page}
-                    className="cursor-pointer"
-                  >
-                    {page}
-                  </PaginationLink>
-                </PaginationItem>
-              ))}
-              <PaginationItem>
-                <PaginationNext
-                  onClick={handleNext}
-                  className={
-                    currentPage === totalPages
-                      ? "pointer-events-none opacity-50"
-                      : "cursor-pointer"
-                  }
-                />
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
-        </div>
-      )}
+      {totalPages > 1 && <div className="mb-5">{renderPagination()}</div>}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-20   ">
         {currentProducts.map((product, index) => (
@@ -104,6 +104,10 @@ export function ProductList({ products }: ProductListProps) {
           />
         ))}
       </div>
+
+      {totalPages > 1 && (
+        <div className="mt-5 lg:hidden">{renderPagination()}</div>
+      )}
     </>
   );
 }

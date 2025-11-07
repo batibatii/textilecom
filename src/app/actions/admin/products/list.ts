@@ -1,6 +1,7 @@
 "use server";
 
-import { FirebaseError, getAllProducts } from "@/lib/firebase";
+import { getAllProducts } from "@/lib/firebase/dal/products";
+import type { FirebaseError } from "@/lib/firebase/config";
 import { Product } from "@/Types/productValidation";
 
 type ProductsFetchResult =

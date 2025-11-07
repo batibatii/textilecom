@@ -33,12 +33,10 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState, useRef } from "react";
 import { ArrowLeft } from "lucide-react";
-import { uploadImages } from "@/app/actions/admin/products/new";
-import { deleteProductImages } from "@/app/actions/admin/products/delete";
-import { revalidateProducts } from "@/app/actions/admin/products/revalidate";
+import { uploadImages } from "@/app/actions/admin/products/uploadImages";
+import { deleteProductImages } from "@/app/actions/admin/products/deleteImages";
+import { updateProduct } from "@/app/actions/admin/products/update";
 import { useAuth } from "@/app/AuthProvider";
-import { db } from "@/lib/firebase";
-import { doc, updateDoc } from "firebase/firestore";
 
 interface EditProductDrawerProps {
   product: Product | null;
@@ -164,8 +162,19 @@ export function EditProductDrawer({
       );
       setProductImages(updatedImages);
 
-      const productRef = doc(db, "products", product.id);
-      await updateDoc(productRef, { images: updatedImages });
+      await updateProduct(product.id, {
+        title: product.title,
+        description: product.description,
+        brand: product.brand,
+        serialNumber: product.serialNumber,
+        price: product.price,
+        taxRate: product.taxRate,
+        category: product.category,
+        stock: product.stock,
+        discount: product.discount || null,
+        images: updatedImages,
+        updatedAt: new Date().toISOString(),
+      });
 
       // Adjust carousel index if needed
       if (
@@ -223,8 +232,6 @@ export function EditProductDrawer({
         throw new Error("Product not found");
       }
 
-      const productRef = doc(db, "products", product.id);
-
       const updatedData = {
         title: data.title,
         description: data.description,
@@ -243,10 +250,7 @@ export function EditProductDrawer({
         updatedAt: new Date().toISOString(),
       };
 
-      await updateDoc(productRef, updatedData);
-
-      // Revalidate products cache
-      await revalidateProducts();
+      await updateProduct(product.id, updatedData);
 
       onOpenChange(false);
       if (onUpdate) {

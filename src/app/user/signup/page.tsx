@@ -7,7 +7,8 @@ import Image from "next/image";
 import { SignUp } from "@/components/SignUp";
 import { LoginAndSignUpType } from "@/Types/authTypes";
 import { useAuth } from "@/app/AuthProvider";
-import { getUIErrorFromFirebaseError, FirebaseError } from "@/lib/firebase";
+import { getUIErrorFromFirebaseError } from "@/lib/firebase/auth";
+import type { FirebaseError } from "@/lib/firebase/config";
 
 export default function SignUpPage() {
   const router = useRouter();

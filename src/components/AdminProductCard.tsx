@@ -6,7 +6,7 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { useState } from "react";
-import { deleteProductWithRevalidation } from "@/app/actions/admin/products/deleteProduct";
+import { deleteProductWithRevalidation } from "@/app/actions/admin/products/delete";
 import { useAuth } from "@/app/AuthProvider";
 import {
   Dialog,

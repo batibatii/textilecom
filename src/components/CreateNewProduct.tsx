@@ -32,11 +32,11 @@ import {
   ProductFormData,
   PRODUCT_CATEGORIES,
 } from "@/Types/productValidation";
-import { FirebaseError } from "@/lib/firebase";
+import type { FirebaseError } from "@/lib/firebase/config";
 import { createProductWithRevalidation } from "@/app/actions/admin/products/create";
 import { Alert, AlertTitle } from "./ui/alert";
 import { useAuth } from "@/app/AuthProvider";
-import { uploadImages } from "@/app/actions/admin/products/new";
+import { uploadImages } from "@/app/actions/admin/products/uploadImages";
 
 export function CreateNewProduct() {
   const [currentPage, setCurrentPage] = useState(1);

@@ -1,8 +1,8 @@
-import { getProducts } from "@/app/actions/admin/products/list";
+import { getProductsInfinite } from "@/app/actions/products/infinite";
 import { CustomerProductList } from "@/components/CustomerProductList";
 
 export default async function Home() {
-  const result = await getProducts();
+  const result = await getProductsInfinite(12, 0);
 
   if (!result.success) {
     return (
@@ -43,7 +43,10 @@ export default async function Home() {
       <h1 className="text-3xl text-center font-bold mt-8 mb-25">
         All Products
       </h1>
-      <CustomerProductList products={result.products} />
+      <CustomerProductList
+        initialProducts={result.products}
+        totalProducts={result.total}
+      />
     </main>
   );
 }

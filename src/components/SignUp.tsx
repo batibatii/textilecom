@@ -172,7 +172,7 @@ export function SignUp({
             type="button"
             onClick={handleSubmit(handleSignUpClick)}
             disabled={signingIn || signingUp}
-            className="bg-background text-foreground/70 border-foreground border hover:text-foreground/50 w-[97%]"
+            className="bg-background text-foreground/70 border-foreground border hover:bg-background hover:font-bold w-[97%]"
           >
             {signingUp ? "CREATING ACCOUNT..." : "SIGN UP"}
           </Button>

@@ -7,7 +7,9 @@ import {
   useEffect,
   ReactNode,
 } from "react";
-import { auth, FirebaseError, createUser, getUserData } from "@/lib/firebase";
+import { auth } from "@/lib/firebase/config";
+import type { FirebaseError } from "@/lib/firebase/config";
+import { createUser, getUserData } from "@/lib/firebase/dal/users";
 import {
   createUserWithEmailAndPassword,
   User as FirebaseUser,

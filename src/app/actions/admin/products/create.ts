@@ -1,6 +1,6 @@
 "use server";
 
-import { createProduct } from "@/lib/firebase";
+import { createProduct } from "@/lib/firebase/dal/products";
 import { revalidateTag } from "next/cache";
 
 export async function createProductWithRevalidation(productData: {
@@ -18,8 +18,7 @@ export async function createProductWithRevalidation(productData: {
   createdBy: string;
 }) {
   const result = await createProduct(productData);
-
-  // Revalidate products cache
+  
   revalidateTag('products');
 
   return result;
