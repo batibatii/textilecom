@@ -78,7 +78,12 @@ const fetchAllProductsFromDB = async () => {
       };
     });
 
-    return products;
+    // Remove duplicates at the source using Map
+    const uniqueProducts = Array.from(
+      new Map(products.map((product) => [product.id, product])).values()
+    );
+
+    return uniqueProducts;
   } catch (error) {
     console.error("Error fetching products:", error);
     throw error;
@@ -101,12 +106,19 @@ const fetchProductsWithLimit = async (limit: number, offset: number) => {
 
     const approvedProducts = allProducts.filter((product) => (product as { draft?: boolean }).draft === false);
 
-    const fetchedProductsWithLimit = approvedProducts.slice(offset, offset + limit);
+    // Randomize products using Fisher-Yates shuffle algorithm
+    const shuffledProducts = [...approvedProducts];
+    for (let i = shuffledProducts.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffledProducts[i], shuffledProducts[j]] = [shuffledProducts[j], shuffledProducts[i]];
+    }
+
+    const fetchedProductsWithLimit = shuffledProducts.slice(offset, offset + limit);
 
     return {
       products: fetchedProductsWithLimit,
-      hasMore: offset + limit < approvedProducts.length,
-      total: approvedProducts.length,
+      hasMore: offset + limit < shuffledProducts.length,
+      total: shuffledProducts.length,
     };
   } catch (error) {
     console.error("Error fetching products with limit:", error);

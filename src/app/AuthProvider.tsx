@@ -190,7 +190,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   if (initializing) {
-    if (pathname === "/" || pathname === "/admin") {
+    if (pathname === "/" || pathname === "/admin" || pathname === "/admin/products/archive") {
       return (
         <AuthContext.Provider
           value={{

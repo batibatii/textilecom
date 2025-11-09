@@ -15,9 +15,10 @@ import { useRouter } from "next/navigation";
 
 interface ProductListProps {
   products: Product[];
+  showMoveToDraft?: boolean;
 }
 
-export function ProductList({ products }: ProductListProps) {
+export function ProductList({ products, showMoveToDraft = false }: ProductListProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const router = useRouter();
   const productsPerPage = 12;
@@ -101,6 +102,7 @@ export function ProductList({ products }: ProductListProps) {
             onDelete={handleProductUpdate}
             onUpdate={handleProductUpdate}
             priority={index < 4}
+            showMoveToDraft={showMoveToDraft}
           />
         ))}
       </div>

@@ -12,9 +12,14 @@ interface CustomerProductListProps {
 }
 
 export function CustomerProductList({ initialProducts, totalProducts }: CustomerProductListProps) {
-  const [products, setProducts] = useState<Product[]>(initialProducts);
+  // Deduplicate initial products just in case
+  const uniqueInitialProducts = Array.from(
+    new Map(initialProducts.map((product) => [product.id, product])).values()
+  );
+
+  const [products, setProducts] = useState<Product[]>(uniqueInitialProducts);
   const [loading, setLoading] = useState(false);
-  const [hasMore, setHasMore] = useState(initialProducts.length < totalProducts);
+  const [hasMore, setHasMore] = useState(uniqueInitialProducts.length < totalProducts);
   const [error, setError] = useState<string | null>(null);
   const observerTarget = useRef<HTMLDivElement>(null);
 
@@ -49,7 +54,13 @@ export function CustomerProductList({ initialProducts, totalProducts }: Customer
       const result = await getProductsInfinite(12, products.length);
 
       if (result.success) {
-        setProducts((prev) => [...prev, ...result.products]);
+        setProducts((prev) => {
+          // Create a Map to track existing product IDs
+          const existingIds = new Set(prev.map(p => p.id));
+          // Only add products that don't already exist
+          const newProducts = result.products.filter(p => !existingIds.has(p.id));
+          return [...prev, ...newProducts];
+        });
         setHasMore(result.hasMore);
       } else {
         setError(result.error.message);

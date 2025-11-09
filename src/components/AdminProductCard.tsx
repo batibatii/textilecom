@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { useState } from "react";
 import { deleteProductWithRevalidation } from "@/app/actions/admin/products/delete";
+import { approveProduct } from "@/app/actions/admin/products/approve";
+import { moveToDraft } from "@/app/actions/admin/products/moveToDraft";
 import { useAuth } from "@/app/AuthProvider";
 import {
   Dialog,
@@ -18,12 +20,14 @@ import {
 } from "@/components/ui/dialog";
 import { Alert, AlertTitle } from "@/components/ui/alert";
 import { EditProductDrawer } from "@/components/EditProductDrawer";
+import { Badge } from "@/components/ui/badge";
 
 interface AdminProductCardProps {
   product: Product;
   onDelete?: () => void;
   onUpdate?: () => void;
   priority?: boolean;
+  showMoveToDraft?: boolean;
 }
 
 const getCurrencySymbol = (currency: string): string => {
@@ -40,11 +44,15 @@ export function AdminProductCard({
   onDelete,
   onUpdate,
   priority = false,
+  showMoveToDraft = false,
 }: AdminProductCardProps) {
   const { user } = useAuth();
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isApproving, setIsApproving] = useState(false);
+  const [isMovingToDraft, setIsMovingToDraft] = useState(false);
   const [error, setError] = useState<string | undefined>();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isMoveToDraftDialogOpen, setIsMoveToDraftDialogOpen] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   const displayPrice = product.discount
@@ -57,6 +65,11 @@ export function AdminProductCard({
   const handleDelete = async () => {
     if (!user) {
       setError("You must be logged in to delete products.");
+      return;
+    }
+
+    if (user.role !== "admin" && user.role !== "superAdmin") {
+      setError("You must be an admin to delete products.");
       return;
     }
 
@@ -87,6 +100,86 @@ export function AdminProductCard({
     setError(undefined);
   };
 
+  const handleApprove = async () => {
+    if (!user) {
+      setError("You must be logged in to approve products.");
+      return;
+    }
+
+    if (user.role !== "admin" && user.role !== "superAdmin") {
+      setError("You must be an admin to approve products.");
+      return;
+    }
+
+    setIsApproving(true);
+    setError(undefined);
+
+    try {
+      const result = await approveProduct(product.id);
+
+      if (!result.success) {
+        setError(result.error?.message || "Failed to approve product.");
+        return;
+      }
+
+      if (onUpdate) {
+        onUpdate();
+      }
+    } catch (error) {
+      console.error("Approve error:", error);
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "An unexpected error occurred while approving the product.";
+      setError(errorMessage);
+    } finally {
+      setIsApproving(false);
+    }
+  };
+
+  const handleMoveToDraft = async () => {
+    if (!user) {
+      setError("You must be logged in to move products to draft.");
+      return;
+    }
+
+    if (user.role !== "admin" && user.role !== "superAdmin") {
+      setError("You must be an admin to move products to draft.");
+      return;
+    }
+
+    setIsMovingToDraft(true);
+    setError(undefined);
+
+    try {
+      const result = await moveToDraft(product.id);
+
+      if (!result.success) {
+        setError(result.error?.message || "Failed to move product to draft.");
+        return;
+      }
+
+      setIsMoveToDraftDialogOpen(false);
+      if (onUpdate) {
+        onUpdate();
+      }
+    } catch (error) {
+      console.error("Move to draft error:", error);
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "An unexpected error occurred while moving the product to draft.";
+      setError(errorMessage);
+    } finally {
+      setIsMovingToDraft(false);
+    }
+  };
+
+  const handleCancelMoveToDraft = () => {
+    setIsMoveToDraftDialogOpen(false);
+    setError(undefined);
+  };
+
   return (
     <Card className="overflow-hidden transition-shadow shadow-none border-none p-0 pb-4 w-full max-w-md mx-auto">
       <div className="relative w-full aspect-3/4 bg-muted">
@@ -105,6 +198,12 @@ export function AdminProductCard({
             No Image
           </div>
         )}
+        <Badge
+          variant={product.draft ? "secondary" : "default"}
+          className="absolute top-2 left-2"
+        >
+          {product.draft ? "DRAFT" : "APPROVED"}
+        </Badge>
       </div>
       <div className="flex justify-end pr-0 -mt-4 ">
         <Button
@@ -143,55 +242,121 @@ export function AdminProductCard({
               </span>
             )}
           </div>
+          {error && !isDialogOpen && !isMoveToDraftDialogOpen && (
+            <Alert variant="destructive" className="mt-4">
+              <AlertTitle>{error}</AlertTitle>
+            </Alert>
+          )}
           <div className="flex gap-2 mt-6">
-            <Button variant="default" size="sm" className="flex-1 rounded-none">
-              APPROVE
+            <Button
+              variant="default"
+              size="sm"
+              className="flex-1 rounded-none"
+              onClick={handleApprove}
+              disabled={isApproving || !product.draft}
+            >
+              {isApproving
+                ? "APPROVING..."
+                : product.draft
+                ? "APPROVE"
+                : "APPROVED"}
             </Button>
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-              <DialogTrigger asChild className="flex-1">
-                <Button
-                  size="sm"
-                  className="flex-1 bg-background text-foreground rounded-none border border-black hover:bg-destructive hover:text-background"
-                >
-                  DELETE
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="min-h-40">
-                <DialogHeader>
-                  <DialogTitle className="mt-2">
-                    Are you absolutely sure?
-                  </DialogTitle>
-                  <DialogDescription>
-                    This action cannot be undone. This will permanently delete{" "}
-                    <span className="font-semibold">
-                      &quot;{product.title}&quot;
-                    </span>{" "}
-                    and remove all associated data from our servers.
-                  </DialogDescription>
-                </DialogHeader>
-                {error && (
-                  <Alert variant="destructive" className="mt-2">
-                    <AlertTitle>{error}</AlertTitle>
-                  </Alert>
-                )}
-                <div className="flex items-center mt-1 justify-end gap-4">
+
+            {showMoveToDraft ? (
+              <Dialog
+                open={isMoveToDraftDialogOpen}
+                onOpenChange={setIsMoveToDraftDialogOpen}
+              >
+                <DialogTrigger asChild className="flex-1">
                   <Button
-                    onClick={handleDelete}
-                    disabled={isDeleting}
-                    className="bg-background text-foreground border border-ring hover:bg-destructive hover:text-primary-foreground active:translate-y-0.5 active:scale-95"
+                    size="sm"
+                    className="flex-1 bg-background text-foreground rounded-none border border-black hover:bg-amber-900 hover:text-background"
                   >
-                    {isDeleting ? "Deleting..." : "Yes"}
+                    MOVE TO DRAFT
                   </Button>
+                </DialogTrigger>
+                <DialogContent className="min-h-40">
+                  <DialogHeader>
+                    <DialogTitle className="mt-2">Move to Draft?</DialogTitle>
+                    <DialogDescription>
+                      This will move{" "}
+                      <span className="font-semibold">
+                        &quot;{product.title}&quot;
+                      </span>{" "}
+                      back to draft products. It will no longer be visible to
+                      customers.
+                    </DialogDescription>
+                  </DialogHeader>
+                  {error && (
+                    <Alert variant="destructive" className="mt-2">
+                      <AlertTitle>{error}</AlertTitle>
+                    </Alert>
+                  )}
+                  <div className="flex items-center mt-1 justify-end gap-4">
+                    <Button
+                      onClick={handleMoveToDraft}
+                      disabled={isMovingToDraft}
+                      className="bg-background text-foreground border border-ring  hover:bg-amber-900  hover:text-background active:translate-y-0.5 active:scale-95"
+                    >
+                      {isMovingToDraft ? "Moving..." : "Yes"}
+                    </Button>
+                    <Button
+                      onClick={handleCancelMoveToDraft}
+                      disabled={isMovingToDraft}
+                      className="bg-foreground  hover:text-primary-foreground active:translate-y-0.5 active:scale-95"
+                    >
+                      No
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            ) : (
+              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                <DialogTrigger asChild className="flex-1">
                   <Button
-                    onClick={handleCancel}
-                    disabled={isDeleting}
-                    className="bg-foreground text-background hover:text-primary-foreground active:translate-y-0.5 active:scale-95"
+                    size="sm"
+                    className="flex-1 bg-background text-foreground rounded-none border border-black hover:bg-destructive hover:text-background"
                   >
-                    No
+                    DELETE
                   </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
+                </DialogTrigger>
+                <DialogContent className="min-h-40">
+                  <DialogHeader>
+                    <DialogTitle className="mt-2">
+                      Are you absolutely sure?
+                    </DialogTitle>
+                    <DialogDescription>
+                      This action cannot be undone. This will permanently delete{" "}
+                      <span className="font-semibold">
+                        &quot;{product.title}&quot;
+                      </span>{" "}
+                      and remove all associated data from our servers.
+                    </DialogDescription>
+                  </DialogHeader>
+                  {error && (
+                    <Alert variant="destructive" className="mt-2">
+                      <AlertTitle>{error}</AlertTitle>
+                    </Alert>
+                  )}
+                  <div className="flex items-center mt-1 justify-end gap-4">
+                    <Button
+                      onClick={handleDelete}
+                      disabled={isDeleting}
+                      className="bg-background text-foreground border border-ring hover:bg-destructive hover:text-primary-foreground active:translate-y-0.5 active:scale-95"
+                    >
+                      {isDeleting ? "Deleting..." : "Yes"}
+                    </Button>
+                    <Button
+                      onClick={handleCancel}
+                      disabled={isDeleting}
+                      className="bg-foreground text-background hover:text-primary-foreground active:translate-y-0.5 active:scale-95"
+                    >
+                      No
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            )}
           </div>
         </CardContent>
       </div>

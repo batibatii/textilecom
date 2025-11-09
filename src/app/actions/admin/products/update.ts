@@ -1,8 +1,8 @@
 "use server";
 
-import { doc, updateDoc } from "firebase/firestore";
-import { db } from "@/lib/firebase/config";
+import { adminDb } from "@/lib/firebase/admin";
 import { revalidateTag } from "next/cache";
+import type { FirebaseError } from "@/lib/firebase/config";
 
 export async function updateProduct(
   productId: string,
@@ -23,10 +23,23 @@ export async function updateProduct(
     updatedAt: string;
   }
 ) {
-  const productRef = doc(db, "products", productId);
-  await updateDoc(productRef, updatedData);
+  try {
+    const productRef = adminDb.collection("products").doc(productId);
+    await productRef.update(updatedData);
 
-  revalidateTag('products');
+    revalidateTag('products');
 
-  return { success: true };
+    return { success: true };
+  } catch (error) {
+    console.error("Error updating product:", error);
+    const firebaseError = error as FirebaseError;
+
+    return {
+      success: false,
+      error: {
+        code: firebaseError.code || "firestore/update-failed",
+        message: firebaseError.message || "Failed to update product. Please try again.",
+      },
+    };
+  }
 }
