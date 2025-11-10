@@ -1,6 +1,6 @@
 "use server";
 
-import { adminDb } from "../admin";
+import { adminDb, adminAuth } from "../admin";
 
 export const createUser = async (email: string, userId: string) => {
   const userRef = adminDb.collection("users").doc(userId);
@@ -23,6 +23,9 @@ export const createUser = async (email: string, userId: string) => {
   };
 
   await userRef.set(userData);
+
+  await adminAuth.setCustomUserClaims(userId, { role: "customer" });
+
   return userData;
 };
 
@@ -41,4 +44,35 @@ export const getUserData = async (userId: string) => {
     return data;
   }
   return null;
+};
+
+export const updateUserRole = async (
+  userId: string,
+  role: "customer" | "admin" | "superAdmin"
+) => {
+  try {
+    // Update role in Firestore
+    const userRef = adminDb.collection("users").doc(userId);
+    await userRef.update({ role });
+
+    // Update custom claim in Firebase Auth
+    await adminAuth.setCustomUserClaims(userId, { role });
+
+    // Revoke all existing refresh tokens (invalidates all sessions)
+    // This forces the user to re-authenticate with the new role
+    await adminAuth.revokeRefreshTokens(userId);
+
+    console.log(`User ${userId} role changed to ${role}. All sessions revoked.`);
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error updating user role:", error);
+    return {
+      success: false,
+      error: {
+        code: "user/update-role-failed",
+        message: "Failed to update user role.",
+      },
+    };
+  }
 };

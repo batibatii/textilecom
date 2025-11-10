@@ -11,6 +11,10 @@ import { auth } from "@/lib/firebase/config";
 import type { FirebaseError } from "@/lib/firebase/config";
 import { createUser, getUserData } from "@/lib/firebase/dal/users";
 import {
+  createUserSession,
+  removeUserSession,
+} from "@/lib/auth/sessionHelpers";
+import {
   createUserWithEmailAndPassword,
   User as FirebaseUser,
   signInWithEmailAndPassword,
@@ -106,6 +110,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         password
       );
       await createUser(email, userCredential.user.uid);
+
+      await createUserSession(userCredential.user);
     } catch (err) {
       const firebaseError = err as FirebaseError;
       setError(firebaseError);
@@ -119,7 +125,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       setError(null);
       setLoading(true);
-      await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+
+      await createUserSession(userCredential.user);
     } catch (err) {
       const firebaseError = err as FirebaseError;
       setError(firebaseError);
@@ -140,6 +152,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (!userData) {
         await createUser(user.email || "", user.uid);
       }
+      await createUserSession(user);
 
       setError(null);
     } catch (error) {
@@ -154,6 +167,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const logout = async () => {
     try {
       setError(null);
+
+      await removeUserSession();
+
       await signOut(auth);
     } catch (err) {
       const firebaseError = err as FirebaseError;
@@ -166,6 +182,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       setError(null);
       if (auth.currentUser) {
+        await removeUserSession();
+
         await deleteUser(auth.currentUser);
       }
     } catch (err) {
@@ -190,7 +208,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   if (initializing) {
-    if (pathname === "/" || pathname === "/admin" || pathname === "/admin/products/archive") {
+    if (
+      pathname === "/" ||
+      pathname === "/admin" ||
+      pathname === "/admin/products/archive"
+    ) {
       return (
         <AuthContext.Provider
           value={{

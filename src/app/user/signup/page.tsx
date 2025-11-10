@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { SignUp } from "@/components/SignUp";
@@ -12,14 +12,18 @@ import type { FirebaseError } from "@/lib/firebase/config";
 
 export default function SignUpPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { register, login, loginWithGoogle } = useAuth();
   const [firebaseError, setFirebaseError] = useState<string | undefined>();
+
+  // Get redirect URL from query params, default to home
+  const redirectUrl = searchParams.get("redirect") || "/";
 
   const handleSignUp = async (data: LoginAndSignUpType) => {
     try {
       setFirebaseError(undefined);
       await register(data.email, data.password);
-      router.push("/");
+      router.push(redirectUrl);
     } catch (err) {
       const firebaseError = err as FirebaseError;
       const errorMessage = getUIErrorFromFirebaseError(firebaseError.code);
@@ -31,10 +35,13 @@ export default function SignUpPage() {
     try {
       setFirebaseError(undefined);
       await login(data.email, data.password);
-      router.push("/");
+      router.push(redirectUrl);
     } catch (err) {
       const firebaseError = err as FirebaseError;
-      const errorMessage = getUIErrorFromFirebaseError(firebaseError.code, "login");
+      const errorMessage = getUIErrorFromFirebaseError(
+        firebaseError.code,
+        "login"
+      );
       setFirebaseError(errorMessage);
     }
   };
@@ -43,7 +50,7 @@ export default function SignUpPage() {
     try {
       setFirebaseError(undefined);
       await loginWithGoogle();
-      router.push("/");
+      router.push(redirectUrl);
     } catch (err) {
       const firebaseError = err as FirebaseError;
       const errorMessage = getUIErrorFromFirebaseError(firebaseError.code);
