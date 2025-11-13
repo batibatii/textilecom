@@ -21,6 +21,12 @@ import {
 import { Alert, AlertTitle } from "@/components/ui/alert";
 import { EditProductDrawer } from "@/components/EditProductDrawer";
 import { Badge } from "@/components/ui/badge";
+import {
+  getCurrencySymbol,
+  getDisplayPrice,
+  hasDiscount as checkHasDiscount,
+  formatPrice,
+} from "@/lib/productPrice";
 
 interface AdminProductCardProps {
   product: Product;
@@ -29,15 +35,6 @@ interface AdminProductCardProps {
   priority?: boolean;
   showMoveToDraft?: boolean;
 }
-
-const getCurrencySymbol = (currency: string): string => {
-  const symbols: Record<string, string> = {
-    USD: "$",
-    EUR: "€",
-    TRY: "₺",
-  };
-  return symbols[currency] || currency;
-};
 
 export function AdminProductCard({
   product,
@@ -55,11 +52,8 @@ export function AdminProductCard({
   const [isMoveToDraftDialogOpen, setIsMoveToDraftDialogOpen] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
-  const displayPrice = product.discount
-    ? (product.price.amount * (1 - product.discount.rate / 100)).toFixed(2)
-    : product.price.amount.toFixed(2);
-
-  const hasDiscount = product.discount && product.discount.rate > 0;
+  const displayPrice = getDisplayPrice(product);
+  const hasDiscount = checkHasDiscount(product);
   const currencySymbol = getCurrencySymbol(product.price.currency);
 
   const handleDelete = async () => {
@@ -227,8 +221,7 @@ export function AdminProductCard({
             <div className="flex items-center gap-2">
               {hasDiscount && (
                 <span className="font-light text-[11px] md:text-[12px] md:font-extralight text-muted-foreground line-through ">
-                  {currencySymbol}
-                  {product.price.amount.toFixed(2)}
+                  {formatPrice(product.price.amount, product.price.currency)}
                 </span>
               )}
               <span className="font-light text-[11px] md:text-[12px]  md:font-extralight">
@@ -237,7 +230,7 @@ export function AdminProductCard({
               </span>
             </div>
             {hasDiscount && (
-              <span className=" text-[11px] md:text-[12px] font-medium text-green-900">
+              <span className="text-[11px] md:text-[12px] font-semibold text-green-900 bg-green-50 px-2 py-0.5 rounded">
                 -{product?.discount?.rate}%
               </span>
             )}

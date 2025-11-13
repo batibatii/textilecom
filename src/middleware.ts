@@ -10,8 +10,12 @@ const SESSION_COOKIE_NAME = "session";
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  if (pathname.startsWith("/admin")) {
-    console.log(`[Middleware] Protecting admin route: ${pathname}`);
+  const isAdminRoute = pathname.startsWith("/admin");
+  const isCartRoute = pathname.startsWith("/cart");
+  const isCheckoutRoute = pathname.startsWith("/checkout");
+
+  if (isAdminRoute || isCartRoute || isCheckoutRoute) {
+    console.log(`[Middleware] Protecting route: ${pathname}`);
 
     const cookieStore = await cookies();
     const sessionCookie = cookieStore.get(SESSION_COOKIE_NAME)?.value;
@@ -40,7 +44,7 @@ export async function middleware(request: NextRequest) {
 
       const userRole = decodedClaims.role || "customer";
 
-      if (userRole !== "admin" && userRole !== "superAdmin") {
+      if (isAdminRoute && userRole !== "admin" && userRole !== "superAdmin") {
         console.log(`[Middleware] Insufficient permissions: ${userRole}`);
 
         const url = request.nextUrl.clone();

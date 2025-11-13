@@ -7,7 +7,10 @@ import { Alert, AlertTitle } from "@/components/ui/alert";
 import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { LoginAndSignUpSchema, LoginAndSignUpType } from "@/Types/authTypes";
+import {
+  LoginAndSignUpSchema,
+  LoginAndSignUpType,
+} from "@/Types/authValidation";
 import { useState } from "react";
 
 type SignUpProps = {

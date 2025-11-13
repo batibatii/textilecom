@@ -51,7 +51,6 @@ export function CreateNewProduct() {
     register,
     handleSubmit,
     setValue,
-    watch,
     reset,
     formState: { errors, isSubmitting },
   } = useForm<ProductFormData>({
@@ -60,8 +59,6 @@ export function CreateNewProduct() {
       discount: 0,
     },
   });
-
-  const productNumber = watch("serialNumber") || "";
 
   const handleNext = () => {
     if (currentPage < totalPages) {

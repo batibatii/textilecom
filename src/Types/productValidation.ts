@@ -30,6 +30,8 @@ export const ProductSchema = z.object({
       rate: z.number(),
     })
     .optional(),
+  stripeProductId: z.string().optional(),
+  stripePriceId: z.string().optional(),
   createdAt: z.string(),
   updatedAt: z.string(),
   createdBy: z.string(),
@@ -82,12 +84,4 @@ export const ImageFileSchema = z.object({
 
 export type ProductFormData = z.infer<typeof ProductFormSchema>;
 
-export type ProductDataWithImages = ProductFormData & {
-  images: string[];
-};
-
 export type Product = z.infer<typeof ProductSchema>;
-
-export type NewProduct = Omit<Product, "id" | "createdAt" | "updatedAt">;
-
-export type ImageFileData = z.infer<typeof ImageFileSchema>;

@@ -3,6 +3,8 @@
 import { adminDb } from "@/lib/firebase/admin";
 import { revalidateTag } from "next/cache";
 import type { FirebaseError } from "@/lib/firebase/config";
+import { syncProductToStripe } from "@/lib/stripe/products";
+import { Product } from "@/Types/productValidation";
 
 export async function updateProduct(
   productId: string,
@@ -25,9 +27,53 @@ export async function updateProduct(
 ) {
   try {
     const productRef = adminDb.collection("products").doc(productId);
+
+    const productDoc = await productRef.get();
+    if (!productDoc.exists) {
+      return {
+        success: false,
+        error: {
+          code: "product/not-found",
+          message: "Product not found",
+        },
+      };
+    }
+
+    const currentProduct = productDoc.data() as Product;
+
     await productRef.update(updatedData);
 
-    revalidateTag('products');
+    if (!currentProduct.draft) {
+      const updatedProduct: Product = {
+        ...currentProduct,
+        ...updatedData,
+        id: productId,
+      } as Product;
+
+      const stripeResult = await syncProductToStripe(updatedProduct);
+
+      if (stripeResult.success) {
+        await productRef.update({
+          stripeProductId: stripeResult.stripeProductId,
+          stripePriceId: stripeResult.stripePriceId,
+        });
+      } else {
+        console.error(
+          "Failed to sync product changes to Stripe:",
+          stripeResult.error
+        );
+      }
+
+      revalidateTag("products");
+
+      return {
+        success: true,
+        stripeSynced: stripeResult.success,
+        stripeError: stripeResult.error,
+      };
+    }
+
+    revalidateTag("products");
 
     return { success: true };
   } catch (error) {
@@ -38,7 +84,9 @@ export async function updateProduct(
       success: false,
       error: {
         code: firebaseError.code || "firestore/update-failed",
-        message: firebaseError.message || "Failed to update product. Please try again.",
+        message:
+          firebaseError.message ||
+          "Failed to update product. Please try again.",
       },
     };
   }
