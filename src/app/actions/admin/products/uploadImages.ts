@@ -2,7 +2,7 @@
 
 import { put } from "@vercel/blob";
 import { ImageFileSchema } from "@/Types/productValidation";
-import { FirebaseError } from "@/lib/firebase";
+import type { FirebaseError } from "@/lib/firebase/config";
 
 type ImageUploadResult =
   | { success: true; urls: string[] }

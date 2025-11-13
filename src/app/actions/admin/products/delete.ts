@@ -1,32 +1,15 @@
 "use server";
 
-import { del } from "@vercel/blob";
-import { FirebaseError } from "@/lib/firebase";
+import { deleteProduct } from "@/lib/firebase/dal/products";
+import { revalidateTag } from "next/cache";
 
-type ImageDeleteResult =
-  | { success: true; deletedCount: number }
-  | { success: false; error: FirebaseError };
-
-export async function deleteProductImages(
+export async function deleteProductWithRevalidation(
+  productId: string,
   imageUrls: string[]
-): Promise<ImageDeleteResult> {
-  try {
-    if (!imageUrls || imageUrls.length === 0) {
-      return { success: true, deletedCount: 0 };
-    }
+) {
+  const result = await deleteProduct(productId, imageUrls);
 
-    const deletePromises = imageUrls.map((url) => del(url));
-    await Promise.all(deletePromises);
+  revalidateTag('products');
 
-    return { success: true, deletedCount: imageUrls.length };
-  } catch (error) {
-    console.error("Image deletion error:", error);
-    return {
-      success: false,
-      error: {
-        code: "storage/delete-failed",
-        message: "Failed to delete product images. Please try again.",
-      },
-    };
-  }
+  return result;
 }

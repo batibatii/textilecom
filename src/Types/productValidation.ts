@@ -7,6 +7,7 @@ export const PRODUCT_CATEGORIES = [
   "Sweaters",
   "Accessories",
   "Shoes",
+  "Socks",
 ] as const;
 
 export const ProductSchema = z.object({
@@ -20,7 +21,7 @@ export const ProductSchema = z.object({
     currency: z.string(),
   }),
   taxRate: z.string(),
-  images: z.array(z.string()),
+  images: z.array(z.string()).min(1, "At least one image is required"),
   category: z.enum(PRODUCT_CATEGORIES),
   stock: z.number(),
   draft: z.boolean(),
@@ -29,6 +30,8 @@ export const ProductSchema = z.object({
       rate: z.number(),
     })
     .optional(),
+  stripeProductId: z.string().optional(),
+  stripePriceId: z.string().optional(),
   createdAt: z.string(),
   updatedAt: z.string(),
   createdBy: z.string(),
@@ -81,12 +84,4 @@ export const ImageFileSchema = z.object({
 
 export type ProductFormData = z.infer<typeof ProductFormSchema>;
 
-export type ProductDataWithImages = ProductFormData & {
-  images?: string[];
-};
-
 export type Product = z.infer<typeof ProductSchema>;
-
-export type NewProduct = Omit<Product, "id" | "createdAt" | "updatedAt">;
-
-export type ImageFileData = z.infer<typeof ImageFileSchema>;

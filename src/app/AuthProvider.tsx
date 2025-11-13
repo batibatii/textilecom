@@ -7,7 +7,13 @@ import {
   useEffect,
   ReactNode,
 } from "react";
-import { auth, FirebaseError, createUser, getUserData } from "@/lib/firebase";
+import { auth } from "@/lib/firebase/config";
+import type { FirebaseError } from "@/lib/firebase/config";
+import { createUser, getUserData } from "@/lib/firebase/dal/users";
+import {
+  createUserSession,
+  removeUserSession,
+} from "@/lib/auth/sessionHelpers";
 import {
   createUserWithEmailAndPassword,
   User as FirebaseUser,
@@ -20,6 +26,7 @@ import {
 } from "firebase/auth";
 import { TailChase } from "ldrs/react";
 import "ldrs/react/TailChase.css";
+import { usePathname } from "next/navigation";
 interface BaseUser extends FirebaseUser {
   id: string;
   role: "admin" | "customer" | "superAdmin";
@@ -72,6 +79,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [initializing, setInitializing] = useState<boolean>(true);
   const [error, setError] = useState<FirebaseError | null>(null);
+  const pathname = usePathname();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -102,6 +110,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         password
       );
       await createUser(email, userCredential.user.uid);
+
+      await createUserSession(userCredential.user);
     } catch (err) {
       const firebaseError = err as FirebaseError;
       setError(firebaseError);
@@ -115,7 +125,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       setError(null);
       setLoading(true);
-      await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+
+      await createUserSession(userCredential.user);
     } catch (err) {
       const firebaseError = err as FirebaseError;
       setError(firebaseError);
@@ -136,6 +152,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (!userData) {
         await createUser(user.email || "", user.uid);
       }
+      await createUserSession(user);
 
       setError(null);
     } catch (error) {
@@ -150,6 +167,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const logout = async () => {
     try {
       setError(null);
+
+      await removeUserSession();
+
       await signOut(auth);
     } catch (err) {
       const firebaseError = err as FirebaseError;
@@ -162,6 +182,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       setError(null);
       if (auth.currentUser) {
+        await removeUserSession();
+
         await deleteUser(auth.currentUser);
       }
     } catch (err) {
@@ -186,6 +208,30 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   if (initializing) {
+    if (
+      pathname === "/" ||
+      pathname === "/admin" ||
+      pathname === "/admin/products/archive"
+    ) {
+      return (
+        <AuthContext.Provider
+          value={{
+            user,
+            loading,
+            error,
+            register,
+            login,
+            loginWithGoogle,
+            logout,
+            deleteAccount,
+            refreshUser,
+          }}
+        >
+          {children}
+        </AuthContext.Provider>
+      );
+    }
+
     return (
       <div className="flex items-center justify-center min-h-screen bg-background">
         <TailChase size="40" speed="1.75" color="black" />

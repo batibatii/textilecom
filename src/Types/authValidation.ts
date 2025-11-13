@@ -3,12 +3,12 @@ import { z } from "zod";
 const emailRegex =
   /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
 
-export const emailValidation = z
+const emailValidation = z
   .string()
   .min(1, "Email is required")
   .regex(emailRegex, "Please enter a valid email address");
 
-export const passwordValidation = z
+const passwordValidation = z
   .string()
   .min(1, "Password is required")
   .min(8, "Password must be at least 8 characters long");
