@@ -63,7 +63,7 @@ export default function SignUpPage() {
       <div className="lg:w-1/2 flex flex-col">
         <div className="text-start mt-12 w-[95%] lg:w-[60%] mx-auto lg:mx-0 lg:ml-[10%] pl-2">
           <Link href={"/"}>
-            <h1 className="font-bold tracking-wider text-2xl antialiased md:text-3xl ">
+            <h1 className="font-serif font-bold tracking-wider text-2xl antialiased md:text-3xl ">
               TEXTILECOM
             </h1>
           </Link>

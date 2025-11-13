@@ -39,7 +39,7 @@ export default function CartPage() {
 
   return (
     <div className="container mx-auto mt-12 px-4 py-8 max-w-6xl">
-      <h1 className="text-3xl text-center lg:text-start font-bold mb-8 tracking-wide antialiased ">
+      <h1 className="font-serif text-3xl text-center lg:text-start font-bold mb-8 tracking-wide antialiased ">
         SHOPPING CART
       </h1>
 
@@ -73,7 +73,7 @@ export default function CartPage() {
 
                     <div className="flex-1 flex flex-col justify-between">
                       <div>
-                        <h3 className="font-medium text-lg text-shadow-2xs">
+                        <h3 className="font-serif font-medium text-lg text-shadow-2xs">
                           {item.title}
                         </h3>
                         <p className="text-sm text-muted-foreground">

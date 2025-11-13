@@ -7,7 +7,7 @@ export default async function AdminPanel() {
   if (!result.success) {
     return (
       <main className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl text-center font-bold mt-8 mb-10">
+        <h1 className="font-serif text-3xl text-center font-bold mt-8 mb-10">
           Product Management
         </h1>
         <div className="flex items-center justify-center h-64">
@@ -27,7 +27,7 @@ export default async function AdminPanel() {
   if (result.products.length === 0) {
     return (
       <main className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl text-center font-bold mt-8 mb-10">
+        <h1 className="font-serif text-3xl text-center font-bold mt-8 mb-10">
           Product Management
         </h1>
         <div className="flex items-center justify-center h-64">
@@ -46,7 +46,7 @@ export default async function AdminPanel() {
 
   return (
     <main className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl text-center font-bold mt-8 mb-25">
+      <h1 className="font-serif text-3xl text-center font-bold mt-8 mb-25">
         Product Management
       </h1>
       <ProductList products={result.products} />

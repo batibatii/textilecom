@@ -82,7 +82,7 @@ export default function CheckoutPage() {
 
   return (
     <div className="container mx-auto px-4 py-8 mt-12 max-w-4xl">
-      <h1 className="text-3xl font-bold mb-8 tracking-wide text-center lg:text-start">
+      <h1 className="font-serif text-3xl font-bold mb-8 tracking-wide text-center lg:text-start">
         CHECKOUT
       </h1>
 

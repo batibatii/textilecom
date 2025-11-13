@@ -52,7 +52,7 @@ export function Navbar() {
       </ul>
       <div className="text-center mt-4 md:text-start md:pl-40">
         <Link href={"/"}>
-          <h1 className="font-bold tracking-wider text-2xl antialiased md:text-3xl ">
+          <h1 className="font-serif font-bold tracking-wider text-2xl antialiased md:text-3xl ">
             TEXTILECOM
           </h1>
         </Link>

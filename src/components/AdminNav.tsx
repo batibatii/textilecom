@@ -69,7 +69,7 @@ export function AdminNavbar() {
       </div>
       <div className="text-center mt-4 lg:text-start lg:pl-20 xl:pl-40">
         <Link href={"/"}>
-          <h1 className="font-bold tracking-wider text-2xl antialiased md:text-3xl ">
+          <h1 className="font-serif font-bold tracking-wider text-2xl antialiased md:text-3xl ">
             TEXTILECOM
           </h1>
         </Link>

@@ -147,7 +147,7 @@ export function ProductDetailDialog({
               <div className="flex flex-col gap-8">
                 {needsSizeSelection && (
                   <div className="flex flex-col gap-3">
-                    <h3 className="text-sm font-medium">Select Size</h3>
+                    <h3 className="font-serif text-sm font-medium">Select Size</h3>
                     <div className="flex gap-2">
                       {["S", "M", "L", "XXL"].map((size) => (
                         <button
