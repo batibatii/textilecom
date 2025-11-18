@@ -11,7 +11,10 @@ interface CustomerProductListProps {
   totalProducts: number;
 }
 
-export function CustomerProductList({ initialProducts, totalProducts }: CustomerProductListProps) {
+export function CustomerProductList({
+  initialProducts,
+  totalProducts,
+}: CustomerProductListProps) {
   // Deduplicate initial products just in case
   const uniqueInitialProducts = Array.from(
     new Map(initialProducts.map((product) => [product.id, product])).values()
@@ -19,9 +22,15 @@ export function CustomerProductList({ initialProducts, totalProducts }: Customer
 
   const [products, setProducts] = useState<Product[]>(uniqueInitialProducts);
   const [loading, setLoading] = useState(false);
-  const [hasMore, setHasMore] = useState(uniqueInitialProducts.length < totalProducts);
+  const [hasMore, setHasMore] = useState(
+    uniqueInitialProducts.length < totalProducts
+  );
   const [error, setError] = useState<string | null>(null);
   const observerTarget = useRef<HTMLDivElement>(null);
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   useEffect(() => {
     const currentTarget = observerTarget.current;
@@ -56,9 +65,11 @@ export function CustomerProductList({ initialProducts, totalProducts }: Customer
       if (result.success) {
         setProducts((prev) => {
           // Create a Map to track existing product IDs
-          const existingIds = new Set(prev.map(p => p.id));
+          const existingIds = new Set(prev.map((p) => p.id));
           // Only add products that don't already exist
-          const newProducts = result.products.filter(p => !existingIds.has(p.id));
+          const newProducts = result.products.filter(
+            (p) => !existingIds.has(p.id)
+          );
           return [...prev, ...newProducts];
         });
         setHasMore(result.hasMore);
@@ -100,8 +111,16 @@ export function CustomerProductList({ initialProducts, totalProducts }: Customer
       )}
 
       {!hasMore && products.length > 0 && (
-        <div className="flex justify-center items-center py-8">
-          <p className="text-muted-foreground text-center">You&apos;ve reached the end!</p>
+        <div className="flex flex-col justify-center items-center py-8 gap-4">
+          <p className="text-muted-foreground text-center">
+            You&apos;ve reached the end!
+          </p>
+          <button
+            onClick={scrollToTop}
+            className="text-sm font-medium text-primary hover:underline md:hidden cursor-pointer"
+          >
+            Go to Top ↑
+          </button>
         </div>
       )}
     </div>

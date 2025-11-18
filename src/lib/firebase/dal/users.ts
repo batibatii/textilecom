@@ -76,3 +76,113 @@ export const updateUserRole = async (
     };
   }
 };
+
+export const updateUserProfile = async (
+  userId: string,
+  profileData: {
+    phoneCountryCode: string;
+    phoneNumber: string;
+    addressLine1: string;
+    addressLine2?: string;
+    city: string;
+    postalCode: string;
+    country: string;
+  }
+) => {
+  try {
+    const userRef = adminDb.collection("users").doc(userId);
+
+    await userRef.set(
+      {
+        phoneCountryCode: profileData.phoneCountryCode,
+        phoneNumber: profileData.phoneNumber,
+        address: {
+          line1: profileData.addressLine1,
+          line2: profileData.addressLine2 || "",
+          city: profileData.city,
+          postalCode: profileData.postalCode,
+          country: profileData.country,
+        },
+        updatedAt: new Date().toISOString(),
+      },
+      { merge: true }
+    );
+
+    console.log(`User ${userId} profile updated successfully`);
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error updating user profile:", error);
+    return {
+      success: false,
+      error: {
+        code: "user/update-profile-failed",
+        message: "Failed to update user profile.",
+      },
+    };
+  }
+};
+
+export const changeUserPassword = async (
+  userId: string,
+  newPassword: string
+) => {
+  try {
+    await adminAuth.updateUser(userId, {
+      password: newPassword,
+    });
+
+    console.log(`Password changed successfully for user ${userId}`);
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error changing password:", error);
+    return {
+      success: false,
+      error: {
+        code: "user/change-password-failed",
+        message: "Failed to change password.",
+      },
+    };
+  }
+};
+
+export const getUserFavorites = async (userId: string) => {
+  try {
+    const userRef = adminDb.collection("users").doc(userId);
+    const userDoc = await userRef.get();
+
+    if (!userDoc.exists) {
+      return { success: true, favorites: [] };
+    }
+
+    const userData = userDoc.data();
+    const favoriteIds = userData?.favorites || [];
+
+    if (favoriteIds.length === 0) {
+      return { success: true, favorites: [] };
+    }
+
+    const productsRef = adminDb.collection("products");
+    const favoriteProducts = [];
+
+    for (const productId of favoriteIds) {
+      const productDoc = await productsRef.doc(productId).get();
+      if (productDoc.exists) {
+        favoriteProducts.push({ id: productDoc.id, ...productDoc.data() });
+      }
+    }
+
+    return { success: true, favorites: favoriteProducts };
+  } catch (error) {
+    console.error("Error fetching user favorites:", error);
+    return {
+      success: false,
+      favorites: [],
+      error: {
+        code: "user/fetch-favorites-failed",
+        message: "Failed to fetch favorites.",
+      },
+    };
+  }
+};
