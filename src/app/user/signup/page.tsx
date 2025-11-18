@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
+import { H1 } from "@/components/ui/headings";
 import { SignUp } from "@/components/SignUp";
 import { LoginAndSignUpType } from "@/Types/authValidation";
 import { useAuth } from "@/app/AuthProvider";
@@ -63,9 +64,9 @@ export default function SignUpPage() {
       <div className="lg:w-1/2 flex flex-col">
         <div className="text-start mt-12 w-[95%] lg:w-[60%] mx-auto lg:mx-0 lg:ml-[10%] pl-2">
           <Link href={"/"}>
-            <h1 className="font-serif font-bold tracking-wider text-2xl antialiased md:text-3xl ">
+            <H1 className="tracking-wider text-2xl md:text-3xl">
               TEXTILECOM
-            </h1>
+            </H1>
           </Link>
         </div>
         <main className="pt-10 flex-1">

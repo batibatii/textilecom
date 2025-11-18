@@ -4,10 +4,12 @@ import { useCart } from "@/app/CartProvider";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { H1 } from "@/components/ui/headings";
 import {
   getCurrencySymbol,
   calculateDiscountedPrice,
 } from "@/lib/productPrice";
+import { handleCheckout } from "@/app/actions/checkout";
 import { useState } from "react";
 import Link from "next/link";
 
@@ -16,51 +18,44 @@ export default function CheckoutPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const taxRate = 1.2; // 20% tax
+
   const total = getSubtotal(); // Total with tax included
-  const subtotal = total / 1.2;
+  const subtotal = total / taxRate;
   const tax = total - subtotal;
 
   // Get currency from first item
   const currency = items.length > 0 ? items[0].price.currency : "USD";
 
-  const handleCheckout = async () => {
+  const onCheckout = async () => {
     setLoading(true);
     setError(null);
 
     try {
-      // Call checkout API with cart items
-      const response = await fetch("/api/stripe/checkout", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          items: items.map((item) => ({
-            productId: item.productId,
-            title: item.title,
-            brand: item.brand,
-            price: item.price,
-            discount: item.discount,
-            size: item.size,
-            quantity: item.quantity,
-            stripePriceId: item.stripePriceId,
-            taxRate: item.taxRate,
-          })),
-        }),
-      });
+      const result = await handleCheckout(
+        items.map((item) => ({
+          productId: item.productId,
+          title: item.title,
+          brand: item.brand,
+          price: item.price,
+          discount: item.discount,
+          size: item.size,
+          quantity: item.quantity,
+          stripePriceId: item.stripePriceId,
+          taxRate: item.taxRate,
+        }))
+      );
 
-      const data = await response.json();
-
-      if (data.success && data.sessionUrl) {
+      if (result.success) {
         // Redirect to Stripe Checkout
-        window.location.href = data.sessionUrl;
+        window.location.href = result.sessionUrl;
       } else {
-        setError(data.error || "Failed to create checkout session");
-        setLoading(false);
+        setError(result.error);
       }
     } catch (err) {
       console.error("Checkout error:", err);
       setError("An error occurred while processing your request");
+    } finally {
       setLoading(false);
     }
   };
@@ -82,9 +77,9 @@ export default function CheckoutPage() {
 
   return (
     <div className="container mx-auto px-4 py-8 mt-12 max-w-4xl">
-      <h1 className="font-serif text-3xl font-bold mb-8 tracking-wide text-center lg:text-start">
+      <H1 className="mb-8 tracking-wide text-center lg:text-start">
         CHECKOUT
-      </h1>
+      </H1>
 
       {error && (
         <Alert variant="destructive" className="mb-6">
@@ -172,7 +167,7 @@ export default function CheckoutPage() {
                 </div>
               </div>
               <Button
-                onClick={handleCheckout}
+                onClick={onCheckout}
                 disabled={loading}
                 className="w-full"
                 size="lg"

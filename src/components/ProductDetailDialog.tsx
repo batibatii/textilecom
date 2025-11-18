@@ -2,6 +2,7 @@
 
 import { Product } from "@/Types/productValidation";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { H5 } from "@/components/ui/headings";
 import Image from "next/image";
 import {
   getCurrencySymbol,
@@ -147,7 +148,7 @@ export function ProductDetailDialog({
               <div className="flex flex-col gap-8">
                 {needsSizeSelection && (
                   <div className="flex flex-col gap-3">
-                    <h3 className="font-serif text-sm font-medium">Select Size</h3>
+                    <H5>Select Size</H5>
                     <div className="flex gap-2">
                       {["S", "M", "L", "XXL"].map((size) => (
                         <button

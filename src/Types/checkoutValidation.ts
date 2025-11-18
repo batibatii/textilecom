@@ -24,3 +24,6 @@ export const CheckoutSchema = z.object({
     .array(CheckoutItemSchema)
     .min(1, "At least one item is required for checkout"),
 });
+
+export type CheckoutItem = z.infer<typeof CheckoutItemSchema>;
+export type CheckoutData = z.infer<typeof CheckoutSchema>;

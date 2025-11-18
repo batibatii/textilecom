@@ -3,6 +3,7 @@
 import { useCart } from "@/app/CartProvider";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { H1, H3 } from "@/components/ui/headings";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -39,9 +40,9 @@ export default function CartPage() {
 
   return (
     <div className="container mx-auto mt-12 px-4 py-8 max-w-6xl">
-      <h1 className="font-serif text-3xl text-center lg:text-start font-bold mb-8 tracking-wide antialiased ">
+      <H1 className="text-center lg:text-start mb-8 tracking-wide">
         SHOPPING CART
-      </h1>
+      </H1>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-4 max-h-[800px] overflow-y-auto">
@@ -73,9 +74,9 @@ export default function CartPage() {
 
                     <div className="flex-1 flex flex-col justify-between">
                       <div>
-                        <h3 className="font-serif font-medium text-lg text-shadow-2xs">
+                        <H3 className="text-shadow-2xs">
                           {item.title}
-                        </h3>
+                        </H3>
                         <p className="text-sm text-muted-foreground">
                           {item.brand}
                         </p>
@@ -188,7 +189,7 @@ export default function CartPage() {
                 </Button>
               </Link>
               <Link href="/" className="block">
-                <Button variant="outline" className="w-full text-xs">
+                <Button variant="outline" className="w-full text-xs rounded">
                   Continue Shopping
                 </Button>
               </Link>

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useAuth } from "@/app/AuthProvider";
 import { useCart } from "@/app/CartProvider";
 import { useRouter } from "next/navigation";
+import { H1 } from "@/components/ui/headings";
 
 export function Navbar() {
   const { user, logout } = useAuth();
@@ -52,9 +53,9 @@ export function Navbar() {
       </ul>
       <div className="text-center mt-4 md:text-start md:pl-40">
         <Link href={"/"}>
-          <h1 className="font-serif font-bold tracking-wider text-2xl antialiased md:text-3xl ">
+          <H1 className="tracking-wider text-2xl md:text-3xl">
             TEXTILECOM
-          </h1>
+          </H1>
         </Link>
       </div>
     </nav>

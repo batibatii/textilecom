@@ -1,11 +1,12 @@
 import { AdminProductGridSkeleton } from "@/components/AdminProductGridSkeleton";
+import { H1 } from "@/components/ui/headings";
 
 export default function Loading() {
   return (
     <main className="container mx-auto px-4 py-8">
-      <h1 className="font-serif text-3xl text-center font-bold mt-8 mb-25">
+      <H1 className="text-center mt-8 mb-25">
         Approved Products
-      </h1>
+      </H1>
       <AdminProductGridSkeleton />
     </main>
   );

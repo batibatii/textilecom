@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useAuth } from "@/app/AuthProvider";
 import { useRouter } from "next/navigation";
+import { H1 } from "@/components/ui/headings";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -69,9 +70,9 @@ export function AdminNavbar() {
       </div>
       <div className="text-center mt-4 lg:text-start lg:pl-20 xl:pl-40">
         <Link href={"/"}>
-          <h1 className="font-serif font-bold tracking-wider text-2xl antialiased md:text-3xl ">
+          <H1 className="tracking-wider text-2xl md:text-3xl">
             TEXTILECOM
-          </h1>
+          </H1>
         </Link>
       </div>
     </nav>
