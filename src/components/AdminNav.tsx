@@ -57,7 +57,7 @@ export function AdminNavbar() {
           <Link href="/">DASHBOARD</Link>
         </div>
         <div className="px-1.5 py-2 md:px-2">
-          <Link href="/">SETTINGS</Link>
+          <Link href="/profile">PROFILE</Link>
         </div>
         {user && (
           <div
@@ -70,9 +70,7 @@ export function AdminNavbar() {
       </div>
       <div className="text-center mt-4 lg:text-start lg:pl-20 xl:pl-40">
         <Link href={"/"}>
-          <H1 className="tracking-wider text-2xl md:text-3xl">
-            TEXTILECOM
-          </H1>
+          <H1 className="tracking-wider text-2xl md:text-3xl">TEXTILECOM</H1>
         </Link>
       </div>
     </nav>

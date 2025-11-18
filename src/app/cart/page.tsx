@@ -55,8 +55,8 @@ export default function CartPage() {
             return (
               <Card key={`${item.productId}-${item.size}`}>
                 <CardContent className="p-4">
-                  <div className="flex gap-4">
-                    <div className="relative w-24 h-32 bg-muted shrink-0">
+                  <div className="flex gap-4 items-stretch">
+                    <div className="relative w-24 min-h-32 bg-muted shrink-0 ">
                       {item.image ? (
                         <Image
                           src={item.image}
@@ -74,9 +74,7 @@ export default function CartPage() {
 
                     <div className="flex-1 flex flex-col justify-between">
                       <div>
-                        <H3 className="text-shadow-2xs">
-                          {item.title}
-                        </H3>
+                        <H3 className="text-shadow-2xs">{item.title}</H3>
                         <p className="text-sm text-muted-foreground">
                           {item.brand}
                         </p>
@@ -92,7 +90,7 @@ export default function CartPage() {
                         )}
                       </div>
 
-                      <div className="flex items-center justify-between mt-4">
+                      <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <button
                             onClick={() =>
@@ -123,14 +121,16 @@ export default function CartPage() {
                           </button>
                         </div>
 
-                        <div className="flex items-center gap-4">
-                          <div className="text-right">
+                        <div className="flex items-center gap-2">
+                          <div className="ml-4 text-right">
                             {item.discount && item.discount.rate > 0 && (
-                              <p className="text-xs text-muted-foreground line-through">
-                                {formatPrice(item.price.amount, currency)}
-                              </p>
+                              <div className="space-y-0.5">
+                                <p className="text-xs text-muted-foreground line-through">
+                                  {formatPrice(item.price.amount, currency)}
+                                </p>
+                              </div>
                             )}
-                            <p className="text-lg font-medium">
+                            <p className="text-sm md:text-lg font-medium">
                               {getCurrencySymbol(currency)}
                               {(itemPrice * item.quantity).toFixed(2)}
                             </p>

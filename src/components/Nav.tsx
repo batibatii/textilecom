@@ -32,7 +32,7 @@ export function Navbar() {
         )}
         {user && (
           <li className="p-2">
-            <Link href="/">SETTINGS</Link>
+            <Link href="/profile">PROFILE</Link>
           </li>
         )}
         <li className="p-2 relative">
@@ -53,9 +53,7 @@ export function Navbar() {
       </ul>
       <div className="text-center mt-4 md:text-start md:pl-40">
         <Link href={"/"}>
-          <H1 className="tracking-wider text-2xl md:text-3xl">
-            TEXTILECOM
-          </H1>
+          <H1 className="tracking-wider text-2xl md:text-3xl">TEXTILECOM</H1>
         </Link>
       </div>
     </nav>
