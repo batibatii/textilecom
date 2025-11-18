@@ -1,7 +1,7 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
 
-export interface HeadingProps extends React.HTMLAttributes<HTMLHeadingElement> {}
+export type HeadingProps = React.HTMLAttributes<HTMLHeadingElement>;
 
 const H1 = React.forwardRef<HTMLHeadingElement, HeadingProps>(
   ({ className, ...props }, ref) => {
