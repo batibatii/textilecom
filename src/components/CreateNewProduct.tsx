@@ -32,10 +32,11 @@ import {
   ProductFormData,
   PRODUCT_CATEGORIES,
 } from "@/Types/productValidation";
-import { createProduct, FirebaseError } from "@/lib/firebase";
+import type { FirebaseError } from "@/lib/firebase/config";
+import { createProductWithRevalidation } from "@/app/actions/admin/products/create";
 import { Alert, AlertTitle } from "./ui/alert";
 import { useAuth } from "@/app/AuthProvider";
-import { uploadImages } from "@/app/actions/admin/products/new";
+import { uploadImages } from "@/app/actions/admin/products/uploadImages";
 
 export function CreateNewProduct() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -50,7 +51,7 @@ export function CreateNewProduct() {
     register,
     handleSubmit,
     setValue,
-    watch,
+    reset,
     formState: { errors, isSubmitting },
   } = useForm<ProductFormData>({
     resolver: zodResolver(ProductFormSchema),
@@ -58,8 +59,6 @@ export function CreateNewProduct() {
       discount: 0,
     },
   });
-
-  const productNumber = watch("serialNumber") || "";
 
   const handleNext = () => {
     if (currentPage < totalPages) {
@@ -76,27 +75,29 @@ export function CreateNewProduct() {
   const onSubmit = async (data: ProductFormData) => {
     try {
       setError(undefined);
-      let imageUrls: string[] = [];
 
-      if (selectedImages.length > 0) {
-        setIsUploadingImage(true);
-        const formData = new FormData();
-
-        selectedImages.forEach((file) => {
-          formData.append("images", file);
-        });
-
-        const uploadResult = await uploadImages(formData);
-
-        if (!uploadResult.success) {
-          setError(uploadResult.error.message);
-          setIsUploadingImage(false);
-          return;
-        }
-
-        imageUrls = uploadResult.urls;
-        setIsUploadingImage(false);
+      if (selectedImages.length === 0) {
+        setError("At least one image is required");
+        return;
       }
+
+      setIsUploadingImage(true);
+      const formData = new FormData();
+
+      selectedImages.forEach((file) => {
+        formData.append("images", file);
+      });
+
+      const uploadResult = await uploadImages(formData);
+
+      if (!uploadResult.success) {
+        setError(uploadResult.error.message);
+        setIsUploadingImage(false);
+        return;
+      }
+
+      const imageUrls = uploadResult.urls;
+      setIsUploadingImage(false);
 
       const productData = {
         ...data,
@@ -105,11 +106,15 @@ export function CreateNewProduct() {
         createdBy: user?.uid || "",
       };
 
-      const result = await createProduct(productData);
+      const result = await createProductWithRevalidation(productData);
       console.log("Product created successfully:", result);
 
       setSuccess(true);
       setSelectedImages([]);
+      reset({
+        discount: 0,
+      });
+      setCurrentPage(1);
 
       setTimeout(() => {
         setSuccess(false);
@@ -258,11 +263,12 @@ export function CreateNewProduct() {
                   </div>
                   <div className="flex flex-col gap-1">
                     <Label className="text-xs md:text-sm">
-                      Images (Optional)
+                      Images (Required)
                     </Label>
                     <Input
                       type="file"
                       multiple
+                      required
                       accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
                       onChange={(e) => {
                         const files = Array.from(e.target.files || []);
@@ -352,7 +358,7 @@ export function CreateNewProduct() {
         )}
 
         <CardFooter className="flex flex-col gap-2 md:gap-4 p-3 md:p-6">
-          <Pagination>
+          <Pagination className="flex justify-center">
             <PaginationContent>
               <PaginationItem>
                 <PaginationPrevious

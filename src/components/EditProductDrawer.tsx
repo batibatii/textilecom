@@ -33,11 +33,10 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState, useRef } from "react";
 import { ArrowLeft } from "lucide-react";
-import { uploadImages } from "@/app/actions/admin/products/new";
-import { deleteProductImages } from "@/app/actions/admin/products/delete";
+import { uploadImages } from "@/app/actions/admin/products/uploadImages";
+import { deleteProductImages } from "@/app/actions/admin/products/deleteImages";
+import { updateProduct } from "@/app/actions/admin/products/update";
 import { useAuth } from "@/app/AuthProvider";
-import { db } from "@/lib/firebase";
-import { doc, updateDoc } from "firebase/firestore";
 
 interface EditProductDrawerProps {
   product: Product | null;
@@ -139,6 +138,11 @@ export function EditProductDrawer({
 
     if (!product || productImages.length === 0) return;
 
+    if (productImages.length === 1) {
+      setDeleteError("Cannot delete the last image. At least one image is required.");
+      return;
+    }
+
     setIsDeleting(true);
     setDeleteError(undefined);
 
@@ -158,8 +162,19 @@ export function EditProductDrawer({
       );
       setProductImages(updatedImages);
 
-      const productRef = doc(db, "products", product.id);
-      await updateDoc(productRef, { images: updatedImages });
+      await updateProduct(product.id, {
+        title: product.title,
+        description: product.description,
+        brand: product.brand,
+        serialNumber: product.serialNumber,
+        price: product.price,
+        taxRate: product.taxRate,
+        category: product.category,
+        stock: product.stock,
+        discount: product.discount || null,
+        images: updatedImages,
+        updatedAt: new Date().toISOString(),
+      });
 
       // Adjust carousel index if needed
       if (
@@ -207,11 +222,15 @@ export function EditProductDrawer({
 
       const allImageUrls = [...productImages, ...uploadedImageUrls];
 
+      if (allImageUrls.length === 0) {
+        setUploadError("At least one image is required");
+        setIsUploading(false);
+        return;
+      }
+
       if (!product) {
         throw new Error("Product not found");
       }
-
-      const productRef = doc(db, "products", product.id);
 
       const updatedData = {
         title: data.title,
@@ -231,7 +250,7 @@ export function EditProductDrawer({
         updatedAt: new Date().toISOString(),
       };
 
-      await updateDoc(productRef, updatedData);
+      await updateProduct(product.id, updatedData);
 
       onOpenChange(false);
       if (onUpdate) {
@@ -285,6 +304,7 @@ export function EditProductDrawer({
                             fill
                             className="object-contain"
                             sizes="(max-width: 1024px) 100vw, 500px"
+                            loading="lazy"
                           />
                         </div>
                       </CarouselItem>
