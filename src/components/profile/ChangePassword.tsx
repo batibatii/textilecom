@@ -50,10 +50,11 @@ export function ChangePassword() {
 
       try {
         await reauthenticateWithCredential(currentUser, credential);
-      } catch (err: any) {
+      } catch (err) {
+        const firebaseError = err as { code?: string };
         if (
-          err.code === "auth/wrong-password" ||
-          err.code === "auth/invalid-credential"
+          firebaseError.code === "auth/wrong-password" ||
+          firebaseError.code === "auth/invalid-credential"
         ) {
           setError("Current password is incorrect");
         } else {

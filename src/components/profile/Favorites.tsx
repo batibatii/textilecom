@@ -8,8 +8,13 @@ interface FavoritesProps {
   user: User;
 }
 
+interface Product {
+  id: string;
+  [key: string]: unknown;
+}
+
 export function Favorites({ user }: FavoritesProps) {
-  const [favorites, setFavorites] = useState<any[]>([]);
+  const [favorites, setFavorites] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

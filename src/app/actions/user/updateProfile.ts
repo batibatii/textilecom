@@ -18,7 +18,7 @@ export async function updateProfile(userId: string, formData: unknown) {
     };
   }
 
-  const { email, ...profileData } = validationResult.data;
+  const { email: _email, ...profileData } = validationResult.data;
 
   const result = await updateUserProfile(userId, profileData);
 
