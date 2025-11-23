@@ -12,7 +12,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import {
   PersonalInfoSchema,
   type PersonalInfoData,
-} from "@/types/profileValidation";
+} from "@/Types/profileValidation";
 import { updateProfile } from "@/app/actions/user/updateProfile";
 
 interface PersonalInfoProps {

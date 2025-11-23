@@ -4,7 +4,7 @@ import {
   Product,
   ProductFormSchema,
   ProductFormData,
-} from "@/types/productValidation";
+} from "@/Types/productValidation";
 import {
   Drawer,
   DrawerContent,
@@ -27,7 +27,7 @@ import {
   NativeSelect,
   NativeSelectOption,
 } from "@/components/ui/native-select";
-import { PRODUCT_CATEGORIES } from "@/types/productValidation";
+import { PRODUCT_CATEGORIES } from "@/Types/productValidation";
 import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";

@@ -1,7 +1,7 @@
 "use server";
 
 import { adminDb, adminAuth, FieldValue } from "../admin";
-import type { Product } from "@/types/productValidation";
+import type { Product } from "@/Types/productValidation";
 
 export const createUser = async (email: string, userId: string) => {
   const userRef = adminDb.collection("users").doc(userId);

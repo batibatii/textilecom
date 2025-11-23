@@ -2,7 +2,7 @@
 
 import { getAllProducts } from "@/lib/firebase/dal/products";
 import type { FirebaseError } from "@/lib/firebase/config";
-import { Product } from "@/types/productValidation";
+import { Product } from "@/Types/productValidation";
 
 type ProductsFetchResult =
   | { success: true; products: Product[] }

@@ -2,7 +2,7 @@
 
 import { updateUserProfile } from "@/lib/firebase/dal/users";
 import { revalidatePath } from "next/cache";
-import { PersonalInfoSchema } from "@/types/profileValidation";
+import { PersonalInfoSchema } from "@/Types/profileValidation";
 
 export async function updateProfile(userId: string, formData: unknown) {
   const validationResult = PersonalInfoSchema.safeParse(formData);

@@ -31,7 +31,7 @@ import {
   ProductFormSchema,
   ProductFormData,
   PRODUCT_CATEGORIES,
-} from "@/types/productValidation";
+} from "@/Types/productValidation";
 import type { FirebaseError } from "@/lib/firebase/config";
 import { createProductWithRevalidation } from "@/app/actions/admin/products/create";
 import { Alert, AlertTitle } from "@/components/ui/alert";

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import type { User } from "@/contexts/AuthContext";
-import type { Product } from "@/types/productValidation";
+import type { Product } from "@/Types/productValidation";
 import { getFavorites } from "@/app/actions/user/getFavorites";
 import { useFavorites } from "@/contexts/FavoritesContext";
 import { useCart, type CartItem } from "@/contexts/CartContext";

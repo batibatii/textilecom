@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Product } from "@/types/productValidation";
+import { Product } from "@/Types/productValidation";
 import { AdminProductCard } from "@/components/product/AdminProductCard";
 import {
   Pagination,

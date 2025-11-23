@@ -1,4 +1,4 @@
-import { Product } from "@/types/productValidation";
+import { Product } from "@/Types/productValidation";
 import { CartItem } from "@/contexts/CartContext";
 
 export const getCurrencySymbol = (currency: string): string => {

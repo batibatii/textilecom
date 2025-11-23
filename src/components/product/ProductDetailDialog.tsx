@@ -1,6 +1,6 @@
 "use client";
 
-import { Product } from "@/types/productValidation";
+import { Product } from "@/Types/productValidation";
 import {
   Dialog,
   DialogContent,

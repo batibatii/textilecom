@@ -2,7 +2,7 @@
 
 import { verifySession } from "@/app/actions/auth/session";
 import { callApi } from "@/lib/apiHelper";
-import type { CheckoutItem } from "@/types/checkoutValidation";
+import type { CheckoutItem } from "@/Types/checkoutValidation";
 
 type CheckoutResult =
   | { success: true; sessionUrl: string; sessionId: string }
