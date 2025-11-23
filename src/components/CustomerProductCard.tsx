@@ -11,6 +11,17 @@ import {
   formatPrice,
 } from "@/lib/productPrice";
 import { useState } from "react";
+import { useFavorites } from "@/app/FavoritesProvider";
+import { useAuth } from "@/app/AuthProvider";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 interface CustomerProductCardProps {
   product: Product;
@@ -25,6 +36,26 @@ export function CustomerProductCard({
   const hasDiscount = checkHasDiscount(product);
   const currencySymbol = getCurrencySymbol(product.price.currency);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [loginDialogOpen, setLoginDialogOpen] = useState(false);
+  const { user } = useAuth();
+  const { addToFavorites, removeFromFavorites, isFavorited } = useFavorites();
+
+  const isProductFavorited = isFavorited(product.id);
+
+  const handleToggleFavorite = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+
+    if (!user) {
+      setLoginDialogOpen(true);
+      return;
+    }
+
+    if (isProductFavorited) {
+      await removeFromFavorites(product.id);
+    } else {
+      await addToFavorites(product.id);
+    }
+  };
 
   return (
     <>
@@ -62,11 +93,14 @@ export function CustomerProductCard({
                 xmlns="http://www.w3.org/2000/svg"
                 width="16"
                 height="16"
-                fill="#000000"
+                fill={isProductFavorited ? "#000000" : "none"}
                 viewBox="0 0 256 256"
-                className="shrink-0 cursor-pointer active:translate-y-0.5"
+                className="shrink-0 cursor-pointer active:translate-y-0.5 transition-all hover:scale-110"
+                onClick={handleToggleFavorite}
+                stroke="#000000"
+                strokeWidth={isProductFavorited ? "0" : "16"}
               >
-                <path d="M160,56H64A16,16,0,0,0,48,72V224a8,8,0,0,0,12.65,6.51L112,193.83l51.36,36.68A8,8,0,0,0,176,224V72A16,16,0,0,0,160,56Zm0,152.46-43.36-31a8,8,0,0,0-9.3,0L64,208.45V72h96ZM208,40V192a8,8,0,0,1-16,0V40H88a8,8,0,0,1,0-16H192A16,16,0,0,1,208,40Z"></path>
+                <path d="M184,32H72A16,16,0,0,0,56,48V224a8,8,0,0,0,12.24,6.78L128,193.43l59.77,37.35A8,8,0,0,0,200,224V48A16,16,0,0,0,184,32Z"></path>
               </svg>
             </div>
           </CardHeader>
@@ -98,6 +132,29 @@ export function CustomerProductCard({
         open={dialogOpen}
         onOpenChange={setDialogOpen}
       />
+
+      <Dialog open={loginDialogOpen} onOpenChange={setLoginDialogOpen}>
+        <DialogContent className="rounded-none">
+          <DialogHeader>
+            <DialogTitle>Login Required</DialogTitle>
+            <DialogDescription>
+              Please log in to save products to your favorites.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex gap-2 justify-end">
+            <Button
+              variant="outline"
+              onClick={() => setLoginDialogOpen(false)}
+              className="rounded-none"
+            >
+              Cancel
+            </Button>
+            <Link href="/user/signup">
+              <Button className="rounded-none">Log In</Button>
+            </Link>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

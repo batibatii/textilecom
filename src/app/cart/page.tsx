@@ -1,6 +1,7 @@
 "use client";
 
 import { useCart } from "@/app/CartProvider";
+import { useAuth } from "@/app/AuthProvider";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { H1, H3 } from "@/components/ui/headings";
@@ -11,10 +12,11 @@ import {
   formatPrice,
   calculateDiscountedPrice,
 } from "@/lib/productPrice";
-import { Trash2 } from "lucide-react";
+import { Trash2, MapPin } from "lucide-react";
 
 export default function CartPage() {
   const { items, removeItem, updateQuantity, getSubtotal } = useCart();
+  const { user } = useAuth();
 
   const total = getSubtotal(); // Total with tax included
   const subtotal = total / 1.2;
@@ -154,7 +156,7 @@ export default function CartPage() {
           })}
         </div>
 
-        <div className="lg:col-span-1">
+        <div className="lg:col-span-1 space-y-4">
           <Card className="sticky top-4">
             <CardHeader>
               <CardTitle className="antialiased">Order Summary</CardTitle>
@@ -184,17 +186,69 @@ export default function CartPage() {
                 </div>
               </div>
               <Link href="/checkout" className="block">
-                <Button className="w-full text-xs" size="lg">
+                <Button className="w-full text-xs rounded-none" size="lg">
                   PROCEED TO CHECKOUT
                 </Button>
               </Link>
               <Link href="/" className="block">
-                <Button variant="outline" className="w-full text-xs rounded">
+                <Button variant="outline" className="w-full text-xs ">
                   Continue Shopping
                 </Button>
               </Link>
             </CardContent>
           </Card>
+
+          {user && user.address && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="antialiased flex items-center gap-2">
+                  <MapPin size={18} />
+                  Shipping Address
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {user.address.line1 ||
+                user.address.city ||
+                user.address.postalCode ||
+                user.address.country ? (
+                  <div className="space-y-1 text-sm">
+                    {user.address.line1 && (
+                      <p className="text-gray-700">{user.address.line1}</p>
+                    )}
+                    {user.address.line2 && (
+                      <p className="text-gray-700">{user.address.line2}</p>
+                    )}
+                    {(user.address.city || user.address.postalCode) && (
+                      <p className="text-gray-700">
+                        {[user.address.city, user.address.postalCode]
+                          .filter(Boolean)
+                          .join(", ")}
+                      </p>
+                    )}
+                    {user.address.country && (
+                      <p className="text-gray-700">{user.address.country}</p>
+                    )}
+                    <Link href="/profile" className="block pt-2">
+                      <Button variant="default" className="p-2 h-auto text-xs">
+                        Edit Address
+                      </Button>
+                    </Link>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <p className="text-sm text-muted-foreground">
+                      No shipping address added yet.
+                    </p>
+                    <Link href="/profile" className="block">
+                      <Button variant="outline" size="sm" className="w-full">
+                        Add Address
+                      </Button>
+                    </Link>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
     </div>

@@ -28,7 +28,13 @@ export function ProfileContainer({ user }: ProfileContainerProps) {
   };
 
   const innerCard = (
-    <Card className="h-fit w-90 sm:w-150 border shadow-sm md:w-200">
+    <Card
+      className={`h-fit  ${
+        activeSection === "favorites"
+          ? "w-full sm:w-200 md:w-250 lg:w-300 border-none shadow-none"
+          : "min-w-90 xs:w-147 sm:w-150 md:w-200 border shadow-sm"
+      }`}
+    >
       <CardContent className="p-3 md:p-6">{renderContent()}</CardContent>
     </Card>
   );

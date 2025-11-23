@@ -5,21 +5,21 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef } from "react";
 
 export default function SuccessPage() {
   const searchParams = useSearchParams();
   const { clearCart } = useCart();
-  const [cleared, setCleared] = useState(false);
+  const hasCleared = useRef(false);
 
   const sessionId = searchParams.get("session_id");
 
   useEffect(() => {
-    if (sessionId && !cleared) {
+    if (sessionId && !hasCleared.current) {
+      hasCleared.current = true;
       clearCart();
-      setCleared(true);
     }
-  }, [sessionId, cleared, clearCart]);
+  }, [sessionId, clearCart]);
 
   if (!sessionId) {
     return (
@@ -71,7 +71,7 @@ export default function SuccessPage() {
 
           <div className="flex flex-col items-center sm:flex-row gap-4 justify-center pt-4">
             <Link href="/">
-              <Button variant="default" size="lg">
+              <Button variant="default" size="lg" className="rounded-none">
                 Continue Shopping
               </Button>
             </Link>

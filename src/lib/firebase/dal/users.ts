@@ -1,6 +1,7 @@
 "use server";
 
-import { adminDb, adminAuth } from "../admin";
+import { adminDb, adminAuth, FieldValue } from "../admin";
+import type { Product } from "@/Types/productValidation";
 
 export const createUser = async (email: string, userId: string) => {
   const userRef = adminDb.collection("users").doc(userId);
@@ -37,7 +38,7 @@ export const getUserData = async (userId: string) => {
     const data = userSnap.data();
 
     // Convert Firestore Timestamp to ISO string for serialization
-    if (data?.createdAt && typeof data.createdAt.toDate === 'function') {
+    if (data?.createdAt && typeof data.createdAt.toDate === "function") {
       data.createdAt = data.createdAt.toDate().toISOString();
     }
 
@@ -62,7 +63,9 @@ export const updateUserRole = async (
     // This forces the user to re-authenticate with the new role
     await adminAuth.revokeRefreshTokens(userId);
 
-    console.log(`User ${userId} role changed to ${role}. All sessions revoked.`);
+    console.log(
+      `User ${userId} role changed to ${role}. All sessions revoked.`
+    );
 
     return { success: true };
   } catch (error) {
@@ -164,12 +167,15 @@ export const getUserFavorites = async (userId: string) => {
     }
 
     const productsRef = adminDb.collection("products");
-    const favoriteProducts = [];
+    const favoriteProducts: Product[] = [];
 
     for (const productId of favoriteIds) {
       const productDoc = await productsRef.doc(productId).get();
       if (productDoc.exists) {
-        favoriteProducts.push({ id: productDoc.id, ...productDoc.data() });
+        favoriteProducts.push({
+          id: productDoc.id,
+          ...productDoc.data(),
+        } as Product);
       }
     }
 
@@ -182,6 +188,64 @@ export const getUserFavorites = async (userId: string) => {
       error: {
         code: "user/fetch-favorites-failed",
         message: "Failed to fetch favorites.",
+      },
+    };
+  }
+};
+
+export const addUserFavorite = async (userId: string, productId: string) => {
+  try {
+    const userRef = adminDb.collection("users").doc(userId);
+
+    // Use arrayUnion to add productId atomically (avoids duplicates)
+    // Use set with merge to create the field if it doesn't exist
+    await userRef.set(
+      {
+        favorites: FieldValue.arrayUnion(productId),
+      },
+      { merge: true }
+    );
+
+    console.log(`Product ${productId} added to favorites for user ${userId}`);
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error adding favorite:", error);
+    return {
+      success: false,
+      error: {
+        code: "user/add-favorite-failed",
+        message: "Failed to add product to favorites.",
+      },
+    };
+  }
+};
+
+export const removeUserFavorite = async (userId: string, productId: string) => {
+  try {
+    const userRef = adminDb.collection("users").doc(userId);
+
+    // Use arrayRemove to remove productId atomically
+    // Use set with merge to handle edge cases
+    await userRef.set(
+      {
+        favorites: FieldValue.arrayRemove(productId),
+      },
+      { merge: true }
+    );
+
+    console.log(
+      `Product ${productId} removed from favorites for user ${userId}`
+    );
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error removing favorite:", error);
+    return {
+      success: false,
+      error: {
+        code: "user/remove-favorite-failed",
+        message: "Failed to remove product from favorites.",
       },
     };
   }

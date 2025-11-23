@@ -77,9 +77,7 @@ export default function CheckoutPage() {
 
   return (
     <div className="container mx-auto px-4 py-8 mt-12 max-w-4xl">
-      <H1 className="mb-8 tracking-wide text-center lg:text-start">
-        CHECKOUT
-      </H1>
+      <H1 className="mb-8 tracking-wide text-center lg:text-start">CHECKOUT</H1>
 
       {error && (
         <Alert variant="destructive" className="mb-6">
@@ -169,7 +167,7 @@ export default function CheckoutPage() {
               <Button
                 onClick={onCheckout}
                 disabled={loading}
-                className="w-full"
+                className="w-full rounded-none"
                 size="lg"
               >
                 {loading ? "PROCESSING..." : "PROCEED TO PAYMENT"}

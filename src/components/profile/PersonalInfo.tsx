@@ -107,125 +107,157 @@ export function PersonalInfo({ user }: PersonalInfoProps) {
       onSubmit={handleSubmit(onSubmit)}
       className="flex flex-col gap-3 md:gap-4"
     >
-      <div className="flex flex-col gap-0.5">
-        <Label className="text-xs md:text-sm">Email</Label>
-        <p className="text-sm py-2 ">{user.email}</p>
-        <span className="text-muted-foreground text-[10px] md:text-xs">
+      <div className="flex flex-col gap-1">
+        <Label className="text-sm md:text-base">Email</Label>
+        <p className="text-sm md:text-base py-2 text-muted-foreground W">
+          {user.email}
+        </p>
+        <span className="text-muted-foreground text-xs">
           Email cannot be changed
         </span>
       </div>
 
-      <div className="flex flex-col gap-0.5">
-        <Label className="text-xs md:text-sm">Phone Number</Label>
+      <div className="flex flex-col gap-1">
+        <Label className="text-sm md:text-base">Phone Number</Label>
         {isEditMode ? (
           <div className="flex gap-2">
             <Input
               {...register("phoneCountryCode")}
               placeholder="+31"
-              className="h-8 md:h-9 text-sm border-b border-b-ring rounded-none w-16 md:w-20"
+              className="h-10 md:h-11 text-sm md:text-base border-b border-b-ring rounded-none w-20 md:w-24"
             />
             <Input
               {...register("phoneNumber")}
               type="tel"
               placeholder="123456789"
-              className="h-8 md:h-9 text-sm border-b border-b-ring rounded-none flex-1"
+              className="h-10 md:h-11 text-sm md:text-base border-b border-b-ring rounded-none flex-1"
             />
           </div>
         ) : (
-          <p className="text-sm py-2">
+          <p
+            className={`text-sm md:text-base py-2 ${
+              !formData.phoneNumber ? "text-muted-foreground" : ""
+            }`}
+          >
             {formData.phoneCountryCode} {formData.phoneNumber || "Not provided"}
           </p>
         )}
         {(errors.phoneCountryCode || errors.phoneNumber) && (
-          <span className="text-destructive text-[10px] md:text-xs mt-1">
+          <span className="text-destructive text-xs mt-1">
             {errors.phoneCountryCode?.message || errors.phoneNumber?.message}
           </span>
         )}
       </div>
 
-      <div className="flex flex-col gap-0.5">
-        <Label className="text-xs md:text-sm">Address Line 1</Label>
+      <div className="flex flex-col gap-1">
+        <Label className="text-sm md:text-base">Address Line 1</Label>
         {isEditMode ? (
           <Input
             {...register("addressLine1")}
-            className="h-8 md:h-9 text-sm border-b border-b-ring rounded-none"
+            className="h-10 md:h-11 text-sm md:text-base border-b border-b-ring rounded-none"
           />
         ) : (
-          <p className="text-sm py-2">
+          <p
+            className={`text-sm md:text-base py-2 ${
+              !formData.addressLine1 ? "text-muted-foreground" : ""
+            }`}
+          >
             {formData.addressLine1 || "Not provided"}
           </p>
         )}
         {errors.addressLine1 && (
-          <span className="text-destructive text-[10px] md:text-xs mt-1">
+          <span className="text-destructive text-xs mt-1">
             {errors.addressLine1.message}
           </span>
         )}
       </div>
 
-      <div className="flex flex-col gap-0.5">
-        <Label className="text-xs md:text-sm">Address Line 2 (Optional)</Label>
+      <div className="flex flex-col gap-1">
+        <Label className="text-sm md:text-base">
+          Address Line 2 (Optional)
+        </Label>
         {isEditMode ? (
           <Input
             {...register("addressLine2")}
-            className="h-8 md:h-9 text-sm border-b border-b-ring rounded-none"
+            className="h-10 md:h-11 text-sm md:text-base border-b border-b-ring rounded-none"
           />
         ) : (
-          <p className="text-sm py-2">
+          <p
+            className={`text-sm md:text-base py-2 ${
+              !formData.addressLine2 ? "text-muted-foreground" : ""
+            }`}
+          >
             {formData.addressLine2 || "Not provided"}
           </p>
         )}
       </div>
 
-      <div className="flex gap-2 md:gap-4">
-        <div className="flex flex-col gap-0.5 flex-1">
-          <Label className="text-xs md:text-sm">City</Label>
+      <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
+        <div className="flex flex-col gap-1 flex-1">
+          <Label className="text-sm md:text-base">City</Label>
           {isEditMode ? (
             <Input
               {...register("city")}
-              className="h-8 md:h-9 text-sm border-b border-b-ring rounded-none"
+              className="h-10 md:h-11 text-sm md:text-base border-b border-b-ring rounded-none"
             />
           ) : (
-            <p className="text-sm py-2">{formData.city || "Not provided"}</p>
+            <p
+              className={`text-sm md:text-base py-2 ${
+                !formData.city ? "text-muted-foreground" : ""
+              }`}
+            >
+              {formData.city || "Not provided"}
+            </p>
           )}
           {errors.city && (
-            <span className="text-destructive text-[10px] md:text-xs mt-1">
+            <span className="text-destructive text-xs mt-1">
               {errors.city.message}
             </span>
           )}
         </div>
 
-        <div className="flex flex-col gap-0.5 flex-1">
-          <Label className="text-xs md:text-sm">Postal Code</Label>
+        <div className="flex flex-col gap-1 flex-1">
+          <Label className="text-sm md:text-base">Postal Code</Label>
           {isEditMode ? (
             <Input
               {...register("postalCode")}
-              className="h-8 md:h-9 text-sm border-b border-b-ring rounded-none"
+              className="h-10 md:h-11 text-sm md:text-base border-b border-b-ring rounded-none"
             />
           ) : (
-            <p className="text-sm py-2">
+            <p
+              className={`text-sm md:text-base py-2 ${
+                !formData.postalCode ? "text-muted-foreground" : ""
+              }`}
+            >
               {formData.postalCode || "Not provided"}
             </p>
           )}
           {errors.postalCode && (
-            <span className="text-destructive text-[10px] md:text-xs mt-1">
+            <span className="text-destructive text-xs mt-1">
               {errors.postalCode.message}
             </span>
           )}
         </div>
       </div>
 
-      <div className="flex flex-col gap-0.5">
-        <Label className="text-xs md:text-sm">Country</Label>
+      <div className="flex flex-col gap-1">
+        <Label className="text-sm md:text-base">Country</Label>
         {isEditMode ? (
           <Input
             {...register("country")}
-            className="h-8 md:h-9 text-sm border-b border-b-ring rounded-none"
+            className="h-10 md:h-11 text-sm md:text-base border-b border-b-ring rounded-none"
           />
         ) : (
-          <p className="text-sm py-2">{formData.country || "Not provided"}</p>
+          <p
+            className={`text-sm md:text-base py-2 ${
+              !formData.country ? "text-muted-foreground" : ""
+            }`}
+          >
+            {formData.country || "Not provided"}
+          </p>
         )}
         {errors.country && (
-          <span className="text-destructive text-[10px] md:text-xs mt-1">
+          <span className="text-destructive text-xs mt-1">
             {errors.country.message}
           </span>
         )}
@@ -235,7 +267,7 @@ export function PersonalInfo({ user }: PersonalInfoProps) {
         type="submit"
         disabled={isSubmitting || success}
         onClick={handleButtonClick}
-        className="w-full h-8 md:h-9 text-xs md:text-sm mt-2"
+        className="w-full h-9 md:h-10 text-xs md:text-sm mt-4"
       >
         {isSubmitting
           ? "UPDATING..."
@@ -252,25 +284,23 @@ export function PersonalInfo({ user }: PersonalInfoProps) {
           variant="outline"
           onClick={handleCancel}
           disabled={isSubmitting}
-          className="w-full h-8 md:h-9 text-xs md:text-sm mt-2 border-2 shadow-xs"
+          className="w-full h-9 md:h-10 text-xs md:text-sm border-2 shadow-xs"
         >
           CANCEL
         </Button>
       )}
 
       {success && (
-        <Alert className="ml-0 mt-0.5 pl-0">
-          <AlertTitle className="text-xs md:text-sm">
+        <Alert className="mt-2">
+          <AlertTitle className="text-sm">
             Information updated successfully!
           </AlertTitle>
         </Alert>
       )}
 
       {error && (
-        <Alert variant="destructive">
-          <AlertTitle className="text-xs md:text-sm ml-0 mt-0.5 pl-0">
-            {error}
-          </AlertTitle>
+        <Alert variant="destructive" className="mt-2">
+          <AlertTitle className="text-sm">{error}</AlertTitle>
         </Alert>
       )}
     </form>

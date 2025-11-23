@@ -24,25 +24,23 @@ export function AdminNavbar() {
 
   return (
     <nav className="flex flex-col gap-6 lg:gap-0">
-      <div className="flex flex-wrap lg:justify-end gap-1 font-light text-[11x] justify-center md:text-sm md:font-extralight mt-2  lg:mt-10 lg:mr-16">
+      <div className="flex flex-wrap lg:justify-end gap-1 font-light text-[13px] justify-center md:text-sm md:font-extralight mt-2  lg:mt-10 lg:mr-16">
         <div className="px-1.5 py-2 md:px-2">
           <Link href="/admin/products/new">ADD PRODUCT</Link>
         </div>
         <NavigationMenu>
           <NavigationMenuList>
-            <NavigationMenuItem>
-              <Link href="/admin" className="px-1.5 py-2 md:px-2 ">
-                <NavigationMenuTrigger className="bg-transparent hover:bg-transparent focus:bg-transparent data-[state=open]:bg-transparent h-auto px-0 py-0 font-light text-[11px] md:text-sm md:font-extralight cursor-pointer">
-                  PRODUCTS
-                </NavigationMenuTrigger>
-              </Link>
+            <NavigationMenuItem className="px-1.5 py-2 md:px-2">
+              <NavigationMenuTrigger className="bg-transparent hover:bg-transparent focus:bg-transparent data-[state=open]:bg-transparent data-[active]:bg-transparent h-auto px-0 py-0 font-light text-[13px] md:text-sm md:font-extralight cursor-pointer">
+                PRODUCTS
+              </NavigationMenuTrigger>
               <NavigationMenuContent>
                 <ul className="w-[200px] p-2">
                   <li>
                     <NavigationMenuLink asChild>
                       <Link
                         href="/admin/products/archive"
-                        className="block select-none  p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground font-light text-[11px] md:text-sm"
+                        className="block select-none  p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground font-light text-[13px] md:text-sm"
                       >
                         Approved Products
                       </Link>

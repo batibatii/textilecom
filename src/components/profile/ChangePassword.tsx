@@ -86,74 +86,72 @@ export function ChangePassword() {
       onSubmit={handleSubmit(onSubmit)}
       className="flex flex-col gap-3 md:gap-4"
     >
-      <div className="flex flex-col gap-0.5">
-        <Label className="text-xs md:text-sm">Current Password</Label>
+      <div className="flex flex-col gap-1">
+        <Label className="text-sm md:text-base">Current Password</Label>
         <Input
           type="password"
           {...register("currentPassword")}
-          className="h-8 md:h-9 text-sm border-b border-b-ring rounded-none"
+          className="h-10 md:h-11 text-sm md:text-base border-b border-b-ring rounded-none"
         />
         {errors.currentPassword && (
-          <span className="text-destructive text-[10px] md:text-xs mt-1">
+          <span className="text-destructive text-xs mt-1">
             {errors.currentPassword.message}
           </span>
         )}
       </div>
 
-      <div className="flex flex-col gap-0.5">
-        <Label className="text-xs md:text-sm">New Password</Label>
+      <div className="flex flex-col gap-1">
+        <Label className="text-sm md:text-base">New Password</Label>
         <Input
           type="password"
           {...register("newPassword")}
-          className="h-8 md:h-9 text-sm border-b border-b-ring rounded-none"
+          className="h-10 md:h-11 text-sm md:text-base border-b border-b-ring rounded-none"
         />
         {errors.newPassword && (
-          <span className="text-destructive text-[10px] md:text-xs mt-1">
+          <span className="text-destructive text-xs mt-1">
             {errors.newPassword.message}
           </span>
         )}
       </div>
 
-      <div className="flex flex-col gap-0.5">
-        <Label className="text-xs md:text-sm">Confirm New Password</Label>
+      <div className="flex flex-col gap-1">
+        <Label className="text-sm md:text-base">Confirm New Password</Label>
         <Input
           type="password"
           {...register("confirmPassword")}
-          className="h-8 md:h-9 text-sm border-b border-b-ring rounded-none"
+          className="h-10 md:h-11 text-sm md:text-base border-b border-b-ring rounded-none"
         />
         {errors.confirmPassword && (
-          <span className="text-destructive text-[10px] md:text-xs mt-1">
+          <span className="text-destructive text-xs mt-1">
             {errors.confirmPassword.message}
           </span>
         )}
       </div>
 
       {success && (
-        <Alert className="ml-0 mt-0.5 pl-0">
-          <AlertTitle className="text-xs md:text-sm">
+        <Alert className="mt-2">
+          <AlertTitle className="text-sm">
             Password changed successfully! Redirecting to login...
           </AlertTitle>
         </Alert>
       )}
 
       {error && (
-        <Alert variant="destructive">
-          <AlertTitle className="text-xs md:text-xs ml-0 mt-4 pl-0">
-            {error}
-          </AlertTitle>
+        <Alert variant="destructive" className="mt-2">
+          <AlertTitle className="text-sm">{error}</AlertTitle>
         </Alert>
       )}
 
       <Button
         type="submit"
         disabled={isSubmitting || success}
-        className="w-full h-8 md:h-9 text-xs md:text-sm mt-2"
+        className="w-full h-9 md:h-10 text-xs md:text-sm mt-4"
       >
         {isSubmitting
-          ? "Changing..."
+          ? "CHANGING..."
           : success
-          ? "Changed!"
-          : "Change Password"}
+          ? "CHANGED!"
+          : "CHANGE PASSWORD"}
       </Button>
     </form>
   );

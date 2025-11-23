@@ -26,9 +26,9 @@ export function ProfileSubNav({
           key={section.id}
           onClick={() => onSectionChange(section.id)}
           className={cn(
-            "px-2 py-1 md:px-3 md:py-1.5 text-xs md:text-sm font-light transition-colors cursor-pointer",
+            "px-2 py-1 md:px-3 md:py-1.5 text-xs md:text-sm font-light transition-colors cursor-pointer mt-1.5",
             activeSection === section.id
-              ? "font-normal"
+              ? "font-normal border-b-2 border-foreground "
               : "text-muted-foreground hover:text-foreground"
           )}
         >
