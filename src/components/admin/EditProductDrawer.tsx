@@ -139,7 +139,9 @@ export function EditProductDrawer({
     if (!product || productImages.length === 0) return;
 
     if (productImages.length === 1) {
-      setDeleteError("Cannot delete the last image. At least one image is required.");
+      setDeleteError(
+        "Cannot delete the last image. At least one image is required."
+      );
       return;
     }
 

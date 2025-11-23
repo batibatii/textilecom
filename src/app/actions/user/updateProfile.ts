@@ -5,7 +5,6 @@ import { revalidatePath } from "next/cache";
 import { PersonalInfoSchema } from "@/types/profileValidation";
 
 export async function updateProfile(userId: string, formData: unknown) {
-
   const validationResult = PersonalInfoSchema.safeParse(formData);
 
   if (!validationResult.success) {

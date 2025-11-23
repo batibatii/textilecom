@@ -37,7 +37,10 @@ export const calculateDiscountedPrice = (
 
 export const calculateSubtotal = (items: CartItem[]): number => {
   return items.reduce((total, item) => {
-    const discountedPrice = calculateDiscountedPrice(item.price.amount, item.discount);
+    const discountedPrice = calculateDiscountedPrice(
+      item.price.amount,
+      item.discount
+    );
     return total + discountedPrice * item.quantity;
   }, 0);
 };
