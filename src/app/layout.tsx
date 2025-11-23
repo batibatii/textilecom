@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import { Playfair_Display, Merriweather } from "next/font/google";
 import "./globals.css";
-import { ConditionalNavbar } from "../components/ConditionalNavbar";
-import { AuthProvider } from "./AuthProvider";
-import { FavoritesProvider } from "./FavoritesProvider";
-import { CartProvider } from "./CartProvider";
+import { ConditionalNavbar } from "@/components/layout/ConditionalNavbar";
+import { AuthProvider } from "@/contexts/AuthContext";
+import { FavoritesProvider } from "@/contexts/FavoritesContext";
+import { CartProvider } from "@/contexts/CartContext";
 
 const playfairDisplay = Playfair_Display({
   variable: "--font-playfair",

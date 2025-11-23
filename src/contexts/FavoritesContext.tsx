@@ -1,6 +1,13 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useMemo,
+  useCallback,
+} from "react";
 import { auth } from "@/lib/firebase/config";
 import { onAuthStateChanged } from "firebase/auth";
 import { addFavorite } from "@/app/actions/user/addFavorite";
@@ -55,72 +62,85 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
     loadFavorites();
   }, [userId]);
 
-  const addToFavorites = async (productId: string): Promise<boolean> => {
-    if (!userId) {
-      return false;
-    }
+  const addToFavorites = useCallback(
+    async (productId: string): Promise<boolean> => {
+      if (!userId) {
+        return false;
+      }
 
-    // Optimistic update - add immediately to UI
-    setFavorites((prev) => {
-      if (prev.includes(productId)) return prev;
-      return [...prev, productId];
-    });
+      // Optimistic update - add immediately to UI
+      setFavorites((prev) => {
+        if (prev.includes(productId)) return prev;
+        return [...prev, productId];
+      });
 
-    try {
-      const result = await addFavorite(productId);
+      try {
+        const result = await addFavorite(productId);
 
-      if (!result.success) {
-        // Revert on error
+        if (!result.success) {
+          // Revert on error
+          setFavorites((prev) => prev.filter((id) => id !== productId));
+          console.error("Failed to add favorite:", result.error);
+          return false;
+        }
+
+        return true;
+      } catch (error) {
         setFavorites((prev) => prev.filter((id) => id !== productId));
-        console.error("Failed to add favorite:", result.error);
+        console.error("Error adding to favorites:", error);
+        return false;
+      }
+    },
+    [userId]
+  );
+
+  const removeFromFavorites = useCallback(
+    async (productId: string): Promise<boolean> => {
+      if (!userId) {
         return false;
       }
 
-      return true;
-    } catch (error) {
+      // Optimistic update - remove immediately from UI
       setFavorites((prev) => prev.filter((id) => id !== productId));
-      console.error("Error adding to favorites:", error);
-      return false;
-    }
-  };
 
-  const removeFromFavorites = async (productId: string): Promise<boolean> => {
-    if (!userId) {
-      return false;
-    }
+      try {
+        const result = await removeFavorite(productId);
 
-    // Optimistic update - remove immediately from UI
-    const previousFavorites = favorites;
-    setFavorites((prev) => prev.filter((id) => id !== productId));
+        if (!result.success) {
+          // Revert on error - add back the product
+          setFavorites((prev) => [...prev, productId]);
+          console.error("Failed to remove favorite:", result.error);
+          return false;
+        }
 
-    try {
-      const result = await removeFavorite(productId);
-
-      if (!result.success) {
-        setFavorites(previousFavorites);
-        console.error("Failed to remove favorite:", result.error);
+        return true;
+      } catch (error) {
+        // Revert on error - add back the product
+        setFavorites((prev) => [...prev, productId]);
+        console.error("Error removing from favorites:", error);
         return false;
       }
+    },
+    [userId]
+  );
 
-      return true;
-    } catch (error) {
-      setFavorites(previousFavorites);
-      console.error("Error removing from favorites:", error);
-      return false;
-    }
-  };
+  const isFavorited = useCallback(
+    (productId: string): boolean => {
+      return favorites.includes(productId);
+    },
+    [favorites]
+  );
 
-  const isFavorited = (productId: string): boolean => {
-    return favorites.includes(productId);
-  };
-
-  const value: FavoritesContextType = {
-    favorites,
-    addToFavorites,
-    removeFromFavorites,
-    isFavorited,
-    loading,
-  };
+  const value: FavoritesContextType = useMemo(
+    () => ({
+      favorites,
+      addToFavorites,
+      removeFromFavorites,
+      isFavorited,
+      loading,
+    }),
+    [favorites, addToFavorites, removeFromFavorites, isFavorited, loading]
+  );
 
   return (
     <FavoritesContext.Provider value={value}>

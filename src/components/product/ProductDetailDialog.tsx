@@ -1,6 +1,6 @@
 "use client";
 
-import { Product } from "@/Types/productValidation";
+import { Product } from "@/types/productValidation";
 import {
   Dialog,
   DialogContent,
@@ -16,12 +16,12 @@ import {
   hasDiscount as checkHasDiscount,
   formatPrice,
 } from "@/lib/productPrice";
-import { Button } from "./ui/button";
-import { useCart, type CartItem } from "@/app/CartProvider";
+import { Button } from "@/components/ui/button";
+import { useCart, type CartItem } from "@/contexts/CartContext";
 import { useState } from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { useFavorites } from "@/app/FavoritesProvider";
-import { useAuth } from "@/app/AuthProvider";
+import { useFavorites } from "@/contexts/FavoritesContext";
+import { useAuth } from "@/contexts/AuthContext";
 import Link from "next/link";
 
 interface ProductDetailDialogProps {

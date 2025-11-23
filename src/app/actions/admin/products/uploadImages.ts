@@ -1,7 +1,7 @@
 "use server";
 
 import { put } from "@vercel/blob";
-import { ImageFileSchema } from "@/Types/productValidation";
+import { ImageFileSchema } from "@/types/productValidation";
 import type { FirebaseError } from "@/lib/firebase/config";
 
 type ImageUploadResult =

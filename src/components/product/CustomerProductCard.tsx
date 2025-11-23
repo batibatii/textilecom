@@ -1,9 +1,9 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Product } from "@/Types/productValidation";
+import { Product } from "@/types/productValidation";
 import Image from "next/image";
-import { ProductDetailDialog } from "@/components/ProductDetailDialog";
+import { ProductDetailDialog } from "@/components/product/ProductDetailDialog";
 import {
   getCurrencySymbol,
   getDisplayPrice,
@@ -11,8 +11,8 @@ import {
   formatPrice,
 } from "@/lib/productPrice";
 import { useState } from "react";
-import { useFavorites } from "@/app/FavoritesProvider";
-import { useAuth } from "@/app/AuthProvider";
+import { useFavorites } from "@/contexts/FavoritesContext";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   Dialog,
   DialogContent,
@@ -84,7 +84,7 @@ export function CustomerProductCard({
           <CardHeader className="pt-2 pl-0 pr-0">
             <div className="flex items-center justify-between gap-2 w-full">
               <CardTitle
-                className="font-light text-[12px] md:text-[13px] tracking-wider md:font-extralight truncate cursor-pointer hover:underline"
+                className="font-light text-[12px] md:text-[13px] tracking-wider md:font-extralight cursor-pointer hover:underline"
                 onClick={() => setDialogOpen(true)}
               >
                 {product.title.toUpperCase()}

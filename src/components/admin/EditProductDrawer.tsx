@@ -4,7 +4,7 @@ import {
   Product,
   ProductFormSchema,
   ProductFormData,
-} from "@/Types/productValidation";
+} from "@/types/productValidation";
 import {
   Drawer,
   DrawerContent,
@@ -27,7 +27,7 @@ import {
   NativeSelect,
   NativeSelectOption,
 } from "@/components/ui/native-select";
-import { PRODUCT_CATEGORIES } from "@/Types/productValidation";
+import { PRODUCT_CATEGORIES } from "@/types/productValidation";
 import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -36,7 +36,7 @@ import { ArrowLeft } from "lucide-react";
 import { uploadImages } from "@/app/actions/admin/products/uploadImages";
 import { deleteProductImages } from "@/app/actions/admin/products/deleteImages";
 import { updateProduct } from "@/app/actions/admin/products/update";
-import { useAuth } from "@/app/AuthProvider";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface EditProductDrawerProps {
   product: Product | null;

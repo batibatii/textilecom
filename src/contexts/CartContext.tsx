@@ -7,6 +7,7 @@ import React, {
   useEffect,
   useCallback,
   useRef,
+  useMemo,
 } from "react";
 import { calculateSubtotal } from "@/lib/productPrice";
 import { auth } from "@/lib/firebase/config";
@@ -81,7 +82,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           let retries = 0;
 
           while (userCart === null && retries < 3) {
-            await new Promise(resolve => setTimeout(resolve, 500));
+            await new Promise((resolve) => setTimeout(resolve, 500));
             userCart = await loadUserCart();
             retries++;
           }
@@ -120,7 +121,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     });
   }, [items, isInitialized, userId, isClearing]);
 
-  const addItem = (item: CartItem) => {
+  const addItem = useCallback((item: CartItem) => {
     setItems((prevItems) => {
       const existingItemIndex = prevItems.findIndex(
         (i) => i.productId === item.productId && i.size === item.size
@@ -137,32 +138,31 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         return [...prevItems, item];
       }
     });
-  };
+  }, []);
 
-  const removeItem = (productId: string, size?: string) => {
+  const removeItem = useCallback((productId: string, size?: string) => {
     setItems((prevItems) =>
       prevItems.filter((i) => !(i.productId === productId && i.size === size))
     );
-  };
+  }, []);
 
-  const updateQuantity = (
-    productId: string,
-    size: string | undefined,
-    quantity: number
-  ) => {
-    if (quantity <= 0) {
-      removeItem(productId, size);
-      return;
-    }
+  const updateQuantity = useCallback(
+    (productId: string, size: string | undefined, quantity: number) => {
+      if (quantity <= 0) {
+        removeItem(productId, size);
+        return;
+      }
 
-    setItems((prevItems) =>
-      prevItems.map((item) =>
-        item.productId === productId && item.size === size
-          ? { ...item, quantity }
-          : item
-      )
-    );
-  };
+      setItems((prevItems) =>
+        prevItems.map((item) =>
+          item.productId === productId && item.size === size
+            ? { ...item, quantity }
+            : item
+        )
+      );
+    },
+    [removeItem]
+  );
 
   const clearCart = useCallback(() => {
     setIsClearing(true);
@@ -175,23 +175,34 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setTimeout(() => setIsClearing(false), 100);
   }, [userId]);
 
-  const getItemCount = () => {
+  const getItemCount = useCallback(() => {
     return items.reduce((total, item) => total + item.quantity, 0);
-  };
+  }, [items]);
 
-  const getSubtotal = () => {
+  const getSubtotal = useCallback(() => {
     return calculateSubtotal(items);
-  };
+  }, [items]);
 
-  const value: CartContextType = {
-    items,
-    addItem,
-    removeItem,
-    updateQuantity,
-    clearCart,
-    getItemCount,
-    getSubtotal,
-  };
+  const value: CartContextType = useMemo(
+    () => ({
+      items,
+      addItem,
+      removeItem,
+      updateQuantity,
+      clearCart,
+      getItemCount,
+      getSubtotal,
+    }),
+    [
+      items,
+      addItem,
+      removeItem,
+      updateQuantity,
+      clearCart,
+      getItemCount,
+      getSubtotal,
+    ]
+  );
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }

@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { User } from "@/app/AuthProvider";
-import type { Product } from "@/Types/productValidation";
+import type { User } from "@/contexts/AuthContext";
+import type { Product } from "@/types/productValidation";
 import { getFavorites } from "@/app/actions/user/getFavorites";
-import { useFavorites } from "@/app/FavoritesProvider";
-import { useCart, type CartItem } from "@/app/CartProvider";
+import { useFavorites } from "@/contexts/FavoritesContext";
+import { useCart, type CartItem } from "@/contexts/CartContext";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";

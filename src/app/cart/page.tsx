@@ -1,7 +1,7 @@
 "use client";
 
-import { useCart } from "@/app/CartProvider";
-import { useAuth } from "@/app/AuthProvider";
+import { useCart } from "@/contexts/CartContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { H1, H3 } from "@/components/ui/headings";

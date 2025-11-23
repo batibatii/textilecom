@@ -31,11 +31,11 @@ import {
   ProductFormSchema,
   ProductFormData,
   PRODUCT_CATEGORIES,
-} from "@/Types/productValidation";
+} from "@/types/productValidation";
 import type { FirebaseError } from "@/lib/firebase/config";
 import { createProductWithRevalidation } from "@/app/actions/admin/products/create";
 import { Alert, AlertTitle } from "./ui/alert";
-import { useAuth } from "@/app/AuthProvider";
+import { useAuth } from "@/contexts/AuthContext";
 import { uploadImages } from "@/app/actions/admin/products/uploadImages";
 
 export function CreateNewProduct() {

@@ -4,7 +4,7 @@ import { adminDb } from "@/lib/firebase/admin";
 import { revalidateTag } from "next/cache";
 import type { FirebaseError } from "@/lib/firebase/config";
 import { syncProductToStripe } from "@/lib/stripe/products";
-import { Product } from "@/Types/productValidation";
+import { Product } from "@/types/productValidation";
 
 export async function approveProduct(productId: string) {
   try {

@@ -1,4 +1,4 @@
-import { CustomerProductCardSkeleton } from "@/components/CustomerProductCardSkeleton";
+import { CustomerProductCardSkeleton } from "@/components/product/skeletons/CustomerProductCardSkeleton";
 
 export function CustomerProductGridSkeleton() {
   return (

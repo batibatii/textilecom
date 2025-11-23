@@ -1,12 +1,13 @@
 "use client";
 
+import React from "react";
 import Link from "next/link";
-import { useAuth } from "@/app/AuthProvider";
-import { useCart } from "@/app/CartProvider";
+import { useAuth } from "@/contexts/AuthContext";
+import { useCart } from "@/contexts/CartContext";
 import { useRouter } from "next/navigation";
 import { H1 } from "@/components/ui/headings";
 
-export function Navbar() {
+export const Navbar = React.memo(function Navbar() {
   const { user, logout } = useAuth();
   const { getItemCount } = useCart();
   const router = useRouter();
@@ -58,4 +59,4 @@ export function Navbar() {
       </div>
     </nav>
   );
-}
+});

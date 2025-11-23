@@ -1,5 +1,5 @@
-import { Product } from "@/Types/productValidation";
-import { CartItem } from "@/app/CartProvider";
+import { Product } from "@/types/productValidation";
+import { CartItem } from "@/contexts/CartContext";
 
 export const getCurrencySymbol = (currency: string): string => {
   const symbols: Record<string, string> = {

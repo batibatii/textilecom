@@ -6,7 +6,7 @@ import {
   deleteCart,
   mergeCart,
 } from "@/lib/firebase/dal/cart";
-import type { CartItem } from "@/app/CartProvider";
+import type { CartItem } from "@/contexts/CartContext";
 import { getCurrentUserId } from "@/lib/auth/session";
 
 export async function loadUserCart(): Promise<CartItem[] | null> {

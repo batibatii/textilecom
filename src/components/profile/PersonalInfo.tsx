@@ -7,12 +7,12 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertTitle } from "@/components/ui/alert";
-import type { User } from "@/app/AuthProvider";
-import { useAuth } from "@/app/AuthProvider";
+import type { User } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   PersonalInfoSchema,
   type PersonalInfoData,
-} from "@/Types/profileValidation";
+} from "@/types/profileValidation";
 import { updateProfile } from "@/app/actions/user/updateProfile";
 
 interface PersonalInfoProps {

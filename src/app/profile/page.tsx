@@ -1,7 +1,7 @@
 "use client";
 
-import { useAuth } from "@/app/AuthProvider";
-import { ProfileContainer } from "@/components/ProfileContainer";
+import { useAuth } from "@/contexts/AuthContext";
+import { ProfileContainer } from "@/components/profile/ProfileContainer";
 import { TailChase } from "ldrs/react";
 
 export default function ProfilePage() {

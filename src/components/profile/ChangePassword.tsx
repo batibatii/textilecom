@@ -10,11 +10,11 @@ import { Alert, AlertTitle } from "@/components/ui/alert";
 import {
   ChangePasswordSchema,
   type ChangePasswordData,
-} from "@/Types/profileValidation";
+} from "@/types/profileValidation";
 import { changePassword } from "@/app/actions/user/changePassword";
 import { auth } from "@/lib/firebase/config";
 import { EmailAuthProvider, reauthenticateWithCredential } from "firebase/auth";
-import { useAuth } from "@/app/AuthProvider";
+import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
 
 export function ChangePassword() {

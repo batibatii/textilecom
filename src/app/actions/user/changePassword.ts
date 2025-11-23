@@ -1,7 +1,7 @@
 "use server";
 
 import { changeUserPassword } from "@/lib/firebase/dal/users";
-import { ChangePasswordSchema } from "@/Types/profileValidation";
+import { ChangePasswordSchema } from "@/types/profileValidation";
 
 export async function changePassword(userId: string, formData: unknown) {
   const validationResult = ChangePasswordSchema.safeParse(formData);

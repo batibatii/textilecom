@@ -2,7 +2,7 @@
 
 import { getProductsWithLimit } from "@/lib/firebase/dal/products";
 import type { FirebaseError } from "@/lib/firebase/config";
-import { Product } from "@/Types/productValidation";
+import { Product } from "@/types/productValidation";
 
 type InfiniteProductsResult =
   | {

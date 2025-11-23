@@ -10,7 +10,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
   LoginAndSignUpSchema,
   LoginAndSignUpType,
-} from "@/Types/authValidation";
+} from "@/types/authValidation";
 import { useState } from "react";
 
 type SignUpProps = {

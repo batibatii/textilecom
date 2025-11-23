@@ -1,7 +1,7 @@
 import "server-only";
 
 import { stripe } from "./client";
-import { Product } from "@/Types/productValidation";
+import { Product } from "@/types/productValidation";
 import Stripe from "stripe";
 
 export interface SyncProductResult {

@@ -5,9 +5,9 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { H1 } from "@/components/ui/headings";
-import { SignUp } from "@/components/SignUp";
-import { LoginAndSignUpType } from "@/Types/authValidation";
-import { useAuth } from "@/app/AuthProvider";
+import { SignUp } from "@/components/auth/SignUp";
+import { LoginAndSignUpType } from "@/types/authValidation";
+import { useAuth } from "@/contexts/AuthContext";
 import { getUIErrorFromFirebaseError } from "@/lib/firebase/auth";
 import type { FirebaseError } from "@/lib/firebase/config";
 

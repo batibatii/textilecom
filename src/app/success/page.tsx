@@ -1,6 +1,6 @@
 "use client";
 
-import { useCart } from "@/app/CartProvider";
+import { useCart } from "@/contexts/CartContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useAuth } from "@/app/AuthProvider";
+import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
 import { H1 } from "@/components/ui/headings";
 import {
@@ -31,7 +31,7 @@ export function AdminNavbar() {
         <NavigationMenu>
           <NavigationMenuList>
             <NavigationMenuItem className="px-1.5 py-2 md:px-2">
-              <NavigationMenuTrigger className="bg-transparent hover:bg-transparent focus:bg-transparent data-[state=open]:bg-transparent data-[active]:bg-transparent h-auto px-0 py-0 font-light text-[13px] md:text-sm md:font-extralight cursor-pointer">
+              <NavigationMenuTrigger className="bg-transparent hover:bg-transparent focus:bg-transparent data-[state=open]:bg-transparent data-active:bg-transparent h-auto px-0 py-0 font-light text-[13px] md:text-sm md:font-extralight cursor-pointer">
                 PRODUCTS
               </NavigationMenuTrigger>
               <NavigationMenuContent>

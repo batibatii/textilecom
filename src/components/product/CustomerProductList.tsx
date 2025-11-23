@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Product } from "@/Types/productValidation";
-import { CustomerProductCard } from "@/components/CustomerProductCard";
-import { CustomerProductCardSkeleton } from "@/components/CustomerProductCardSkeleton";
+import { Product } from "@/types/productValidation";
+import { CustomerProductCard } from "@/components/product/CustomerProductCard";
+import { CustomerProductCardSkeleton } from "@/components/product/skeletons/CustomerProductCardSkeleton";
 import { getProductsInfinite } from "@/app/actions/products/infinite";
 
 interface CustomerProductListProps {

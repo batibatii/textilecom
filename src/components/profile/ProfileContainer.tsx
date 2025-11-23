@@ -2,11 +2,11 @@
 
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { ProfileSubNav, ProfileSection } from "@/components/ProfileSubNav";
+import { ProfileSubNav, ProfileSection } from "@/components/layout/ProfileSubNav";
 import { PersonalInfo } from "@/components/profile/PersonalInfo";
 import { ChangePassword } from "@/components/profile/ChangePassword";
 import { Favorites } from "@/components/profile/Favorites";
-import type { User } from "@/app/AuthProvider";
+import type { User } from "@/contexts/AuthContext";
 
 interface ProfileContainerProps {
   user: User;

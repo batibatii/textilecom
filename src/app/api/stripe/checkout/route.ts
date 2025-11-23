@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { stripe } from "@/lib/stripe/client";
-import { CheckoutSchema } from "@/Types/checkoutValidation";
+import { CheckoutSchema } from "@/types/checkoutValidation";
 import type Stripe from "stripe";
 
 export async function POST(request: NextRequest) {
