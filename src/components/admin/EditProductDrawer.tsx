@@ -36,7 +36,7 @@ import { ArrowLeft } from "lucide-react";
 import { uploadImages } from "@/app/actions/admin/products/uploadImages";
 import { deleteProductImages } from "@/app/actions/admin/products/deleteImages";
 import { updateProduct } from "@/app/actions/admin/products/update";
-import { useAuth } from "@/app/AuthProvider";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface EditProductDrawerProps {
   product: Product | null;
@@ -139,7 +139,9 @@ export function EditProductDrawer({
     if (!product || productImages.length === 0) return;
 
     if (productImages.length === 1) {
-      setDeleteError("Cannot delete the last image. At least one image is required.");
+      setDeleteError(
+        "Cannot delete the last image. At least one image is required."
+      );
       return;
     }
 

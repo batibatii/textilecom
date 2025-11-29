@@ -1,4 +1,4 @@
-import { AdminProductGridSkeleton } from "@/components/AdminProductGridSkeleton";
+import { AdminProductGridSkeleton } from "@/components/product/skeletons/AdminProductGridSkeleton";
 import { H1 } from "@/components/ui/headings";
 
 export default function Loading() {

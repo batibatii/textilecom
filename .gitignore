@@ -23,7 +23,10 @@
 # misc
 .DS_Store
 *.pem
-ms.md
+
+# Ignore all markdown files except README.md
+*.md
+!README.md
 
 # debug
 npm-debug.log*

@@ -9,7 +9,7 @@ import { useState } from "react";
 import { deleteProductWithRevalidation } from "@/app/actions/admin/products/delete";
 import { approveProduct } from "@/app/actions/admin/products/approve";
 import { moveToDraft } from "@/app/actions/admin/products/moveToDraft";
-import { useAuth } from "@/app/AuthProvider";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   Dialog,
   DialogContent,
@@ -19,7 +19,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Alert, AlertTitle } from "@/components/ui/alert";
-import { EditProductDrawer } from "@/components/EditProductDrawer";
+import { EditProductDrawer } from "@/components/admin/EditProductDrawer";
 import { Badge } from "@/components/ui/badge";
 import {
   getCurrencySymbol,

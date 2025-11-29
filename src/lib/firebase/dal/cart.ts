@@ -1,7 +1,7 @@
 "use server";
 
 import { adminDb } from "../admin";
-import type { CartItem } from "@/app/CartProvider";
+import type { CartItem } from "@/contexts/CartContext";
 
 const CARTS_COLLECTION = "carts";
 

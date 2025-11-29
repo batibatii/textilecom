@@ -1,5 +1,5 @@
 import { getApprovedProducts } from "@/app/actions/admin/products/list";
-import { ProductList } from "@/components/ProductList";
+import { ProductList } from "@/components/product/ProductList";
 import { H1 } from "@/components/ui/headings";
 
 export default async function ApprovedProductsPage() {

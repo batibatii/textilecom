@@ -1,12 +1,13 @@
 "use client";
 
+import React from "react";
 import Link from "next/link";
-import { useAuth } from "@/app/AuthProvider";
-import { useCart } from "@/app/CartProvider";
+import { useAuth } from "@/contexts/AuthContext";
+import { useCart } from "@/contexts/CartContext";
 import { useRouter } from "next/navigation";
 import { H1 } from "@/components/ui/headings";
 
-export function Navbar() {
+export const Navbar = React.memo(function Navbar() {
   const { user, logout } = useAuth();
   const { getItemCount } = useCart();
   const router = useRouter();
@@ -32,7 +33,7 @@ export function Navbar() {
         )}
         {user && (
           <li className="p-2">
-            <Link href="/">SETTINGS</Link>
+            <Link href="/profile">PROFILE</Link>
           </li>
         )}
         <li className="p-2 relative">
@@ -53,11 +54,9 @@ export function Navbar() {
       </ul>
       <div className="text-center mt-4 md:text-start md:pl-40">
         <Link href={"/"}>
-          <H1 className="tracking-wider text-2xl md:text-3xl">
-            TEXTILECOM
-          </H1>
+          <H1 className="tracking-wider text-2xl md:text-3xl">TEXTILECOM</H1>
         </Link>
       </div>
     </nav>
   );
-}
+});

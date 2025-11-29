@@ -1,13 +1,21 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+  useMemo,
+} from "react";
 import { calculateSubtotal } from "@/lib/productPrice";
 import { auth } from "@/lib/firebase/config";
 import { onAuthStateChanged } from "firebase/auth";
 import {
   loadUserCart,
   syncUserCart,
-  mergeUserCart,
+  clearUserCart,
 } from "@/app/actions/cart/sync";
 
 export interface CartItem {
@@ -47,17 +55,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [isInitialized, setIsInitialized] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [previousUserId, setPreviousUserId] = useState<string | null>(null);
+  const [isClearing, setIsClearing] = useState(false);
+  const isLoadingCartRef = useRef(false);
 
   useEffect(() => {
-    const savedCart = localStorage.getItem("shopping-cart");
-    if (savedCart) {
-      try {
-        const parsedCart = JSON.parse(savedCart);
-        setItems(parsedCart);
-      } catch (error) {
-        console.error("Failed to parse cart from localStorage:", error);
-      }
-    }
     setIsInitialized(true);
   }, []);
 
@@ -70,54 +71,57 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    if (!isInitialized) return;
+    if (!isInitialized || isClearing) return;
 
     async function handleAuthChange() {
       if (userId && userId !== previousUserId) {
+        isLoadingCartRef.current = true;
         try {
-          const localCart = items.length > 0 ? items : [];
+          // Retry loading cart if session cookie isn't ready yet
+          let userCart = await loadUserCart();
+          let retries = 0;
 
-          // Merge local cart with user's Firestore cart
-          const mergedCart = await mergeUserCart(localCart);
+          while (userCart === null && retries < 3) {
+            await new Promise((resolve) => setTimeout(resolve, 500));
+            userCart = await loadUserCart();
+            retries++;
+          }
 
-          if (mergedCart) {
-            setItems(mergedCart);
-            localStorage.setItem("shopping-cart", JSON.stringify(mergedCart));
+          if (userCart && userCart.length > 0) {
+            setItems(userCart);
           } else {
-            const userCart = await loadUserCart();
-            if (userCart && userCart.length > 0) {
-              setItems(userCart);
-              localStorage.setItem("shopping-cart", JSON.stringify(userCart));
-            }
+            setItems([]);
           }
         } catch (error) {
-          console.error("Error loading/merging user cart:", error);
+          console.error("Error loading user cart:", error);
+          setItems([]);
+        } finally {
+          isLoadingCartRef.current = false;
         }
 
         setPreviousUserId(userId);
       } else if (!userId && previousUserId) {
+        // User logged out - clear cart
         setItems([]);
-        localStorage.removeItem("shopping-cart");
         setPreviousUserId(null);
       }
     }
 
     handleAuthChange();
-  }, [userId, isInitialized, previousUserId]);
+  }, [userId, isInitialized, previousUserId, isClearing]);
 
   useEffect(() => {
-    if (!isInitialized) return;
-
-    localStorage.setItem("shopping-cart", JSON.stringify(items));
-
-    if (userId) {
-      syncUserCart(items).catch((error) => {
-        console.error("Failed to sync cart to Firestore:", error);
-      });
+    if (!isInitialized || isClearing || !userId || isLoadingCartRef.current) {
+      return;
     }
-  }, [items, isInitialized, userId]);
 
-  const addItem = (item: CartItem) => {
+    // Only sync to Firestore if user is logged in and not currently loading
+    syncUserCart(items).catch((error) => {
+      console.error("Failed to sync cart to Firestore:", error);
+    });
+  }, [items, isInitialized, userId, isClearing]);
+
+  const addItem = useCallback((item: CartItem) => {
     setItems((prevItems) => {
       const existingItemIndex = prevItems.findIndex(
         (i) => i.productId === item.productId && i.size === item.size
@@ -134,55 +138,71 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         return [...prevItems, item];
       }
     });
-  };
+  }, []);
 
-  const removeItem = (productId: string, size?: string) => {
+  const removeItem = useCallback((productId: string, size?: string) => {
     setItems((prevItems) =>
       prevItems.filter((i) => !(i.productId === productId && i.size === size))
     );
-  };
+  }, []);
 
-  const updateQuantity = (
-    productId: string,
-    size: string | undefined,
-    quantity: number
-  ) => {
-    if (quantity <= 0) {
-      removeItem(productId, size);
-      return;
-    }
+  const updateQuantity = useCallback(
+    (productId: string, size: string | undefined, quantity: number) => {
+      if (quantity <= 0) {
+        removeItem(productId, size);
+        return;
+      }
 
-    setItems((prevItems) =>
-      prevItems.map((item) =>
-        item.productId === productId && item.size === size
-          ? { ...item, quantity }
-          : item
-      )
-    );
-  };
+      setItems((prevItems) =>
+        prevItems.map((item) =>
+          item.productId === productId && item.size === size
+            ? { ...item, quantity }
+            : item
+        )
+      );
+    },
+    [removeItem]
+  );
 
-  const clearCart = () => {
+  const clearCart = useCallback(() => {
+    setIsClearing(true);
     setItems([]);
-    localStorage.removeItem("shopping-cart");
-  };
+    if (userId) {
+      clearUserCart().catch((error) => {
+        console.error("Failed to clear cart in Firestore:", error);
+      });
+    }
+    setTimeout(() => setIsClearing(false), 100);
+  }, [userId]);
 
-  const getItemCount = () => {
+  const getItemCount = useCallback(() => {
     return items.reduce((total, item) => total + item.quantity, 0);
-  };
+  }, [items]);
 
-  const getSubtotal = () => {
+  const getSubtotal = useCallback(() => {
     return calculateSubtotal(items);
-  };
+  }, [items]);
 
-  const value: CartContextType = {
-    items,
-    addItem,
-    removeItem,
-    updateQuantity,
-    clearCart,
-    getItemCount,
-    getSubtotal,
-  };
+  const value: CartContextType = useMemo(
+    () => ({
+      items,
+      addItem,
+      removeItem,
+      updateQuantity,
+      clearCart,
+      getItemCount,
+      getSubtotal,
+    }),
+    [
+      items,
+      addItem,
+      removeItem,
+      updateQuantity,
+      clearCart,
+      getItemCount,
+      getSubtotal,
+    ]
+  );
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }

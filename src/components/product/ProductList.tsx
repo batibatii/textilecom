@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Product } from "@/Types/productValidation";
-import { AdminProductCard } from "@/components/AdminProductCard";
+import { AdminProductCard } from "@/components/product/AdminProductCard";
 import {
   Pagination,
   PaginationContent,
@@ -18,7 +18,10 @@ interface ProductListProps {
   showMoveToDraft?: boolean;
 }
 
-export function ProductList({ products, showMoveToDraft = false }: ProductListProps) {
+export function ProductList({
+  products,
+  showMoveToDraft = false,
+}: ProductListProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const router = useRouter();
   const productsPerPage = 12;

@@ -1,5 +1,5 @@
 import { getProductsInfinite } from "@/app/actions/products/infinite";
-import { CustomerProductList } from "@/components/CustomerProductList";
+import { CustomerProductList } from "@/components/product/CustomerProductList";
 import { H1 } from "@/components/ui/headings";
 
 export default async function Home() {

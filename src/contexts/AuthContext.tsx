@@ -27,12 +27,21 @@ import {
 import { TailChase } from "ldrs/react";
 import "ldrs/react/TailChase.css";
 import { usePathname } from "next/navigation";
-interface BaseUser extends FirebaseUser {
+interface BaseUser extends Omit<FirebaseUser, 'phoneNumber'> {
   id: string;
   role: "admin" | "customer" | "superAdmin";
   email: string;
   theme?: string;
   createdAt: Date;
+  phoneCountryCode?: string;
+  phoneNumber?: string;
+  address?: {
+    line1: string;
+    line2: string;
+    city: string;
+    postalCode: string;
+    country: string;
+  };
 }
 export interface CustomerUser extends BaseUser {
   role: "customer";
@@ -198,7 +207,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setError(null);
       if (auth.currentUser) {
         await auth.currentUser.reload();
-        setUser(auth.currentUser as User);
+        const userData = await getUserData(auth.currentUser.uid);
+        if (userData) {
+          setUser({ ...auth.currentUser, ...userData } as User);
+        } else {
+          setUser(auth.currentUser as User);
+        }
       }
     } catch (err) {
       const firebaseError = err as FirebaseError;
