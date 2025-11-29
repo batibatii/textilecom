@@ -40,6 +40,11 @@ export async function POST(request: NextRequest) {
       metadata: {
         orderItemCount: items.length.toString(),
         userId: userId,
+        cartItems: JSON.stringify(items.map(item => ({
+          productId: item.productId,
+          size: item.size,
+          stripePriceId: item.stripePriceId,
+        }))),
       },
     });
 
