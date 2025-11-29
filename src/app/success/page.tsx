@@ -148,7 +148,7 @@ export default function SuccessPage() {
                   Your order is being prepared
                 </p>
                 <p className="text-sm text-blue-700">
-                  We're creating your order details. This may take a moment.
+                  We&apos;re creating your order details. This may take a moment.
                 </p>
               </div>
               <div className="space-y-2 pt-2">
