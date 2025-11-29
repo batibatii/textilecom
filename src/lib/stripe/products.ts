@@ -23,6 +23,7 @@ async function createOrUpdateStripeProduct(
         brand: product.brand,
         serialNumber: product.serialNumber,
         category: product.category,
+        ...(product.discount?.rate && { discountRate: product.discount.rate.toString() }),
       },
       active: !product.draft,
     };

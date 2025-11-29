@@ -2,7 +2,11 @@
 
 import { cn } from "@/lib/utils";
 
-export type ProfileSection = "personal-info" | "password" | "favorites";
+export type ProfileSection =
+  | "personal-info"
+  | "password"
+  | "favorites"
+  | "orders";
 
 interface ProfileSubNavProps {
   activeSection: ProfileSection;
@@ -17,6 +21,7 @@ export function ProfileSubNav({
     { id: "personal-info", label: "Personal Info" },
     { id: "password", label: "Password" },
     { id: "favorites", label: "Favorites" },
+    { id: "orders", label: "Orders" },
   ];
 
   return (

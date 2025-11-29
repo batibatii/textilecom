@@ -1,6 +1,7 @@
 "use client";
 
 import { useCart } from "@/contexts/CartContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -12,9 +13,11 @@ import {
 import { handleCheckout } from "@/app/actions/checkout";
 import { useState } from "react";
 import Link from "next/link";
+import { AlertCircle } from "lucide-react";
 
 export default function CheckoutPage() {
   const { items, getSubtotal } = useCart();
+  const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -60,6 +63,14 @@ export default function CheckoutPage() {
     }
   };
 
+  // Check if user has an address (all users need address to checkout)
+  const hasAddress =
+    user?.address &&
+    user.address.line1 &&
+    user.address.city &&
+    user.address.postalCode &&
+    user.address.country;
+
   if (items.length === 0) {
     return (
       <div className="container mx-auto px-4 py-16 max-w-4xl">
@@ -82,6 +93,18 @@ export default function CheckoutPage() {
       {error && (
         <Alert variant="destructive" className="mb-6">
           <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+
+      {!hasAddress && (
+        <Alert className="mb-6 border-amber-500 bg-amber-50">
+          <AlertCircle className="h-4 w-4 text-amber-600" />
+          <AlertDescription className="text-amber-900">
+            Please add your shipping address before checkout.{" "}
+            <Link href="/profile" className="font-medium underline hover:no-underline">
+              Go to Profile
+            </Link>
+          </AlertDescription>
         </Alert>
       )}
 
@@ -166,11 +189,11 @@ export default function CheckoutPage() {
               </div>
               <Button
                 onClick={onCheckout}
-                disabled={loading}
+                disabled={loading || !hasAddress}
                 className="w-full rounded-none"
                 size="lg"
               >
-                {loading ? "PROCESSING..." : "PROCEED TO PAYMENT"}
+                {loading ? "PROCESSING..." : !hasAddress ? "ADD ADDRESS TO CHECKOUT" : "PROCEED TO PAYMENT"}
               </Button>
               <Link href="/cart" className="block">
                 <Button variant="outline" className="w-full">

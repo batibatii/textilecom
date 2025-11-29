@@ -4,6 +4,7 @@ import { unstable_cache } from "next/cache";
 import { adminDb } from "../admin";
 import type { FirebaseError } from "../config";
 import { deleteProductImages } from "@/app/actions/admin/products/deleteImages";
+import { convertTaxRateToMultiplier } from "@/lib/utils/taxRate";
 
 export const createProduct = async (productData: {
   title: string;
@@ -36,7 +37,7 @@ export const createProduct = async (productData: {
       amount: productData.price,
       currency: productData.currency,
     },
-    taxRate: productData.taxRate,
+    taxRate: convertTaxRateToMultiplier(productData.taxRate),
     images: productData.images,
     category: productData.category,
     stock: productData.stock,
@@ -46,9 +47,10 @@ export const createProduct = async (productData: {
     createdBy: productData.createdBy,
   };
 
-  const product = productData.discount !== undefined && productData.discount !== null
-    ? { ...baseProduct, discount: { rate: productData.discount } }
-    : baseProduct;
+  const product =
+    productData.discount !== undefined && productData.discount !== null
+      ? { ...baseProduct, discount: { rate: productData.discount } }
+      : baseProduct;
 
   console.log("Product object before saving:", product);
 
@@ -92,28 +94,35 @@ const fetchAllProductsFromDB = async () => {
 
 export const getAllProducts = unstable_cache(
   fetchAllProductsFromDB,
-  ['products-list'],
+  ["products-list"],
   {
-    tags: ['products'],
+    tags: ["products"],
     revalidate: 60, // Cache for 60 seconds
   }
 );
 
 const fetchProductsWithLimit = async (limit: number, offset: number) => {
   try {
-
     const allProducts = await getAllProducts();
 
-    const approvedProducts = allProducts.filter((product) => (product as { draft?: boolean }).draft === false);
+    const approvedProducts = allProducts.filter(
+      (product) => (product as { draft?: boolean }).draft === false
+    );
 
     // Randomize products using Fisher-Yates shuffle algorithm
     const shuffledProducts = [...approvedProducts];
     for (let i = shuffledProducts.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
-      [shuffledProducts[i], shuffledProducts[j]] = [shuffledProducts[j], shuffledProducts[i]];
+      [shuffledProducts[i], shuffledProducts[j]] = [
+        shuffledProducts[j],
+        shuffledProducts[i],
+      ];
     }
 
-    const fetchedProductsWithLimit = shuffledProducts.slice(offset, offset + limit);
+    const fetchedProductsWithLimit = shuffledProducts.slice(
+      offset,
+      offset + limit
+    );
 
     return {
       products: fetchedProductsWithLimit,
@@ -127,11 +136,12 @@ const fetchProductsWithLimit = async (limit: number, offset: number) => {
 };
 
 export const getProductsWithLimit = unstable_cache(
-  async (limit: number, offset: number) => fetchProductsWithLimit(limit, offset),
-  ['products-withLimit'],
+  async (limit: number, offset: number) =>
+    fetchProductsWithLimit(limit, offset),
+  ["products-withLimit"],
   {
-    tags: ['products'],
-    revalidate: 60, 
+    tags: ["products"],
+    revalidate: 60,
   }
 );
 
@@ -145,7 +155,8 @@ export const deleteProductFromDB = async (productId: string) => {
     const firebaseError = error as FirebaseError;
     throw {
       code: firebaseError.code || "firestore/delete-failed",
-      message: firebaseError.message || "Failed to delete product from database.",
+      message:
+        firebaseError.message || "Failed to delete product from database.",
     };
   }
 };

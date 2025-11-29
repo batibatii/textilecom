@@ -1,11 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
-import { ProfileSubNav, ProfileSection } from "@/components/layout/ProfileSubNav";
+import {
+  ProfileSubNav,
+  ProfileSection,
+} from "@/components/layout/ProfileSubNav";
 import { PersonalInfo } from "@/components/profile/PersonalInfo";
 import { ChangePassword } from "@/components/profile/ChangePassword";
 import { Favorites } from "@/components/profile/Favorites";
+import { OrderHistory } from "@/components/profile/OrderHistory";
 import type { User } from "@/contexts/AuthContext";
 
 interface ProfileContainerProps {
@@ -13,8 +18,18 @@ interface ProfileContainerProps {
 }
 
 export function ProfileContainer({ user }: ProfileContainerProps) {
+  const searchParams = useSearchParams();
+  const sectionParam = searchParams.get("section") as ProfileSection | null;
+
   const [activeSection, setActiveSection] =
-    useState<ProfileSection>("personal-info");
+    useState<ProfileSection>(sectionParam || "personal-info");
+
+  // Update active section when URL changes
+  useEffect(() => {
+    if (sectionParam && ["personal-info", "password", "favorites", "orders"].includes(sectionParam)) {
+      setActiveSection(sectionParam);
+    }
+  }, [sectionParam]);
 
   const renderContent = () => {
     switch (activeSection) {
@@ -24,18 +39,22 @@ export function ProfileContainer({ user }: ProfileContainerProps) {
         return <ChangePassword />;
       case "favorites":
         return <Favorites user={user} />;
+      case "orders":
+        return <OrderHistory />;
     }
   };
 
   const innerCard = (
     <Card
       className={`h-fit  ${
-        activeSection === "favorites"
+        activeSection === "favorites" || activeSection === "orders"
           ? "w-full sm:w-200 md:w-250 lg:w-300 border-none shadow-none"
           : "min-w-90 xs:w-147 sm:w-150 md:w-200 border shadow-sm"
       }`}
     >
-      <CardContent className="p-3 md:p-6">{renderContent()}</CardContent>
+      <CardContent className={activeSection === "orders" ? "p-4 md:p-6" : "p-3 md:p-6"}>
+        {renderContent()}
+      </CardContent>
     </Card>
   );
 

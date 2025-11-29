@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { items } = validationResult.data;
+    const { items, userId } = validationResult.data;
 
     const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = items.map(
       (item) => ({
@@ -39,6 +39,7 @@ export async function POST(request: NextRequest) {
       cancel_url: `${origin}/cart?canceled=true`,
       metadata: {
         orderItemCount: items.length.toString(),
+        userId: userId,
       },
     });
 
