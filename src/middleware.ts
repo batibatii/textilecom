@@ -55,7 +55,6 @@ export async function middleware(request: NextRequest) {
 
       console.log(`[Middleware] Access granted to ${pathname}`);
       return NextResponse.next();
-    
     } catch (error) {
       console.log(`[Middleware] Verification failed:`, error);
 

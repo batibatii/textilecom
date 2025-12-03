@@ -1,20 +1,15 @@
 "use server";
 
 import { verifySession } from "@/app/actions/auth/session";
-import { callApi } from "@/lib/apiHelper";
 import { adminDb } from "@/lib/firebase/admin";
+import { stripe } from "@/lib/stripe/client";
+import { headers } from "next/headers";
 import type { CheckoutItem } from "@/Types/checkoutValidation";
+import type Stripe from "stripe";
 
 type CheckoutResult =
   | { success: true; sessionUrl: string; sessionId: string }
   | { success: false; error: string };
-
-type ApiCheckoutResponse = {
-  success: boolean;
-  sessionUrl?: string;
-  sessionId?: string;
-  error?: string;
-};
 
 export async function handleCheckout(
   items: CheckoutItem[]
@@ -29,10 +24,9 @@ export async function handleCheckout(
       };
     }
 
-    const userDoc = await adminDb
-      .collection("users")
-      .doc(session.user.uid)
-      .get();
+    const userId = session.user.uid;
+
+    const userDoc = await adminDb.collection("users").doc(userId).get();
 
     if (!userDoc.exists) {
       return {
@@ -42,7 +36,7 @@ export async function handleCheckout(
     }
 
     const userData = userDoc.data();
-    
+
     if (
       !userData?.address ||
       !userData.address.line1 ||
@@ -52,26 +46,52 @@ export async function handleCheckout(
     ) {
       return {
         success: false,
-        error: "Please add your shipping address in your profile before checkout",
+        error:
+          "Please add your shipping address in your profile before checkout",
       };
     }
 
-    const data = await callApi<ApiCheckoutResponse>("/api/stripe/checkout", {
-      method: "POST",
-      body: { items, userId: session.user.uid },
+    // Create Stripe line items
+    const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] =
+      items.map((item) => ({
+        price: item.stripePriceId,
+        quantity: item.quantity,
+      }));
+
+    // Get origin for redirect URLs
+    const headersList = await headers();
+    const origin = headersList.get("origin") || process.env.NEXT_PUBLIC_URL || "http://localhost:3000";
+
+    // Create Stripe checkout session
+    const stripeSession = await stripe.checkout.sessions.create({
+      line_items: lineItems,
+      mode: "payment",
+      success_url: `${origin}/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${origin}/cart?canceled=true`,
+      metadata: {
+        orderItemCount: items.length.toString(),
+        userId: userId,
+        cartItems: JSON.stringify(
+          items.map((item) => ({
+            productId: item.productId,
+            size: item.size,
+            stripePriceId: item.stripePriceId,
+          }))
+        ),
+      },
     });
 
-    if (!data.success || !data.sessionUrl) {
+    if (!stripeSession.url) {
       return {
         success: false,
-        error: data.error || "Failed to create checkout session",
+        error: "Failed to create checkout session",
       };
     }
 
     return {
       success: true,
-      sessionUrl: data.sessionUrl,
-      sessionId: data.sessionId!,
+      sessionUrl: stripeSession.url,
+      sessionId: stripeSession.id,
     };
   } catch (error) {
     console.error("Checkout action error:", error);
