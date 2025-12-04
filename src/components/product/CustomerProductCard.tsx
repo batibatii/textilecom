@@ -9,7 +9,7 @@ import {
   getDisplayPrice,
   hasDiscount as checkHasDiscount,
   formatPrice,
-} from "@/lib/productPrice";
+} from "@/lib/utils/productPrice";
 import { useState } from "react";
 import { useFavorites } from "@/contexts/FavoritesContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { Badge } from "@/components/ui/badge";
 
 interface CustomerProductCardProps {
   product: Product;
@@ -78,6 +79,22 @@ export function CustomerProductCard({
             <div className="flex items-center justify-center h-full text-muted-foreground">
               No Image
             </div>
+          )}
+          {product.stock === 0 && (
+            <Badge
+              variant="destructive"
+              className="absolute top-2 left-2 font-semibold"
+            >
+              OUT OF STOCK
+            </Badge>
+          )}
+          {product.stock > 0 && product.stock <= 3 && (
+            <Badge
+              variant="secondary"
+              className="absolute top-2 left-2 bg-amber-500 text-white hover:bg-amber-600 font-semibold"
+            >
+              LOW STOCK
+            </Badge>
           )}
         </div>
         <div className="">

@@ -2,7 +2,7 @@
 
 import { Order } from "@/Types/orderValidation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { getCurrencySymbol } from "@/lib/productPrice";
+import { getCurrencySymbol } from "@/lib/utils/productPrice";
 import Image from "next/image";
 
 interface OrderDetailProps {

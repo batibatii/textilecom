@@ -5,7 +5,7 @@ import { Order } from "@/Types/orderValidation";
 import { getUserOrders } from "@/app/actions/orders/getOrder";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { getCurrencySymbol } from "@/lib/productPrice";
+import { getCurrencySymbol } from "@/lib/utils/productPrice";
 import Link from "next/link";
 import { TailChase } from "ldrs/react";
 
@@ -115,7 +115,11 @@ export function OrderHistory() {
           <CardContent className="pt-0">
             <div className="flex gap-2 justify-end">
               <Link href={`/profile/orders/${order.id}`}>
-                <Button variant="outline" size="sm" className="rounded-none w-full sm:w-auto">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="rounded-none w-full sm:w-auto"
+                >
                   View Details
                 </Button>
               </Link>

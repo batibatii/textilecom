@@ -20,6 +20,7 @@ export const createUser = async (email: string, userId: string) => {
     billingAddress: {},
     theme: "light",
     createdAt: new Date().toISOString(),
+    lastLoginAt: new Date().toISOString(),
     discounts: [],
   };
 
@@ -47,12 +48,25 @@ export const getUserData = async (userId: string) => {
   return null;
 };
 
+export const updateLastLogin = async (userId: string) => {
+  try {
+    const userRef = adminDb.collection("users").doc(userId);
+    await userRef.update({
+      lastLoginAt: new Date().toISOString(),
+    });
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error updating last login:", error);
+    return { success: false, error };
+  }
+};
+
 export const updateUserRole = async (
   userId: string,
   role: "customer" | "admin" | "superAdmin"
 ) => {
   try {
-    // Update role in Firestore
     const userRef = adminDb.collection("users").doc(userId);
     await userRef.update({ role });
 
@@ -226,7 +240,7 @@ export const removeUserFavorite = async (userId: string, productId: string) => {
     const userRef = adminDb.collection("users").doc(userId);
 
     // Use arrayRemove to remove productId atomically
-    // Use set with merge to handle edge cases
+    // Use set with merge to handle edge cases 
     await userRef.set(
       {
         favorites: FieldValue.arrayRemove(productId),

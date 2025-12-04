@@ -109,25 +109,21 @@ const fetchProductsWithLimit = async (limit: number, offset: number) => {
       (product) => (product as { draft?: boolean }).draft === false
     );
 
-    // Randomize products using Fisher-Yates shuffle algorithm
-    const shuffledProducts = [...approvedProducts];
-    for (let i = shuffledProducts.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [shuffledProducts[i], shuffledProducts[j]] = [
-        shuffledProducts[j],
-        shuffledProducts[i],
-      ];
-    }
+    const sortedProducts = approvedProducts.sort((a, b) => {
+      const dateA = new Date(a.createdAt as string).getTime();
+      const dateB = new Date(b.createdAt as string).getTime();
+      return dateB - dateA;
+    });
 
-    const fetchedProductsWithLimit = shuffledProducts.slice(
+    const fetchedProductsWithLimit = sortedProducts.slice(
       offset,
       offset + limit
     );
 
     return {
       products: fetchedProductsWithLimit,
-      hasMore: offset + limit < shuffledProducts.length,
-      total: shuffledProducts.length,
+      hasMore: offset + limit < sortedProducts.length,
+      total: sortedProducts.length,
     };
   } catch (error) {
     console.error("Error fetching products with limit:", error);
@@ -135,15 +131,16 @@ const fetchProductsWithLimit = async (limit: number, offset: number) => {
   }
 };
 
-export const getProductsWithLimit = unstable_cache(
-  async (limit: number, offset: number) =>
-    fetchProductsWithLimit(limit, offset),
-  ["products-withLimit"],
-  {
-    tags: ["products"],
-    revalidate: 60,
-  }
-);
+export const getProductsWithLimit = async (limit: number, offset: number) => {
+  return unstable_cache(
+    async () => fetchProductsWithLimit(limit, offset),
+    ["products-withLimit", `${limit}`, `${offset}`],
+    {
+      tags: ["products"],
+      revalidate: 60,
+    }
+  )();
+};
 
 export const deleteProductFromDB = async (productId: string) => {
   try {

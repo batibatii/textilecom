@@ -15,7 +15,7 @@ import {
   getDisplayPrice,
   hasDiscount as checkHasDiscount,
   formatPrice,
-} from "@/lib/productPrice";
+} from "@/lib/utils/productPrice";
 import { Button } from "@/components/ui/button";
 import { useCart, type CartItem } from "@/contexts/CartContext";
 import { useState } from "react";
@@ -23,6 +23,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useFavorites } from "@/contexts/FavoritesContext";
 import { useAuth } from "@/contexts/AuthContext";
 import Link from "next/link";
+import { Badge } from "@/components/ui/badge";
 
 interface ProductDetailDialogProps {
   product: Product;
@@ -127,6 +128,22 @@ export function ProductDetailDialog({
                 <div className="flex items-center justify-center h-full text-muted-foreground">
                   No Image
                 </div>
+              )}
+              {product.stock === 0 && (
+                <Badge
+                  variant="destructive"
+                  className="absolute top-2 left-2 font-semibold"
+                >
+                  OUT OF STOCK
+                </Badge>
+              )}
+              {product.stock > 0 && product.stock <= 3 && (
+                <Badge
+                  variant="secondary"
+                  className="absolute top-2 left-2 bg-amber-500 text-white hover:bg-amber-600 font-semibold"
+                >
+                  LOW STOCK
+                </Badge>
               )}
             </div>
 
@@ -251,9 +268,10 @@ export function ProductDetailDialog({
                 <Button
                   onClick={handleAddToCart}
                   variant="default"
-                  className="w-full py-3 px-6 transition-colors h-12 font-medium text-base cursor-pointer active:translate-y-0.5 active:shadow-md"
+                  disabled={product.stock === 0}
+                  className="w-full py-3 px-6 transition-colors h-12 font-medium text-base cursor-pointer active:translate-y-0.5 active:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  ADD TO CART
+                  {product.stock === 0 ? "OUT OF STOCK" : "ADD TO CART"}
                 </Button>
               </div>
             </div>

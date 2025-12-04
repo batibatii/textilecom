@@ -11,7 +11,7 @@ import {
   getCurrencySymbol,
   formatPrice,
   calculateDiscountedPrice,
-} from "@/lib/productPrice";
+} from "@/lib/utils/productPrice";
 import { Trash2, MapPin } from "lucide-react";
 
 export default function CartPage() {

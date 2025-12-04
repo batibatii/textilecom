@@ -7,7 +7,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { getOrderBySessionId } from "@/app/actions/orders/getOrder";
 import { Order } from "@/Types/orderValidation";
-import { getCurrencySymbol } from "@/lib/productPrice";
+import { getCurrencySymbol } from "@/lib/utils/productPrice";
 import Image from "next/image";
 import { TailChase } from "ldrs/react";
 
@@ -148,7 +148,8 @@ export default function SuccessPage() {
                   Your order is being prepared
                 </p>
                 <p className="text-sm text-blue-700">
-                  We&apos;re creating your order details. This may take a moment.
+                  We&apos;re creating your order details. This may take a
+                  moment.
                 </p>
               </div>
               <div className="space-y-2 pt-2">

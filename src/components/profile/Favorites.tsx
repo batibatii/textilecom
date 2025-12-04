@@ -14,7 +14,7 @@ import {
   formatPrice,
   getDisplayPrice,
   hasDiscount as checkHasDiscount,
-} from "@/lib/productPrice";
+} from "@/lib/utils/productPrice";
 
 interface FavoritesProps {
   user: User;
@@ -184,7 +184,7 @@ export function Favorites({ user }: FavoritesProps) {
         })}
       </div>
 
-      <div className="text-center py-4">
+      <div className="text-center py-4 md:hidden">
         <button
           onClick={scrollToTop}
           className="text-sm font-medium text-primary hover:underline cursor-pointer"

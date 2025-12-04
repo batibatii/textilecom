@@ -14,6 +14,7 @@ import {
   createUserSession,
   removeUserSession,
 } from "@/lib/auth/sessionHelpers";
+import { updateUserLastLogin } from "@/app/actions/auth/updateLastLogin";
 import {
   createUserWithEmailAndPassword,
   User as FirebaseUser,
@@ -27,12 +28,13 @@ import {
 import { TailChase } from "ldrs/react";
 import "ldrs/react/TailChase.css";
 import { usePathname } from "next/navigation";
-interface BaseUser extends Omit<FirebaseUser, 'phoneNumber'> {
+interface BaseUser extends Omit<FirebaseUser, "phoneNumber"> {
   id: string;
   role: "admin" | "customer" | "superAdmin";
   email: string;
   theme?: string;
   createdAt: Date;
+  lastLoginAt?: Date;
   phoneCountryCode?: string;
   phoneNumber?: string;
   address?: {
@@ -99,6 +101,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         } else {
           setUser(firebaseUser as User);
         }
+        
+        updateUserLastLogin(firebaseUser.uid).catch((error) =>
+          console.error("Failed to update last login:", error)
+        );
       } else {
         setUser(null);
       }
@@ -141,6 +147,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       );
 
       await createUserSession(userCredential.user);
+
+      // Update last login timestamp (don't block login if this fails)
+      updateUserLastLogin(userCredential.user.uid).catch((error) =>
+        console.error("Failed to update last login:", error)
+      );
     } catch (err) {
       const firebaseError = err as FirebaseError;
       setError(firebaseError);
@@ -162,6 +173,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         await createUser(user.email || "", user.uid);
       }
       await createUserSession(user);
+
+      // Update last login timestamp (don't block login if this fails)
+      updateUserLastLogin(user.uid).catch((error) =>
+        console.error("Failed to update last login:", error)
+      );
 
       setError(null);
     } catch (error) {

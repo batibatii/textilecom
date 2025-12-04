@@ -26,7 +26,7 @@ import {
   getDisplayPrice,
   hasDiscount as checkHasDiscount,
   formatPrice,
-} from "@/lib/productPrice";
+} from "@/lib/utils/productPrice";
 
 interface AdminProductCardProps {
   product: Product;
@@ -198,6 +198,22 @@ export function AdminProductCard({
         >
           {product.draft ? "DRAFT" : "APPROVED"}
         </Badge>
+        {product.stock === 0 && (
+          <Badge
+            variant="destructive"
+            className="absolute top-2 right-2 font-semibold"
+          >
+            OUT OF STOCK
+          </Badge>
+        )}
+        {product.stock > 0 && product.stock <= 3 && (
+          <Badge
+            variant="secondary"
+            className="absolute top-2 right-2 bg-amber-500 text-white hover:bg-amber-600 font-semibold"
+          >
+            LOW STOCK
+          </Badge>
+        )}
       </div>
       <div className="flex justify-end pr-0 -mt-4 ">
         <Button

@@ -9,7 +9,7 @@ import { H1 } from "@/components/ui/headings";
 import {
   getCurrencySymbol,
   calculateDiscountedPrice,
-} from "@/lib/productPrice";
+} from "@/lib/utils/productPrice";
 import { handleCheckout } from "@/app/actions/checkout";
 import { useState } from "react";
 import Link from "next/link";
@@ -101,7 +101,10 @@ export default function CheckoutPage() {
           <AlertCircle className="h-4 w-4 text-amber-600" />
           <AlertDescription className="text-amber-900">
             Please add your shipping address before checkout.{" "}
-            <Link href="/profile" className="font-medium underline hover:no-underline">
+            <Link
+              href="/profile"
+              className="font-medium underline hover:no-underline"
+            >
               Go to Profile
             </Link>
           </AlertDescription>
@@ -193,11 +196,15 @@ export default function CheckoutPage() {
                 className="w-full rounded-none"
                 size="lg"
               >
-                {loading ? "PROCESSING..." : !hasAddress ? "ADD ADDRESS TO CHECKOUT" : "PROCEED TO PAYMENT"}
+                {loading
+                  ? "PROCESSING..."
+                  : !hasAddress
+                  ? "ADD ADDRESS TO CHECKOUT"
+                  : "PROCEED TO PAYMENT"}
               </Button>
               <Link href="/cart" className="block">
                 <Button variant="outline" className="w-full">
-                  Back to Cart
+                  BACK TO CART
                 </Button>
               </Link>
             </CardContent>

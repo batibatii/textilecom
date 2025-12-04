@@ -9,7 +9,7 @@ import React, {
   useRef,
   useMemo,
 } from "react";
-import { calculateSubtotal } from "@/lib/productPrice";
+import { calculateSubtotal } from "@/lib/utils/productPrice";
 import { auth } from "@/lib/firebase/config";
 import { onAuthStateChanged } from "firebase/auth";
 import {
