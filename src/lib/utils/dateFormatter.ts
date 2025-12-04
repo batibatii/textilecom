@@ -1,9 +1,11 @@
 import { format } from "date-fns";
 
 // Helper function to convert Firestore Timestamp to ISO string
-export const toISOString = (value: any): string | null => {
+export const toISOString = (
+  value: { toDate?: () => Date } | string | null | undefined
+): string | null => {
   if (!value) return null;
-  if (typeof value.toDate === "function") {
+  if (typeof value === "object" && value.toDate && typeof value.toDate === "function") {
     return value.toDate().toISOString();
   }
   if (typeof value === "string") {

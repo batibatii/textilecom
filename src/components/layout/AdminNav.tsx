@@ -39,6 +39,16 @@ export function AdminNavbar() {
                   <li>
                     <NavigationMenuLink asChild>
                       <Link
+                        href="/admin"
+                        className="block select-none  p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground font-light text-[13px] md:text-sm"
+                      >
+                        Draft Products
+                      </Link>
+                    </NavigationMenuLink>
+                  </li>
+                  <li>
+                    <NavigationMenuLink asChild>
+                      <Link
                         href="/admin/products/archive"
                         className="block select-none  p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground font-light text-[13px] md:text-sm"
                       >

@@ -187,30 +187,36 @@ export function UsersTable({ users }: UsersTableProps) {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Email</TableHead>
-                <TableHead>Joined</TableHead>
-                <TableHead>Last Login</TableHead>
-                <TableHead>Orders</TableHead>
-                <TableHead>Role</TableHead>
-                {isSuperAdmin && <TableHead>Actions</TableHead>}
+                <TableHead className="text-xs sm:text-sm">Email</TableHead>
+                <TableHead className="hidden md:table-cell">Joined</TableHead>
+                <TableHead className="hidden md:table-cell">
+                  Last Login
+                </TableHead>
+                <TableHead className="text-xs sm:text-sm">Orders</TableHead>
+                <TableHead className="text-xs sm:text-sm">Role</TableHead>
+                {isSuperAdmin && (
+                  <TableHead className="hidden md:table-cell">
+                    Actions
+                  </TableHead>
+                )}
               </TableRow>
             </TableHeader>
             <TableBody>
               {paginatedUsers.map((user) => (
                 <TableRow key={user.id}>
-                  <TableCell className="font-medium text-sm">
+                  <TableCell className="font-medium text-xs sm:text-sm">
                     {user.email}
                   </TableCell>
-                  <TableCell className="text-sm">
+                  <TableCell className="hidden md:table-cell text-sm">
                     {formatDate(user.createdAt)}
                   </TableCell>
-                  <TableCell className="text-sm">
+                  <TableCell className="hidden md:table-cell text-sm">
                     {formatDate(user.lastLoginAt)}
                   </TableCell>
                   <TableCell>
                     <button
                       onClick={() => setSelectedUserId(user.id)}
-                      className="text-primary hover:underline text-sm cursor-pointer"
+                      className="text-primary hover:underline text-xs sm:text-sm cursor-pointer"
                       disabled={loading}
                     >
                       {user.orderCount}
@@ -223,7 +229,7 @@ export function UsersTable({ users }: UsersTableProps) {
                         handleRoleChange(user.id, e.target.value)
                       }
                       disabled={loading}
-                      className="w-[140px] h-9 text-sm rounded-none"
+                      className="w-[110px] sm:w-[140px] h-8 sm:h-9 text-xs sm:text-sm rounded-none"
                     >
                       <NativeSelectOption value="customer">
                         Customer
@@ -237,7 +243,7 @@ export function UsersTable({ users }: UsersTableProps) {
                     </NativeSelect>
                   </TableCell>
                   {isSuperAdmin && (
-                    <TableCell>
+                    <TableCell className="hidden md:table-cell">
                       <Button
                         variant="destructive"
                         size="sm"
