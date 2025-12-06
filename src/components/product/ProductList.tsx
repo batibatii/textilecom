@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { Product } from "@/Types/productValidation";
 import { AdminProductCard } from "@/components/product/AdminProductCard";
 import {
@@ -13,11 +13,15 @@ import {
 } from "@/components/ui/pagination";
 import { useRouter } from "next/navigation";
 import { AdminProductFilters, SortOption } from "@/Types/adminFilterTypes";
-import { sortProducts } from "@/lib/utils/productFilters";
+import {
+  sortProducts,
+  searchProductsForAdmin,
+} from "@/lib/utils/productFilters";
 import { FilterSection } from "./filters/FilterSection";
 import { ProductSorting } from "./filters/ProductSorting";
 import { FilterBadges } from "./filters/FilterBadges";
 import { MobileFilterDrawer } from "./filters/MobileFilterDrawer";
+import { SearchInput } from "./filters/SearchInput";
 import { Button } from "@/components/ui/button";
 import { Filter } from "lucide-react";
 
@@ -33,6 +37,7 @@ export function ProductList({
   const [currentPage, setCurrentPage] = useState(1);
   const [filters, setFilters] = useState<AdminProductFilters>({
     categories: [],
+    searchQuery: "",
   });
   const [sortBy, setSortBy] = useState<SortOption>("newest");
   const router = useRouter();
@@ -48,6 +53,10 @@ export function ProductList({
 
   const filteredAndSortedProducts = useMemo(() => {
     let result = [...products];
+
+    if (filters.searchQuery) {
+      result = searchProductsForAdmin(result, filters.searchQuery);
+    }
 
     if (filters.categories.length > 0) {
       result = result.filter((product) =>
@@ -67,26 +76,31 @@ export function ProductList({
   const endIndex = startIndex + productsPerPage;
   const currentProducts = filteredAndSortedProducts.slice(startIndex, endIndex);
 
-  const handleFilterChange = (newFilters: AdminProductFilters) => {
+  const handleSearchChange = useCallback((newSearch: string) => {
+    setFilters((prev) => ({ ...prev, searchQuery: newSearch }));
+    setCurrentPage(1);
+  }, []);
+
+  const handleFilterChange = useCallback((newFilters: AdminProductFilters) => {
     setFilters(newFilters);
     setCurrentPage(1);
-  };
+  }, []);
 
-  const handleSortChange = (newSort: SortOption) => {
+  const handleSortChange = useCallback((newSort: SortOption) => {
     setSortBy(newSort);
     setCurrentPage(1);
-  };
+  }, []);
 
-  const handleRemoveFilter = (
-    type: keyof AdminProductFilters,
-    value: string
-  ) => {
-    setFilters((prev) => ({
-      ...prev,
-      [type]: prev[type].filter((v) => v !== value),
-    }));
-    setCurrentPage(1);
-  };
+  const handleRemoveFilter = useCallback(
+    (type: "categories", value: string) => {
+      setFilters((prev) => ({
+        ...prev,
+        [type]: prev[type].filter((v) => v !== value),
+      }));
+      setCurrentPage(1);
+    },
+    []
+  );
 
   const handleNext = () => {
     if (currentPage < totalPages) {
@@ -155,6 +169,11 @@ export function ProductList({
   return (
     <div className="flex flex-col md:flex-row gap-6">
       <aside className="hidden md:block w-64 space-y-4 sticky top-4 h-fit">
+        <SearchInput
+          value={filters.searchQuery || ""}
+          onChange={handleSearchChange}
+          placeholder="Search products..."
+        />
         <div className="space-y-4 border rounded-none p-4">
           <div className="flex items-center justify-between">
             <h3 className="font-semibold">Filters</h3>
@@ -182,6 +201,14 @@ export function ProductList({
       </aside>
 
       <div className="flex-1">
+        <div className="md:hidden mb-4">
+          <SearchInput
+            value={filters.searchQuery || ""}
+            onChange={handleSearchChange}
+            placeholder="Search products..."
+          />
+        </div>
+
         <div className="md:hidden flex gap-2 mb-4">
           <MobileFilterDrawer
             filters={{
@@ -229,6 +256,7 @@ export function ProductList({
 
         <div className="flex mb-5">
           <p className="text-sm text-muted-foreground whitespace-nowrap mt-2">
+            {filters.searchQuery && `Searching for "${filters.searchQuery}" - `}
             Showing {filteredAndSortedProducts.length} products
           </p>
           {totalPages > 1 && renderPagination()}

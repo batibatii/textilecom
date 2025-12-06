@@ -6,7 +6,7 @@ import { X } from "lucide-react";
 
 interface FilterBadgesProps {
   filters: ProductFilters;
-  onRemove: (type: keyof ProductFilters, value: string) => void;
+  onRemove: (type: "brands" | "categories" | "sex", value: string) => void;
 }
 
 export function FilterBadges({ filters, onRemove }: FilterBadgesProps) {

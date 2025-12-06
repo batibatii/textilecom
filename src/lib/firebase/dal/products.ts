@@ -10,6 +10,7 @@ import {
   sortProducts,
   isApprovedProduct,
   sortByNewest,
+  searchProductsForCustomer,
 } from "@/lib/utils/productFilters";
 import { SortOption } from "@/Types/filterTypes";
 
@@ -194,6 +195,7 @@ export const getFilteredProductsFromDB = async (
     brands: string[];
     categories: string[];
     sex: string[];
+    searchQuery?: string;
   },
   sortBy: string,
   limit: number,
@@ -203,6 +205,13 @@ export const getFilteredProductsFromDB = async (
     const allProducts = await getAllProducts();
 
     let filteredProducts: Product[] = allProducts.filter(isApprovedProduct);
+
+    if (filters.searchQuery) {
+      filteredProducts = searchProductsForCustomer(
+        filteredProducts,
+        filters.searchQuery
+      );
+    }
 
     if (filters.brands.length > 0) {
       filteredProducts = filteredProducts.filter((product) =>

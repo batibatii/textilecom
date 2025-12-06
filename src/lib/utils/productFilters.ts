@@ -10,6 +10,47 @@ export function isDraftProduct(product: unknown): boolean {
   return (product as { draft?: boolean }).draft === true;
 }
 
+export function searchProductsForCustomer(
+  products: Product[],
+  searchQuery: string
+): Product[] {
+  if (!searchQuery || searchQuery.trim() === "") {
+    return products;
+  }
+
+  const query = searchQuery.toLowerCase().trim();
+
+  return products.filter((product) => {
+    return (
+      product.title.toLowerCase().includes(query) ||
+      product.brand.toLowerCase().includes(query) ||
+      product.category.toLowerCase().includes(query) ||
+      product.sex?.toLowerCase().includes(query)
+    );
+  });
+}
+
+export function searchProductsForAdmin(
+  products: Product[],
+  searchQuery: string
+): Product[] {
+  if (!searchQuery || searchQuery.trim() === "") {
+    return products;
+  }
+
+  const query = searchQuery.toLowerCase().trim();
+
+  return products.filter((product) => {
+    return (
+      product.title.toLowerCase().includes(query) ||
+      product.brand.toLowerCase().includes(query) ||
+      product.serialNumber.toLowerCase().includes(query) ||
+      product.category.toLowerCase().includes(query) ||
+      product.sex?.toLowerCase().includes(query)
+    );
+  });
+}
+
 export function filterProducts(
   products: Product[],
   filters: ProductFilters

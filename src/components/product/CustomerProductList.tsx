@@ -9,6 +9,7 @@ import { ProductFilters as ProductFiltersComponent } from "./filters/ProductFilt
 import { ProductSorting } from "./filters/ProductSorting";
 import { FilterBadges } from "./filters/FilterBadges";
 import { MobileFilterDrawer } from "./filters/MobileFilterDrawer";
+import { SearchInput } from "./filters/SearchInput";
 import { Button } from "@/components/ui/button";
 import { Filter } from "lucide-react";
 import { getFilteredProducts } from "@/app/actions/products/getFiltered";
@@ -38,10 +39,12 @@ export function CustomerProductList({
   const [error, setError] = useState<string | null>(null);
   const [total, setTotal] = useState(totalProducts);
 
+  const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState<ProductFilters>({
     brands: [],
     categories: [],
     sex: [],
+    searchQuery: "",
   });
   const [sortBy, setSortBy] = useState<SortOption>("newest");
 
@@ -75,6 +78,13 @@ export function CustomerProductList({
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    setFilters((prev) => ({
+      ...prev,
+      searchQuery,
+    }));
+  }, [searchQuery]);
 
   useEffect(() => {
     fetchProducts(0, false);
@@ -114,7 +124,10 @@ export function CustomerProductList({
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const handleRemoveFilter = (type: keyof ProductFilters, value: string) => {
+  const handleRemoveFilter = (
+    type: "brands" | "categories" | "sex",
+    value: string
+  ) => {
     setFilters((prev) => ({
       ...prev,
       [type]: prev[type].filter((v) => v !== value),
@@ -127,6 +140,11 @@ export function CustomerProductList({
   return (
     <div className="flex flex-col md:flex-row gap-6">
       <aside className="hidden md:block w-64 space-y-4 sticky top-4 h-fit">
+        <SearchInput
+          value={searchQuery}
+          onChange={setSearchQuery}
+          placeholder="Search products..."
+        />
         <ProductFiltersComponent
           filters={filters}
           onChange={setFilters}
@@ -136,6 +154,14 @@ export function CustomerProductList({
       </aside>
 
       <div className="flex-1">
+        <div className="md:hidden mb-4">
+          <SearchInput
+            value={searchQuery}
+            onChange={setSearchQuery}
+            placeholder="Search products..."
+          />
+        </div>
+
         <div className="md:hidden flex gap-2 mb-4">
           <MobileFilterDrawer
             filters={filters}
@@ -161,6 +187,7 @@ export function CustomerProductList({
         <FilterBadges filters={filters} onRemove={handleRemoveFilter} />
 
         <p className="text-sm text-muted-foreground mb-4">
+          {searchQuery && `Searching for "${searchQuery}" - `}
           Showing {products.length} of {total} products
         </p>
 

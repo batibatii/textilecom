@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo, useCallback } from "react";
 import {
   Table,
   TableBody,
@@ -33,9 +33,11 @@ import { batchUpdateUserRoles } from "@/app/actions/admin/users/updateRoles";
 import { deleteUser } from "@/app/actions/admin/users/deleteUser";
 import { useAuth } from "@/contexts/AuthContext";
 import type { UserDashboardData } from "@/Types/userDashboardType";
+import type { SortField, SortDirection } from "@/Types/userTableTypes";
 import { formatDate } from "@/lib/utils/dateFormatter";
 import { useRouter } from "next/navigation";
-import { Download } from "lucide-react";
+import { Download, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import { SearchInput } from "@/components/product/filters/SearchInput";
 
 interface UsersTableProps {
   users: UserDashboardData[];
@@ -58,13 +60,104 @@ export function UsersTable({ users }: UsersTableProps) {
     email: string;
   } | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortField, setSortField] = useState<SortField | null>(null);
+  const [sortDirection, setSortDirection] = useState<SortDirection>(null);
 
   const isSuperAdmin = currentUser?.role === "superAdmin";
 
-  const totalPages = Math.ceil(localUsers.length / ITEMS_PER_PAGE);
+  const filteredAndSortedUsers = useMemo(() => {
+    let result = [...localUsers];
+
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase().trim();
+      result = result.filter(
+        (user) =>
+          user.email.toLowerCase().includes(query) ||
+          user.role.toLowerCase().includes(query)
+      );
+    }
+
+    if (sortField && sortDirection) {
+      result.sort((a, b) => {
+        const aValue = a[sortField];
+        const bValue = b[sortField];
+
+        // Handle null values for lastLoginAt
+        if (sortField === "lastLoginAt") {
+          if (!aValue) return sortDirection === "asc" ? 1 : -1;
+          if (!bValue) return sortDirection === "asc" ? -1 : 1;
+        }
+
+        // Convert dates to timestamps for comparison
+        if (sortField === "createdAt" || sortField === "lastLoginAt") {
+          const aTime = new Date(aValue as string).getTime();
+          const bTime = new Date(bValue as string).getTime();
+          return sortDirection === "asc" ? aTime - bTime : bTime - aTime;
+        }
+
+        if (sortField === "email" || sortField === "role") {
+          const aStr = aValue as string;
+          const bStr = bValue as string;
+          return sortDirection === "asc"
+            ? aStr.localeCompare(bStr)
+            : bStr.localeCompare(aStr);
+        }
+
+        if (sortField === "orderCount") {
+          const aNum = aValue as number;
+          const bNum = bValue as number;
+          return sortDirection === "asc" ? aNum - bNum : bNum - aNum;
+        }
+
+        return 0;
+      });
+    }
+
+    return result;
+  }, [localUsers, searchQuery, sortField, sortDirection]);
+
+  const totalPages = Math.ceil(filteredAndSortedUsers.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const endIndex = startIndex + ITEMS_PER_PAGE;
-  const paginatedUsers = localUsers.slice(startIndex, endIndex);
+  const paginatedUsers = filteredAndSortedUsers.slice(startIndex, endIndex);
+
+  const handleSort = useCallback(
+    (field: SortField) => {
+      if (sortField === field) {
+        // Toggle direction or reset
+        if (sortDirection === "asc") {
+          setSortDirection("desc");
+        } else if (sortDirection === "desc") {
+          setSortField(null);
+          setSortDirection(null);
+        }
+      } else {
+        setSortField(field);
+        setSortDirection("asc");
+      }
+      setCurrentPage(1);
+    },
+    [sortField, sortDirection]
+  );
+
+  const handleSearchChange = useCallback((query: string) => {
+    setSearchQuery(query);
+    setCurrentPage(1);
+  }, []);
+
+  const getSortIcon = useCallback(
+    (field: SortField) => {
+      if (sortField !== field) {
+        return <ArrowUpDown className="ml-1 h-3 w-3 inline" />;
+      }
+      if (sortDirection === "asc") {
+        return <ArrowUp className="ml-1 h-3 w-3 inline" />;
+      }
+      return <ArrowDown className="ml-1 h-3 w-3 inline" />;
+    },
+    [sortField, sortDirection]
+  );
 
   const handleRoleChange = (userId: string, newRole: string) => {
     const newChanges = new Map(roleChanges);
@@ -172,28 +265,65 @@ export function UsersTable({ users }: UsersTableProps) {
   return (
     <>
       <div className="space-y-4">
-        <div className="flex justify-end mb-4">
+        <div className="flex flex-col sm:flex-row justify-between gap-4 mb-4">
+          <div className="w-full sm:w-96">
+            <SearchInput
+              value={searchQuery}
+              onChange={handleSearchChange}
+              placeholder="Search by email or role..."
+            />
+          </div>
           <Button
             onClick={handleExportCSV}
             variant="outline"
             size="sm"
-            className="rounded-none gap-2 text-xs"
+            className="rounded-none gap-2 text-xs w-full sm:w-auto"
           >
             <Download className="h-4 w-4" />
             EXPORT CSV
           </Button>
         </div>
+
+        {searchQuery && (
+          <p className="text-sm text-muted-foreground">
+            Showing {filteredAndSortedUsers.length} of {localUsers.length} users
+          </p>
+        )}
+
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="text-xs sm:text-sm">Email</TableHead>
-                <TableHead className="hidden md:table-cell">Joined</TableHead>
-                <TableHead className="hidden md:table-cell">
-                  Last Login
+                <TableHead
+                  className="text-xs sm:text-sm cursor-pointer hover:bg-muted/50"
+                  onClick={() => handleSort("email")}
+                >
+                  Email{getSortIcon("email")}
                 </TableHead>
-                <TableHead className="text-xs sm:text-sm">Orders</TableHead>
-                <TableHead className="text-xs sm:text-sm">Role</TableHead>
+                <TableHead
+                  className="hidden md:table-cell cursor-pointer hover:bg-muted/50"
+                  onClick={() => handleSort("createdAt")}
+                >
+                  Joined{getSortIcon("createdAt")}
+                </TableHead>
+                <TableHead
+                  className="hidden md:table-cell cursor-pointer hover:bg-muted/50"
+                  onClick={() => handleSort("lastLoginAt")}
+                >
+                  Last Login{getSortIcon("lastLoginAt")}
+                </TableHead>
+                <TableHead
+                  className="text-xs sm:text-sm cursor-pointer hover:bg-muted/50"
+                  onClick={() => handleSort("orderCount")}
+                >
+                  Orders{getSortIcon("orderCount")}
+                </TableHead>
+                <TableHead
+                  className="text-xs sm:text-sm cursor-pointer hover:bg-muted/50"
+                  onClick={() => handleSort("role")}
+                >
+                  Role{getSortIcon("role")}
+                </TableHead>
                 {isSuperAdmin && (
                   <TableHead className="hidden md:table-cell">
                     Actions
