@@ -13,13 +13,14 @@ export async function createProductWithRevalidation(productData: {
   taxRate: string;
   images: string[];
   category: string;
+  sex: string;
   stock: number;
   discount?: number;
   createdBy: string;
 }) {
   const result = await createProduct(productData);
-  
-  revalidateTag('products');
+
+  revalidateTag("products");
 
   return result;
 }

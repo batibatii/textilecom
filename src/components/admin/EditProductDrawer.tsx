@@ -27,7 +27,10 @@ import {
   NativeSelect,
   NativeSelectOption,
 } from "@/components/ui/native-select";
-import { PRODUCT_CATEGORIES } from "@/Types/productValidation";
+import {
+  PRODUCT_CATEGORIES,
+  PRODUCT_SEX_OPTIONS,
+} from "@/Types/productValidation";
 import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -37,6 +40,7 @@ import { uploadImages } from "@/app/actions/admin/products/uploadImages";
 import { deleteProductImages } from "@/app/actions/admin/products/deleteImages";
 import { updateProduct } from "@/app/actions/admin/products/update";
 import { useAuth } from "@/contexts/AuthContext";
+import { convertMultiplierToTaxRate } from "@/lib/utils/taxRate";
 
 interface EditProductDrawerProps {
   product: Product | null;
@@ -78,6 +82,7 @@ export function EditProductDrawer({
       currency: "",
       taxRate: "",
       category: undefined,
+      sex: undefined,
       stock: 0,
       discount: 0,
     },
@@ -92,8 +97,9 @@ export function EditProductDrawer({
         serialNumber: product.serialNumber,
         price: product.price.amount,
         currency: product.price.currency,
-        taxRate: product.taxRate,
+        taxRate: convertMultiplierToTaxRate(product.taxRate),
         category: product.category,
+        sex: product.sex,
         stock: product.stock,
         discount: product.discount?.rate || 0,
       });
@@ -172,6 +178,7 @@ export function EditProductDrawer({
         price: product.price,
         taxRate: product.taxRate,
         category: product.category,
+        sex: product.sex,
         stock: product.stock,
         discount: product.discount || null,
         images: updatedImages,
@@ -245,6 +252,7 @@ export function EditProductDrawer({
         },
         taxRate: data.taxRate,
         category: data.category,
+        sex: data.sex,
         stock: data.stock,
         discount:
           data.discount && data.discount > 0 ? { rate: data.discount } : null,
@@ -435,25 +443,50 @@ export function EditProductDrawer({
                 )}
               </div>
 
-              <div className="flex flex-col gap-0.5">
-                <Label className="text-xs">Currency</Label>
-                <NativeSelect
-                  defaultValue=""
-                  {...register("currency")}
-                  className="h-8 text-xs border border-b-ring rounded-none"
-                >
-                  <NativeSelectOption value="" disabled>
-                    Select
-                  </NativeSelectOption>
-                  <NativeSelectOption value="USD">$ (USD)</NativeSelectOption>
-                  <NativeSelectOption value="EUR">€ (EUR)</NativeSelectOption>
-                  <NativeSelectOption value="TRY">₺ (TRY)</NativeSelectOption>
-                </NativeSelect>
-                {errors.currency && (
-                  <span className="text-destructive text-[10px] mt-1">
-                    {errors.currency.message}
-                  </span>
-                )}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex flex-col gap-0.5">
+                  <Label className="text-xs">Currency</Label>
+                  <NativeSelect
+                    defaultValue=""
+                    {...register("currency")}
+                    className="h-8 text-xs border border-b-ring rounded-none"
+                  >
+                    <NativeSelectOption value="" disabled>
+                      Select
+                    </NativeSelectOption>
+                    <NativeSelectOption value="USD">$ (USD)</NativeSelectOption>
+                    <NativeSelectOption value="EUR">€ (EUR)</NativeSelectOption>
+                    <NativeSelectOption value="TRY">₺ (TRY)</NativeSelectOption>
+                  </NativeSelect>
+                  {errors.currency && (
+                    <span className="text-destructive text-[10px] mt-1">
+                      {errors.currency.message}
+                    </span>
+                  )}
+                </div>
+
+                <div className="flex flex-col gap-0.5">
+                  <Label className="text-xs">Gender</Label>
+                  <NativeSelect
+                    defaultValue=""
+                    {...register("sex")}
+                    className="h-8 text-xs border-b border-b-ring rounded-none"
+                  >
+                    <NativeSelectOption value="" disabled>
+                      Select gender
+                    </NativeSelectOption>
+                    {PRODUCT_SEX_OPTIONS.map((sex) => (
+                      <NativeSelectOption key={sex} value={sex}>
+                        {sex}
+                      </NativeSelectOption>
+                    ))}
+                  </NativeSelect>
+                  {errors.sex && (
+                    <span className="text-destructive text-[10px] mt-1">
+                      {errors.sex.message}
+                    </span>
+                  )}
+                </div>
               </div>
 
               <div className="flex flex-col gap-0.5">

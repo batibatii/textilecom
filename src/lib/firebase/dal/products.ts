@@ -5,6 +5,13 @@ import { adminDb } from "../admin";
 import type { FirebaseError } from "../config";
 import { deleteProductImages } from "@/app/actions/admin/products/deleteImages";
 import { convertTaxRateToMultiplier } from "@/lib/utils/taxRate";
+import { Product } from "@/Types/productValidation";
+import {
+  sortProducts,
+  isApprovedProduct,
+  sortByNewest,
+} from "@/lib/utils/productFilters";
+import { SortOption } from "@/Types/filterTypes";
 
 export const createProduct = async (productData: {
   title: string;
@@ -16,6 +23,7 @@ export const createProduct = async (productData: {
   taxRate: string;
   images: string[];
   category: string;
+  sex: string;
   stock: number;
   discount?: number;
   createdBy: string;
@@ -40,6 +48,7 @@ export const createProduct = async (productData: {
     taxRate: convertTaxRateToMultiplier(productData.taxRate),
     images: productData.images,
     category: productData.category,
+    sex: productData.sex,
     stock: productData.stock,
     draft: true,
     createdAt: new Date().toISOString(),
@@ -105,15 +114,9 @@ const fetchProductsWithLimit = async (limit: number, offset: number) => {
   try {
     const allProducts = await getAllProducts();
 
-    const approvedProducts = allProducts.filter(
-      (product) => (product as { draft?: boolean }).draft === false
-    );
+    const approvedProducts = allProducts.filter(isApprovedProduct);
 
-    const sortedProducts = approvedProducts.sort((a, b) => {
-      const dateA = new Date(a.createdAt as string).getTime();
-      const dateB = new Date(b.createdAt as string).getTime();
-      return dateB - dateA;
-    });
+    const sortedProducts = sortByNewest(approvedProducts);
 
     const fetchedProductsWithLimit = sortedProducts.slice(
       offset,
@@ -183,5 +186,53 @@ export const deleteProduct = async (productId: string, imageUrls: string[]) => {
       message:
         firebaseError.message || "Failed to delete product. Please try again.",
     };
+  }
+};
+
+export const getFilteredProductsFromDB = async (
+  filters: {
+    brands: string[];
+    categories: string[];
+    sex: string[];
+  },
+  sortBy: string,
+  limit: number,
+  offset: number
+) => {
+  try {
+    const allProducts = await getAllProducts();
+
+    let filteredProducts: Product[] = allProducts.filter(isApprovedProduct);
+
+    if (filters.brands.length > 0) {
+      filteredProducts = filteredProducts.filter((product) =>
+        filters.brands.includes(product.brand)
+      );
+    }
+
+    if (filters.categories.length > 0) {
+      filteredProducts = filteredProducts.filter((product) =>
+        filters.categories.includes(product.category)
+      );
+    }
+
+    if (filters.sex.length > 0) {
+      filteredProducts = filteredProducts.filter(
+        (product) => product.sex && filters.sex.includes(product.sex)
+      );
+    }
+
+    filteredProducts = sortProducts(filteredProducts, sortBy as SortOption);
+
+    const paginatedProducts = filteredProducts.slice(offset, offset + limit);
+
+    return {
+      products: paginatedProducts,
+      hasMore: offset + limit < filteredProducts.length,
+      total: filteredProducts.length,
+    };
+  } catch (error) {
+    console.error("Error fetching filtered products:", error);
+    throw error;
   }
 };

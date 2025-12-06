@@ -20,6 +20,7 @@ export async function updateProduct(
     };
     taxRate: string;
     category: string;
+    sex: string;
     stock: number;
     discount: { rate: number } | null;
     images: string[];

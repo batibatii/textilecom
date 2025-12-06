@@ -3,6 +3,7 @@
 import { getAllProducts } from "@/lib/firebase/dal/products";
 import type { FirebaseError } from "@/lib/firebase/config";
 import { Product } from "@/Types/productValidation";
+import { isApprovedProduct, isDraftProduct } from "@/lib/utils/productFilters";
 
 type ProductsFetchResult =
   | { success: true; products: Product[] }
@@ -11,9 +12,7 @@ type ProductsFetchResult =
 export async function getDraftProducts(): Promise<ProductsFetchResult> {
   try {
     const allProducts = await getAllProducts();
-    const draftProducts = allProducts.filter(
-      (product) => (product as { draft?: boolean }).draft === true
-    );
+    const draftProducts = allProducts.filter(isDraftProduct);
 
     return {
       success: true,
@@ -39,9 +38,7 @@ export async function getDraftProducts(): Promise<ProductsFetchResult> {
 export async function getApprovedProducts(): Promise<ProductsFetchResult> {
   try {
     const allProducts = await getAllProducts();
-    const approvedProducts = allProducts.filter(
-      (product) => (product as { draft?: boolean }).draft === false
-    );
+    const approvedProducts = allProducts.filter(isApprovedProduct);
 
     return {
       success: true,

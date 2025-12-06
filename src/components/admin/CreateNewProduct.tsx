@@ -31,6 +31,7 @@ import {
   ProductFormSchema,
   ProductFormData,
   PRODUCT_CATEGORIES,
+  PRODUCT_SEX_OPTIONS,
 } from "@/Types/productValidation";
 import type { FirebaseError } from "@/lib/firebase/config";
 import { createProductWithRevalidation } from "@/app/actions/admin/products/create";
@@ -50,7 +51,6 @@ export function CreateNewProduct() {
   const {
     register,
     handleSubmit,
-    setValue,
     reset,
     formState: { errors, isSubmitting },
   } = useForm<ProductFormData>({
@@ -318,6 +318,28 @@ export function CreateNewProduct() {
                   )}
                 </div>
                 <div className="flex flex-col gap-0.5">
+                  <Label className="text-xs md:text-sm">Gender</Label>
+                  <NativeSelect
+                    defaultValue=""
+                    {...register("sex")}
+                    className="h-8 md:h-9 text-xs md:text-sm border-b border-b-ring rounded-none"
+                  >
+                    <NativeSelectOption value="" disabled>
+                      Select gender
+                    </NativeSelectOption>
+                    {PRODUCT_SEX_OPTIONS.map((sex) => (
+                      <NativeSelectOption key={sex} value={sex}>
+                        {sex}
+                      </NativeSelectOption>
+                    ))}
+                  </NativeSelect>
+                  {errors.sex && (
+                    <span className="text-destructive text-[10px] md:text-xs mt-2">
+                      {errors.sex.message}
+                    </span>
+                  )}
+                </div>
+                <div className="flex flex-col gap-0.5">
                   <Label className="text-xs md:text-sm">Stock</Label>
                   <Input
                     type="number"
@@ -419,7 +441,6 @@ export function CreateNewProduct() {
   return (
     <>
       <div className="xl:hidden">{innerCard}</div>
-
       <Card className="hidden xl:flex border h-250 w-450 justify-center items-center shadow-md">
         {innerCard}
       </Card>

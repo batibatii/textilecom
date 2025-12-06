@@ -10,11 +10,14 @@ export const getCurrencySymbol = (currency: string): string => {
   return symbols[currency] || currency;
 };
 
+export const getNumericPrice = (product: Product): number => {
+  return product.discount
+    ? product.price.amount * (1 - product.discount.rate / 100)
+    : product.price.amount;
+};
+
 export const getDisplayPrice = (product: Product): string => {
-  const displayPrice = product.discount
-    ? (product.price.amount * (1 - product.discount.rate / 100)).toFixed(2)
-    : product.price.amount.toFixed(2);
-  return displayPrice;
+  return getNumericPrice(product).toFixed(2);
 };
 
 export const hasDiscount = (product: Product): boolean => {
