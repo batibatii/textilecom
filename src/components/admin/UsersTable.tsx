@@ -35,8 +35,9 @@ import { useAuth } from "@/contexts/AuthContext";
 import type { UserDashboardData } from "@/Types/userDashboardType";
 import type { SortField, SortDirection } from "@/Types/userTableTypes";
 import { formatDate } from "@/lib/utils/dateFormatter";
+import { getSortIcon } from "@/lib/utils/tableSorting";
 import { useRouter } from "next/navigation";
-import { Download, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import { Download } from "lucide-react";
 import { SearchInput } from "@/components/product/filters/SearchInput";
 
 interface UsersTableProps {
@@ -145,19 +146,6 @@ export function UsersTable({ users }: UsersTableProps) {
     setSearchQuery(query);
     setCurrentPage(1);
   }, []);
-
-  const getSortIcon = useCallback(
-    (field: SortField) => {
-      if (sortField !== field) {
-        return <ArrowUpDown className="ml-1 h-3 w-3 inline" />;
-      }
-      if (sortDirection === "asc") {
-        return <ArrowUp className="ml-1 h-3 w-3 inline" />;
-      }
-      return <ArrowDown className="ml-1 h-3 w-3 inline" />;
-    },
-    [sortField, sortDirection]
-  );
 
   const handleRoleChange = (userId: string, newRole: string) => {
     const newChanges = new Map(roleChanges);
@@ -298,31 +286,31 @@ export function UsersTable({ users }: UsersTableProps) {
                   className="text-xs sm:text-sm cursor-pointer hover:bg-muted/50"
                   onClick={() => handleSort("email")}
                 >
-                  Email{getSortIcon("email")}
+                  Email{getSortIcon(sortField, "email", sortDirection)}
                 </TableHead>
                 <TableHead
                   className="hidden md:table-cell cursor-pointer hover:bg-muted/50"
                   onClick={() => handleSort("createdAt")}
                 >
-                  Joined{getSortIcon("createdAt")}
+                  Joined{getSortIcon(sortField, "createdAt", sortDirection)}
                 </TableHead>
                 <TableHead
                   className="hidden md:table-cell cursor-pointer hover:bg-muted/50"
                   onClick={() => handleSort("lastLoginAt")}
                 >
-                  Last Login{getSortIcon("lastLoginAt")}
+                  Last Login{getSortIcon(sortField, "lastLoginAt", sortDirection)}
                 </TableHead>
                 <TableHead
                   className="text-xs sm:text-sm cursor-pointer hover:bg-muted/50"
                   onClick={() => handleSort("orderCount")}
                 >
-                  Orders{getSortIcon("orderCount")}
+                  Orders{getSortIcon(sortField, "orderCount", sortDirection)}
                 </TableHead>
                 <TableHead
                   className="text-xs sm:text-sm cursor-pointer hover:bg-muted/50"
                   onClick={() => handleSort("role")}
                 >
-                  Role{getSortIcon("role")}
+                  Role{getSortIcon(sortField, "role", sortDirection)}
                 </TableHead>
                 {isSuperAdmin && (
                   <TableHead className="hidden md:table-cell">
