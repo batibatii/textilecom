@@ -3,6 +3,7 @@
 import { adminDb } from "@/lib/firebase/admin";
 import { Order, OrderSchema } from "@/Types/orderValidation";
 import { getCurrentUserId } from "@/lib/auth/session";
+import { toISOString } from "@/lib/utils/dateFormatter";
 
 type GetOrderResult =
   | { success: true; order: Order }
@@ -36,7 +37,14 @@ export async function getOrderBySessionId(
     }
 
     const orderDoc = ordersSnapshot.docs[0];
-    const orderData = { id: orderDoc.id, ...orderDoc.data() };
+    const rawData = orderDoc.data();
+    const orderData = {
+      id: orderDoc.id,
+      ...rawData,
+      createdAt: toISOString(rawData.createdAt) as string,
+      updatedAt: toISOString(rawData.updatedAt) as string,
+      paymentCompletedAt: toISOString(rawData.paymentCompletedAt) || undefined,
+    };
 
     const validatedOrder = OrderSchema.parse(orderData);
 
@@ -82,7 +90,13 @@ export async function getOrderById(orderId: string): Promise<GetOrderResult> {
       };
     }
 
-    const orderData = { id: orderDoc.id, ...rawData };
+    const orderData = {
+      id: orderDoc.id,
+      ...rawData,
+      createdAt: toISOString(rawData.createdAt) as string,
+      updatedAt: toISOString(rawData.updatedAt) as string,
+      paymentCompletedAt: toISOString(rawData.paymentCompletedAt) || undefined,
+    };
     const validatedOrder = OrderSchema.parse(orderData);
 
     return {
@@ -120,7 +134,15 @@ export async function getUserOrders(): Promise<{
       .get();
 
     const orders = ordersSnapshot.docs.map((doc) => {
-      const data = { id: doc.id, ...doc.data() };
+      const rawData = doc.data();
+      const data = {
+        id: doc.id,
+        ...rawData,
+        createdAt: toISOString(rawData.createdAt) as string,
+        updatedAt: toISOString(rawData.updatedAt) as string,
+        paymentCompletedAt:
+          toISOString(rawData.paymentCompletedAt) || undefined,
+      };
       return OrderSchema.parse(data);
     });
 

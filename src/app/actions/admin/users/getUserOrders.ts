@@ -3,6 +3,7 @@
 import { adminDb } from "@/lib/firebase/admin";
 import { OrderSchema, type Order } from "@/Types/orderValidation";
 import { verifyUserRole } from "@/lib/auth/roleCheck";
+import { toISOString } from "@/lib/utils/dateFormatter";
 
 export async function getOrdersForUser(userId: string): Promise<{
   success: boolean;
@@ -22,7 +23,15 @@ export async function getOrdersForUser(userId: string): Promise<{
       .get();
 
     const orders = ordersSnapshot.docs.map((doc) => {
-      const data = { id: doc.id, ...doc.data() };
+      const rawData = doc.data();
+      const data = {
+        id: doc.id,
+        ...rawData,
+        createdAt: toISOString(rawData.createdAt) as string,
+        updatedAt: toISOString(rawData.updatedAt) as string,
+        paymentCompletedAt:
+          toISOString(rawData.paymentCompletedAt) || undefined,
+      };
       return OrderSchema.parse(data);
     });
 

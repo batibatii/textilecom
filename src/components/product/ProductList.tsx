@@ -36,12 +36,21 @@ export function ProductList({
 }: ProductListProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [filters, setFilters] = useState<AdminProductFilters>({
+    brands: [],
     categories: [],
     searchQuery: "",
   });
   const [sortBy, setSortBy] = useState<SortOption>("newest");
   const router = useRouter();
   const productsPerPage = 12;
+
+  const availableBrands = useMemo(() => {
+    const brands = new Set<string>();
+    products.forEach((product) => {
+      brands.add(product.brand);
+    });
+    return Array.from(brands).sort();
+  }, [products]);
 
   const availableCategories = useMemo(() => {
     const categories = new Set<string>();
@@ -56,6 +65,12 @@ export function ProductList({
 
     if (filters.searchQuery) {
       result = searchProductsForAdmin(result, filters.searchQuery);
+    }
+
+    if (filters.brands.length > 0) {
+      result = result.filter((product) =>
+        filters.brands.includes(product.brand)
+      );
     }
 
     if (filters.categories.length > 0) {
@@ -92,7 +107,7 @@ export function ProductList({
   }, []);
 
   const handleRemoveFilter = useCallback(
-    (type: "categories", value: string) => {
+    (type: "brands" | "categories", value: string) => {
       setFilters((prev) => ({
         ...prev,
         [type]: prev[type].filter((v) => v !== value),
@@ -164,7 +179,7 @@ export function ProductList({
     </Pagination>
   );
 
-  const activeFilterCount = filters.categories.length;
+  const activeFilterCount = filters.brands.length + filters.categories.length;
 
   return (
     <div className="flex flex-col md:flex-row gap-6">
@@ -181,13 +196,21 @@ export function ProductList({
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => handleFilterChange({ categories: [] })}
+                onClick={() =>
+                  handleFilterChange({ brands: [], categories: [] })
+                }
                 className="h-auto p-1 text-xs"
               >
                 Clear all
               </Button>
             )}
           </div>
+          <FilterSection
+            title="Brand"
+            options={availableBrands}
+            selected={filters.brands}
+            onChange={(brands) => handleFilterChange({ ...filters, brands })}
+          />
           <FilterSection
             title="Category"
             options={availableCategories}
@@ -212,15 +235,18 @@ export function ProductList({
         <div className="md:hidden flex gap-2 mb-4">
           <MobileFilterDrawer
             filters={{
-              brands: [],
+              brands: filters.brands,
               categories: filters.categories,
               sex: [],
             }}
             onChange={(newFilters) =>
-              handleFilterChange({ categories: newFilters.categories })
+              handleFilterChange({
+                brands: newFilters.brands,
+                categories: newFilters.categories,
+              })
             }
             availableValues={{
-              brands: [],
+              brands: availableBrands,
               categories: availableCategories,
               sex: [],
             }}
@@ -243,13 +269,13 @@ export function ProductList({
 
         <FilterBadges
           filters={{
-            brands: [],
+            brands: filters.brands,
             categories: filters.categories,
             sex: [],
           }}
           onRemove={(type, value) => {
-            if (type === "categories") {
-              handleRemoveFilter("categories", value);
+            if (type === "brands" || type === "categories") {
+              handleRemoveFilter(type, value);
             }
           }}
         />
@@ -282,7 +308,7 @@ export function ProductList({
             </p>
             <Button
               variant="outline"
-              onClick={() => handleFilterChange({ categories: [] })}
+              onClick={() => handleFilterChange({ brands: [], categories: [] })}
               className="rounded-none"
             >
               Clear all filters

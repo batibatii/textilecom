@@ -121,7 +121,7 @@ export function ProductDetailDialog({
                   src={product.images[0]}
                   alt={product.title}
                   fill
-                  className="object-cover"
+                  className="object-fit"
                   sizes="(max-width: 768px) 100vw, 50vw"
                 />
               ) : (
@@ -205,7 +205,7 @@ export function ProductDetailDialog({
                 </div>
 
                 <div className="border-t pt-4">
-                  <p className="text-sm text-gray-700 leading-relaxed">
+                  <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-line">
                     {product.description}
                   </p>
                 </div>

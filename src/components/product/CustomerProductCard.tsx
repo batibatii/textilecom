@@ -70,7 +70,7 @@ export function CustomerProductCard({
               src={product.images[0]}
               alt={product.title}
               fill
-              className="object-cover"
+              className="object-fit"
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               priority={priority}
               loading={priority ? undefined : "lazy"}

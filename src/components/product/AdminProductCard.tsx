@@ -176,13 +176,24 @@ export function AdminProductCard({
 
   return (
     <Card className="overflow-hidden transition-shadow shadow-none border-none p-0 pb-4 w-full max-w-md mx-auto">
-      <div className="relative w-full aspect-3/4 bg-muted">
+      <div
+        className="relative w-full aspect-3/4 bg-muted cursor-pointer group"
+        onClick={() => setIsDrawerOpen(true)}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            setIsDrawerOpen(true);
+          }
+        }}
+      >
         {product.images && product.images.length > 0 ? (
           <Image
             src={product.images[0]}
             alt={product.title}
             fill
-            className="object-cover"
+            className="object-fit transition-transform"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw "
             priority={priority}
             loading={priority ? undefined : "lazy"}

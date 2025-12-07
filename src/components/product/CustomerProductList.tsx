@@ -63,9 +63,17 @@ export function CustomerProductList({
       );
 
       if (result.success) {
-        setProducts((prev) =>
-          append ? [...prev, ...result.products] : result.products
-        );
+        setProducts((prev) => {
+          if (append) {
+            // Deduplicate products by ID when appending
+            const existingIds = new Set(prev.map((p) => p.id));
+            const newProducts = result.products.filter(
+              (p) => !existingIds.has(p.id)
+            );
+            return [...prev, ...newProducts];
+          }
+          return result.products;
+        });
         setHasMore(result.hasMore);
         setTotal(result.total);
       } else {
@@ -196,7 +204,7 @@ export function CustomerProductList({
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-20">
               {products.map((product, index) => (
                 <CustomerProductCard
-                  key={product.id}
+                  key={`${product.id}-${index}`}
                   product={product}
                   priority={index < 4}
                 />
