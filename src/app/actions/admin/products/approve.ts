@@ -5,8 +5,20 @@ import { revalidateTag } from "next/cache";
 import type { FirebaseError } from "@/lib/firebase/config";
 import { syncProductToStripe } from "@/lib/stripe/products";
 import { Product } from "@/Types/productValidation";
+import { verifyUserRole } from "@/lib/auth/roleCheck";
 
 export async function approveProduct(productId: string) {
+  const roleCheck = await verifyUserRole(["admin", "superAdmin"]);
+  if (!roleCheck.success) {
+    return {
+      success: false,
+      error: {
+        code: "auth/unauthorized",
+        message: roleCheck.error || "Unauthorized",
+      },
+    };
+  }
+
   try {
     const productRef = adminDb.collection("products").doc(productId);
 

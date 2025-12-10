@@ -291,7 +291,7 @@ export function PersonalInfo({ user }: PersonalInfoProps) {
 
       <SuccessAlert
         message={success ? "Information updated successfully!" : undefined}
-        className="mt-2"
+        className="mt-2 rounded-none"
       />
 
       <ErrorAlert message={error} className="mt-2" />

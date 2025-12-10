@@ -1,6 +1,6 @@
 "use server";
 
-import { adminDb } from "@/lib/firebase/admin";
+import { adminDb, FieldPath } from "@/lib/firebase/admin";
 import { Order, OrderSchema } from "@/Types/orderValidation";
 import { getCurrentUserId } from "@/lib/auth/session";
 import { toISOString } from "@/lib/utils/dateFormatter";
@@ -72,23 +72,24 @@ export async function getOrderById(orderId: string): Promise<GetOrderResult> {
       };
     }
 
-    const orderDoc = await adminDb.collection("orders").doc(orderId).get();
+    // Query with userId filter from the start to prevent timing attacks
+    const orderSnapshot = await adminDb
+      .collection("orders")
+      .where(FieldPath.documentId(), "==", orderId)
+      .where("userId", "==", userId)
+      .limit(1)
+      .get();
 
-    if (!orderDoc.exists) {
+    if (orderSnapshot.empty) {
+      // Same error whether order doesn't exist or user doesn't own it
       return {
         success: false,
         error: "Order not found",
       };
     }
 
+    const orderDoc = orderSnapshot.docs[0];
     const rawData = orderDoc.data();
-
-    if (rawData?.userId !== userId) {
-      return {
-        success: false,
-        error: "Unauthorized",
-      };
-    }
 
     const orderData = {
       id: orderDoc.id,

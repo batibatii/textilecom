@@ -36,6 +36,7 @@ import { getSortIcon } from "@/lib/utils/tableSorting";
 import { useRouter } from "next/navigation";
 import { Download } from "lucide-react";
 import { SearchInput } from "@/components/product/filters/SearchInput";
+import { exportToCSV } from "@/lib/utils/csvExport";
 
 interface OrdersTableProps {
   orders: OrderTableData[];
@@ -112,41 +113,26 @@ export function OrdersTable({ orders }: OrdersTableProps) {
   };
 
   const handleExportCSV = () => {
-    const headers = [
-      "Order Number",
-      "Order Date",
-      "Customer Email",
-      "Status",
-      "Total",
-      "Currency",
-    ];
-    const csvContent = [
-      headers.join(","),
-      ...localOrders.map((order) =>
-        [
-          `"${order.orderNumber}"`,
-          `"${formatDate(order.createdAt)}"`,
-          `"${order.customerEmail}"`,
-          order.status,
-          order.total,
-          order.currency,
-        ].join(",")
-      ),
-    ].join("\n");
-
-    // Create download link
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const link = document.createElement("a");
-    const url = URL.createObjectURL(blob);
-    link.setAttribute("href", url);
-    link.setAttribute(
-      "download",
-      `orders_${new Date().toISOString().split("T")[0]}.csv`
+    exportToCSV(
+      localOrders,
+      [
+        "Order Number",
+        "Order Date",
+        "Customer Email",
+        "Status",
+        "Total",
+        "Currency",
+      ],
+      "orders",
+      (order) => [
+        order.orderNumber,
+        formatDate(order.createdAt),
+        order.customerEmail,
+        order.status,
+        order.total,
+        order.currency,
+      ]
     );
-    link.style.visibility = "hidden";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
   };
 
   return (

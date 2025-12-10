@@ -37,7 +37,6 @@ import {
   PRODUCT_CATEGORIES,
   PRODUCT_SEX_OPTIONS,
 } from "@/Types/productValidation";
-import type { FirebaseError } from "@/lib/firebase/config";
 import { createProductWithRevalidation } from "@/app/actions/admin/products/create";
 import { useAuth } from "@/contexts/AuthContext";
 import { uploadImages } from "@/app/actions/admin/products/uploadImages";

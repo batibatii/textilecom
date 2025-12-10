@@ -6,6 +6,7 @@ import type { FirebaseError } from "@/lib/firebase/config";
 import { syncProductToStripe } from "@/lib/stripe/products";
 import { Product } from "@/Types/productValidation";
 import { convertTaxRateToMultiplier } from "@/lib/utils/taxRate";
+import { verifyUserRole } from "@/lib/auth/roleCheck";
 
 export async function updateProduct(
   productId: string,
@@ -27,6 +28,17 @@ export async function updateProduct(
     updatedAt: string;
   }
 ) {
+  const roleCheck = await verifyUserRole(["admin", "superAdmin"]);
+  if (!roleCheck.success) {
+    return {
+      success: false,
+      error: {
+        code: "auth/unauthorized",
+        message: roleCheck.error || "Unauthorized",
+      },
+    };
+  }
+
   try {
     const productRef = adminDb.collection("products").doc(productId);
 

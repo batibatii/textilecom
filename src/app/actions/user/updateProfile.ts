@@ -3,8 +3,20 @@
 import { updateUserProfile } from "@/lib/firebase/dal/users";
 import { revalidatePath } from "next/cache";
 import { PersonalInfoSchema } from "@/Types/profileValidation";
+import { getCurrentUserId } from "@/lib/auth/session";
 
 export async function updateProfile(userId: string, formData: unknown) {
+  const currentUserId = await getCurrentUserId();
+  if (!currentUserId || currentUserId !== userId) {
+    return {
+      success: false,
+      error: {
+        code: "auth/unauthorized",
+        message: "Unauthorized",
+      },
+    };
+  }
+
   const validationResult = PersonalInfoSchema.safeParse(formData);
 
   if (!validationResult.success) {

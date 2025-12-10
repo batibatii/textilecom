@@ -43,6 +43,7 @@ import { LoadingButton } from "@/components/ui/loading-button";
 import { useTableState } from "@/hooks/useTableState";
 import { useDialogState } from "@/hooks/useDialogState";
 import { useAsyncData } from "@/hooks/useAsyncData";
+import { exportToCSV } from "@/lib/utils/csvExport";
 
 interface UsersTableProps {
   users: UserDashboardData[];
@@ -149,33 +150,18 @@ export function UsersTable({ users }: UsersTableProps) {
   };
 
   const handleExportCSV = () => {
-    const headers = ["Email", "Joined", "Last Login", "Orders", "Role"];
-    const csvContent = [
-      headers.join(","),
-      ...localUsers.map((user) =>
-        [
-          `"${user.email}"`,
-          `"${formatDate(user.createdAt)}"`,
-          `"${formatDate(user.lastLoginAt)}"`,
-          user.orderCount,
-          user.role,
-        ].join(",")
-      ),
-    ].join("\n");
-
-    // Create download link
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const link = document.createElement("a");
-    const url = URL.createObjectURL(blob);
-    link.setAttribute("href", url);
-    link.setAttribute(
-      "download",
-      `users_${new Date().toISOString().split("T")[0]}.csv`
+    exportToCSV(
+      localUsers,
+      ["Email", "Joined", "Last Login", "Orders", "Role"],
+      "users",
+      (user) => [
+        user.email,
+        formatDate(user.createdAt),
+        formatDate(user.lastLoginAt),
+        user.orderCount,
+        user.role,
+      ]
     );
-    link.style.visibility = "hidden";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
   };
 
   return (

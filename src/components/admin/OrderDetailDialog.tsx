@@ -45,7 +45,7 @@ export function OrderDetailDialog({
     };
 
     fetchOrder();
-  }, [orderId, fetchOperation]);
+  }, [orderId, fetchOperation.execute]);
 
   return (
     <Dialog open={!!orderId} onOpenChange={onClose}>

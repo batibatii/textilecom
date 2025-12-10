@@ -4,8 +4,20 @@ import { adminDb } from "@/lib/firebase/admin";
 import { revalidateTag } from "next/cache";
 import type { FirebaseError } from "@/lib/firebase/config";
 import { stripe } from "@/lib/stripe/client";
+import { verifyUserRole } from "@/lib/auth/roleCheck";
 
 export async function moveToDraft(productId: string) {
+  const roleCheck = await verifyUserRole(["admin", "superAdmin"]);
+  if (!roleCheck.success) {
+    return {
+      success: false,
+      error: {
+        code: "auth/unauthorized",
+        message: roleCheck.error || "Unauthorized",
+      },
+    };
+  }
+
   try {
     const productRef = adminDb.collection("products").doc(productId);
 
