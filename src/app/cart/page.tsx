@@ -192,7 +192,7 @@ export default function CartPage() {
               </Link>
               <Link href="/" className="block">
                 <Button variant="outline" className="w-full text-xs ">
-                  Continue Shopping
+                  CONTINUE SHOPPING
                 </Button>
               </Link>
             </CardContent>

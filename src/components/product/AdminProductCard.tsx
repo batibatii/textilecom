@@ -5,11 +5,12 @@ import { Product } from "@/Types/productValidation";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
-import { useState } from "react";
 import { deleteProductWithRevalidation } from "@/app/actions/admin/products/delete";
 import { approveProduct } from "@/app/actions/admin/products/approve";
 import { moveToDraft } from "@/app/actions/admin/products/moveToDraft";
 import { useAuth } from "@/contexts/AuthContext";
+import { useAsyncData } from "@/hooks/useAsyncData";
+import { LoadingButton } from "@/components/ui/loading-button";
 import {
   Dialog,
   DialogContent,
@@ -18,15 +19,11 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Alert, AlertTitle } from "@/components/ui/alert";
 import { EditProductDrawer } from "@/components/admin/EditProductDrawer";
 import { Badge } from "@/components/ui/badge";
-import {
-  getCurrencySymbol,
-  getDisplayPrice,
-  hasDiscount as checkHasDiscount,
-  formatPrice,
-} from "@/lib/utils/productPrice";
+import { PriceDisplay } from "@/components/product/PriceDisplay";
+import { ErrorAlert } from "@/components/alert/ErrorAlert";
+import { useDialogState } from "@/hooks/useDialogState";
 
 interface AdminProductCardProps {
   product: Product;
@@ -44,147 +41,109 @@ export function AdminProductCard({
   showMoveToDraft = false,
 }: AdminProductCardProps) {
   const { user } = useAuth();
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [isApproving, setIsApproving] = useState(false);
-  const [isMovingToDraft, setIsMovingToDraft] = useState(false);
-  const [error, setError] = useState<string | undefined>();
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isMoveToDraftDialogOpen, setIsMoveToDraftDialogOpen] = useState(false);
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-
-  const displayPrice = getDisplayPrice(product);
-  const hasDiscount = checkHasDiscount(product);
-  const currencySymbol = getCurrencySymbol(product.price.currency);
+  const deleteOperation = useAsyncData();
+  const approveOperation = useAsyncData();
+  const moveToDraftOperation = useAsyncData();
+  const deleteDialog = useDialogState();
+  const moveToDraftDialog = useDialogState();
+  const editDrawer = useDialogState();
 
   const handleDelete = async () => {
     if (!user) {
-      setError("You must be logged in to delete products.");
+      deleteOperation.setError("You must be logged in to delete products.");
       return;
     }
 
     if (user.role !== "admin" && user.role !== "superAdmin") {
-      setError("You must be an admin to delete products.");
+      deleteOperation.setError("You must be an admin to delete products.");
       return;
     }
 
-    setIsDeleting(true);
-    setError(undefined);
-
-    try {
+    await deleteOperation.execute(async () => {
       await deleteProductWithRevalidation(product.id, product.images);
-
-      setIsDialogOpen(false);
+      deleteDialog.closeDialog();
       if (onDelete) {
         onDelete();
       }
-    } catch (error) {
-      console.error("Delete error:", error);
-      const errorMessage =
-        error instanceof Error
-          ? error.message
-          : "An unexpected error occurred while deleting the product.";
-      setError(errorMessage);
-    } finally {
-      setIsDeleting(false);
-    }
+    });
   };
 
   const handleCancel = () => {
-    setIsDialogOpen(false);
-    setError(undefined);
+    deleteDialog.closeDialog();
+    deleteOperation.setError(undefined);
   };
 
   const handleApprove = async () => {
     if (!user) {
-      setError("You must be logged in to approve products.");
+      approveOperation.setError("You must be logged in to approve products.");
       return;
     }
 
     if (user.role !== "admin" && user.role !== "superAdmin") {
-      setError("You must be an admin to approve products.");
+      approveOperation.setError("You must be an admin to approve products.");
       return;
     }
 
-    setIsApproving(true);
-    setError(undefined);
-
-    try {
+    await approveOperation.execute(async () => {
       const result = await approveProduct(product.id);
 
       if (!result.success) {
-        setError(result.error?.message || "Failed to approve product.");
-        return;
+        throw new Error(result.error?.message || "Failed to approve product.");
       }
 
       if (onUpdate) {
         onUpdate();
       }
-    } catch (error) {
-      console.error("Approve error:", error);
-      const errorMessage =
-        error instanceof Error
-          ? error.message
-          : "An unexpected error occurred while approving the product.";
-      setError(errorMessage);
-    } finally {
-      setIsApproving(false);
-    }
+    });
   };
 
   const handleMoveToDraft = async () => {
     if (!user) {
-      setError("You must be logged in to move products to draft.");
+      moveToDraftOperation.setError(
+        "You must be logged in to move products to draft."
+      );
       return;
     }
 
     if (user.role !== "admin" && user.role !== "superAdmin") {
-      setError("You must be an admin to move products to draft.");
+      moveToDraftOperation.setError(
+        "You must be an admin to move products to draft."
+      );
       return;
     }
 
-    setIsMovingToDraft(true);
-    setError(undefined);
-
-    try {
+    await moveToDraftOperation.execute(async () => {
       const result = await moveToDraft(product.id);
 
       if (!result.success) {
-        setError(result.error?.message || "Failed to move product to draft.");
-        return;
+        throw new Error(
+          result.error?.message || "Failed to move product to draft."
+        );
       }
 
-      setIsMoveToDraftDialogOpen(false);
+      moveToDraftDialog.closeDialog();
       if (onUpdate) {
         onUpdate();
       }
-    } catch (error) {
-      console.error("Move to draft error:", error);
-      const errorMessage =
-        error instanceof Error
-          ? error.message
-          : "An unexpected error occurred while moving the product to draft.";
-      setError(errorMessage);
-    } finally {
-      setIsMovingToDraft(false);
-    }
+    });
   };
 
   const handleCancelMoveToDraft = () => {
-    setIsMoveToDraftDialogOpen(false);
-    setError(undefined);
+    moveToDraftDialog.closeDialog();
+    moveToDraftOperation.setError(undefined);
   };
 
   return (
-    <Card className="overflow-hidden transition-shadow shadow-none border-none p-0 pb-4 w-full max-w-md mx-auto">
+    <Card className="overflow-hidden transition-shadow shadow-none border-none p-4 w-full max-w-md mx-auto">
       <div
         className="relative w-full aspect-3/4 bg-muted cursor-pointer group"
-        onClick={() => setIsDrawerOpen(true)}
+        onClick={editDrawer.openDialog}
         role="button"
         tabIndex={0}
         onKeyDown={(e) => {
           if (e.key === "Enter" || e.key === " ") {
             e.preventDefault();
-            setIsDrawerOpen(true);
+            editDrawer.openDialog();
           }
         }}
       >
@@ -226,9 +185,9 @@ export function AdminProductCard({
           </Badge>
         )}
       </div>
-      <div className="flex justify-end pr-0 -mt-4 ">
+      <div className="flex justify-end mt-2">
         <Button
-          onClick={() => setIsDrawerOpen(true)}
+          onClick={editDrawer.openDialog}
           className="bg-background text-foreground font-light text-[11px] md:text-[12px] md:font-extralight hover:bg-color-none group"
         >
           <span className="flex items-center gap-0.5 border-b-2 border-transparent  group-hover:border-current ">
@@ -237,55 +196,53 @@ export function AdminProductCard({
           </span>
         </Button>
       </div>
-      <div className="">
-        <CardHeader className="pt-2 pl-0 ">
+      <div className="space-y-2">
+        <CardHeader className="p-0">
           <CardTitle className="font-light text-[12px] md:text-[13px] tracking-wider md:font-extralight w-full truncate">
             {product.title.toUpperCase()}
           </CardTitle>
         </CardHeader>
-        <CardContent className="pb-4 pl-0 pr-0 pt-0">
+        <CardContent className="p-0">
           <div className="flex items-center justify-between gap-2 ">
             <div className="flex items-center gap-2">
-              {hasDiscount && (
-                <span className="font-light text-[11px] md:text-[12px] md:font-extralight text-muted-foreground line-through ">
-                  {formatPrice(product.price.amount, product.price.currency)}
-                </span>
-              )}
-              <span className="font-light text-[11px] md:text-[12px]  md:font-extralight">
-                {currencySymbol}
-                {displayPrice}
-              </span>
+              <PriceDisplay
+                product={product}
+                priceSpanClassName="font-light text-[11px] md:text-[12px] md:font-extralight"
+                priceClassName="font-light text-[11px] md:text-[12px] md:font-extralight text-muted-foreground line-through"
+                discountClassName="text-[11px] md:text-[12px] font-semibold text-green-900 bg-green-50 px-2 py-0.5 rounded"
+              />
             </div>
-            {hasDiscount && (
-              <span className="text-[11px] md:text-[12px] font-semibold text-green-900 bg-green-50 px-2 py-0.5 rounded">
-                -{product?.discount?.rate}%
-              </span>
-            )}
           </div>
-          {error && !isDialogOpen && !isMoveToDraftDialogOpen && (
-            <Alert variant="destructive" className="mt-4">
-              <AlertTitle>{error}</AlertTitle>
-            </Alert>
-          )}
+          <ErrorAlert
+            message={
+              (deleteOperation.error ||
+                approveOperation.error ||
+                moveToDraftOperation.error) &&
+              !deleteDialog.open &&
+              !moveToDraftDialog.open
+                ? deleteOperation.error ||
+                  approveOperation.error ||
+                  moveToDraftOperation.error
+                : undefined
+            }
+            className="mt-4"
+          />
           <div className="flex gap-2 mt-6">
-            <Button
-              variant="default"
+            <LoadingButton
               size="sm"
               className="flex-1 rounded-none"
               onClick={handleApprove}
-              disabled={isApproving || !product.draft}
+              disabled={!product.draft}
+              loading={approveOperation.loading}
+              loadingText="APPROVING..."
             >
-              {isApproving
-                ? "APPROVING..."
-                : product.draft
-                ? "APPROVE"
-                : "APPROVED"}
-            </Button>
+              {product.draft ? "APPROVE" : "APPROVED"}
+            </LoadingButton>
 
             {showMoveToDraft ? (
               <Dialog
-                open={isMoveToDraftDialogOpen}
-                onOpenChange={setIsMoveToDraftDialogOpen}
+                open={moveToDraftDialog.open}
+                onOpenChange={moveToDraftDialog.setOpen}
               >
                 <DialogTrigger asChild className="flex-1">
                   <Button
@@ -295,7 +252,7 @@ export function AdminProductCard({
                     MOVE TO DRAFT
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="min-h-40">
+                <DialogContent className="min-h-40 p-6">
                   <DialogHeader>
                     <DialogTitle className="mt-2">Move to Draft?</DialogTitle>
                     <DialogDescription>
@@ -307,22 +264,22 @@ export function AdminProductCard({
                       customers.
                     </DialogDescription>
                   </DialogHeader>
-                  {error && (
-                    <Alert variant="destructive" className="mt-2">
-                      <AlertTitle>{error}</AlertTitle>
-                    </Alert>
-                  )}
+                  <ErrorAlert
+                    message={moveToDraftOperation.error}
+                    className="mt-2"
+                  />
                   <div className="flex items-center mt-1 justify-end gap-4">
-                    <Button
+                    <LoadingButton
                       onClick={handleMoveToDraft}
-                      disabled={isMovingToDraft}
+                      loading={moveToDraftOperation.loading}
+                      loadingText="MOVING..."
                       className="bg-background text-foreground border border-ring  hover:bg-amber-900  hover:text-background active:translate-y-0.5 active:scale-95"
                     >
-                      {isMovingToDraft ? "Moving..." : "Yes"}
-                    </Button>
+                      Yes
+                    </LoadingButton>
                     <Button
                       onClick={handleCancelMoveToDraft}
-                      disabled={isMovingToDraft}
+                      disabled={moveToDraftOperation.loading}
                       className="bg-foreground  hover:text-primary-foreground active:translate-y-0.5 active:scale-95"
                     >
                       No
@@ -331,7 +288,10 @@ export function AdminProductCard({
                 </DialogContent>
               </Dialog>
             ) : (
-              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <Dialog
+                open={deleteDialog.open}
+                onOpenChange={deleteDialog.setOpen}
+              >
                 <DialogTrigger asChild className="flex-1">
                   <Button
                     size="sm"
@@ -340,7 +300,7 @@ export function AdminProductCard({
                     DELETE
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="min-h-40">
+                <DialogContent className="min-h-40 p-6">
                   <DialogHeader>
                     <DialogTitle className="mt-2">
                       Are you absolutely sure?
@@ -353,22 +313,22 @@ export function AdminProductCard({
                       and remove all associated data from our servers.
                     </DialogDescription>
                   </DialogHeader>
-                  {error && (
-                    <Alert variant="destructive" className="mt-2">
-                      <AlertTitle>{error}</AlertTitle>
-                    </Alert>
-                  )}
+                  <ErrorAlert
+                    message={deleteOperation.error}
+                    className="mt-2"
+                  />
                   <div className="flex items-center mt-1 justify-end gap-4">
-                    <Button
+                    <LoadingButton
                       onClick={handleDelete}
-                      disabled={isDeleting}
+                      loading={deleteOperation.loading}
+                      loadingText="Deleting..."
                       className="bg-background text-foreground border border-ring hover:bg-destructive hover:text-primary-foreground active:translate-y-0.5 active:scale-95"
                     >
-                      {isDeleting ? "Deleting..." : "Yes"}
-                    </Button>
+                      Yes
+                    </LoadingButton>
                     <Button
                       onClick={handleCancel}
-                      disabled={isDeleting}
+                      disabled={deleteOperation.loading}
                       className="bg-foreground text-background hover:text-primary-foreground active:translate-y-0.5 active:scale-95"
                     >
                       No
@@ -383,8 +343,8 @@ export function AdminProductCard({
 
       <EditProductDrawer
         product={product}
-        open={isDrawerOpen}
-        onOpenChange={setIsDrawerOpen}
+        open={editDrawer.open}
+        onOpenChange={editDrawer.setOpen}
         onUpdate={onUpdate}
       />
     </Card>

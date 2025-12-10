@@ -10,20 +10,16 @@ import {
 } from "@/components/ui/dialog";
 import { H5 } from "@/components/ui/headings";
 import Image from "next/image";
-import {
-  getCurrencySymbol,
-  getDisplayPrice,
-  hasDiscount as checkHasDiscount,
-  formatPrice,
-} from "@/lib/utils/productPrice";
 import { Button } from "@/components/ui/button";
 import { useCart, type CartItem } from "@/contexts/CartContext";
 import { useState } from "react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useFavorites } from "@/contexts/FavoritesContext";
 import { useAuth } from "@/contexts/AuthContext";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
+import { useDialogState } from "@/hooks/useDialogState";
+import { SuccessAlert } from "@/components/alert/SuccessAlert";
+import { PriceDisplay } from "@/components/product/PriceDisplay";
 
 interface ProductDetailDialogProps {
   product: Product;
@@ -42,9 +38,8 @@ export function ProductDetailDialog({
   const [selectedSize, setSelectedSize] = useState<string>("M");
   const [quantity, setQuantity] = useState<number>(1);
   const [showSuccess, setShowSuccess] = useState<boolean>(false);
-  const [loginDialogOpen, setLoginDialogOpen] = useState<boolean>(false);
-  const [unavailableDialogOpen, setUnavailableDialogOpen] =
-    useState<boolean>(false);
+  const loginDialog = useDialogState();
+  const unavailableDialog = useDialogState();
 
   const isProductFavorited = isFavorited(product.id);
 
@@ -56,7 +51,7 @@ export function ProductDetailDialog({
     e.stopPropagation();
 
     if (!user) {
-      setLoginDialogOpen(true);
+      loginDialog.openDialog();
       return;
     }
 
@@ -69,7 +64,7 @@ export function ProductDetailDialog({
 
   const handleAddToCart = () => {
     if (!product.stripePriceId) {
-      setUnavailableDialogOpen(true);
+      unavailableDialog.openDialog();
       return;
     }
 
@@ -163,31 +158,7 @@ export function ProductDetailDialog({
 
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex items-center gap-3">
-                    {checkHasDiscount(product) && (
-                      <>
-                        <span className="text-base text-muted-foreground line-through">
-                          {formatPrice(
-                            product.price.amount,
-                            product.price.currency
-                          )}
-                        </span>
-
-                        <span className="text-xl font-medium">
-                          {getCurrencySymbol(product.price.currency)}
-                          {getDisplayPrice(product)}
-                        </span>
-
-                        <span className="text-sm font-semibold text-green-900 bg-green-50 px-2 py-1 rounded">
-                          -{product?.discount?.rate}%
-                        </span>
-                      </>
-                    )}
-                    {!checkHasDiscount(product) && (
-                      <span className="text-xl font-medium">
-                        {getCurrencySymbol(product.price.currency)}
-                        {getDisplayPrice(product)}
-                      </span>
-                    )}
+                    <PriceDisplay product={product} />
                   </div>
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -258,13 +229,12 @@ export function ProductDetailDialog({
               </div>
 
               <div className="mt-4 pt-4 space-y-3">
-                {showSuccess && (
-                  <Alert className="bg-green-50 border-green-200 p-2 rounded-none">
-                    <AlertDescription className="text-green-800 text-sm">
-                      Added to cart successfully!
-                    </AlertDescription>
-                  </Alert>
-                )}
+                <SuccessAlert
+                  message={
+                    showSuccess ? "Added to cart successfully!" : undefined
+                  }
+                  className="p-2 rounded-none"
+                />
                 <Button
                   onClick={handleAddToCart}
                   variant="default"
@@ -279,8 +249,8 @@ export function ProductDetailDialog({
         </DialogContent>
       </Dialog>
 
-      <Dialog open={loginDialogOpen} onOpenChange={setLoginDialogOpen}>
-        <DialogContent className="rounded-none">
+      <Dialog open={loginDialog.open} onOpenChange={loginDialog.setOpen}>
+        <DialogContent className="rounded-none p-6">
           <DialogHeader>
             <DialogTitle>Login Required</DialogTitle>
             <DialogDescription>
@@ -290,7 +260,7 @@ export function ProductDetailDialog({
           <div className="flex gap-2 justify-end">
             <Button
               variant="outline"
-              onClick={() => setLoginDialogOpen(false)}
+              onClick={loginDialog.closeDialog}
               className="rounded-none"
             >
               Cancel
@@ -303,10 +273,10 @@ export function ProductDetailDialog({
       </Dialog>
 
       <Dialog
-        open={unavailableDialogOpen}
-        onOpenChange={setUnavailableDialogOpen}
+        open={unavailableDialog.open}
+        onOpenChange={unavailableDialog.setOpen}
       >
-        <DialogContent className="rounded-none">
+        <DialogContent className="rounded-none p-6">
           <DialogHeader>
             <DialogTitle>Product Unavailable</DialogTitle>
             <DialogDescription>
@@ -315,7 +285,7 @@ export function ProductDetailDialog({
           </DialogHeader>
           <div className="flex gap-2 justify-end">
             <Button
-              onClick={() => setUnavailableDialogOpen(false)}
+              onClick={unavailableDialog.closeDialog}
               className="rounded-none"
             >
               OK

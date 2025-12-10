@@ -1,13 +1,13 @@
-import { AdminProductGridSkeleton } from "@/components/product/skeletons/AdminProductGridSkeleton";
-import { H1 } from "@/components/ui/headings";
+"use client";
+
+import { TailChase } from "ldrs/react";
 
 export default function Loading() {
   return (
     <main className="container mx-auto px-4 py-8">
-      <H1 className="text-center mt-8 mb-25">
-        Product Management
-      </H1>
-      <AdminProductGridSkeleton />
+      <div className="flex justify-center items-center h-screen">
+        <TailChase size="40" speed="1.75" color="black" />
+      </div>
     </main>
   );
 }

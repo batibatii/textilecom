@@ -12,13 +12,17 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
   NativeSelect,
   NativeSelectOption,
 } from "@/components/ui/native-select";
+import { FormField } from "@/components/form/FormField";
+import { ErrorAlert } from "@/components/alert/ErrorAlert";
+import { SuccessAlert } from "@/components/alert/SuccessAlert";
+import { LoadingButton } from "@/components/ui/loading-button";
+import { useAsyncData } from "@/hooks/useAsyncData";
 import {
   Pagination,
   PaginationContent,
@@ -35,17 +39,14 @@ import {
 } from "@/Types/productValidation";
 import type { FirebaseError } from "@/lib/firebase/config";
 import { createProductWithRevalidation } from "@/app/actions/admin/products/create";
-import { Alert, AlertTitle } from "@/components/ui/alert";
 import { useAuth } from "@/contexts/AuthContext";
 import { uploadImages } from "@/app/actions/admin/products/uploadImages";
 
 export function CreateNewProduct() {
   const [currentPage, setCurrentPage] = useState(1);
-  const [error, setError] = useState<string | undefined>();
-  const [success, setSuccess] = useState(false);
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
-  const [isUploadingImage, setIsUploadingImage] = useState(false);
   const { user } = useAuth();
+  const createOperation = useAsyncData();
   const totalPages = 3;
 
   const {
@@ -73,15 +74,13 @@ export function CreateNewProduct() {
   };
 
   const onSubmit = async (data: ProductFormData) => {
-    try {
-      setError(undefined);
+    if (selectedImages.length === 0) {
+      createOperation.setError("At least one image is required");
+      return;
+    }
 
-      if (selectedImages.length === 0) {
-        setError("At least one image is required");
-        return;
-      }
-
-      setIsUploadingImage(true);
+    await createOperation.execute(async () => {
+      createOperation.setLoading(true);
       const formData = new FormData();
 
       selectedImages.forEach((file) => {
@@ -91,13 +90,10 @@ export function CreateNewProduct() {
       const uploadResult = await uploadImages(formData);
 
       if (!uploadResult.success) {
-        setError(uploadResult.error.message);
-        setIsUploadingImage(false);
-        return;
+        throw new Error(uploadResult.error.message);
       }
 
       const imageUrls = uploadResult.urls;
-      setIsUploadingImage(false);
 
       const productData = {
         ...data,
@@ -109,7 +105,6 @@ export function CreateNewProduct() {
       const result = await createProductWithRevalidation(productData);
       console.log("Product created successfully:", result);
 
-      setSuccess(true);
       setSelectedImages([]);
       reset({
         discount: 0,
@@ -117,14 +112,9 @@ export function CreateNewProduct() {
       setCurrentPage(1);
 
       setTimeout(() => {
-        setSuccess(false);
+        createOperation.setSuccess(false);
       }, 3000);
-    } catch (err) {
-      console.error("Error creating product:", err);
-      const firebaseError = err as FirebaseError;
-      setError(firebaseError.message || "Failed to create product");
-      setIsUploadingImage(false);
-    }
+    });
   };
 
   const innerCard = (
@@ -139,81 +129,62 @@ export function CreateNewProduct() {
       </CardHeader>
       <form onSubmit={handleSubmit(onSubmit)}>
         <CardContent className="p-3 md:p-6">
-          <div className="flex flex-col gap-2 md:gap-4">
+          <div className="flex flex-col gap-3 md:gap-4">
             {currentPage === 1 && (
               <>
-                <div className="flex flex-col gap-0.5">
-                  <Label className="text-xs md:text-sm">Title</Label>
+                <FormField label="Title" error={errors.title}>
                   <Input
                     {...register("title")}
                     className="h-8 md:h-9 text-sm border-b border-b-ring rounded-none"
                   />
-                  {errors.title && (
-                    <span className="text-destructive text-[10px] md:text-xs mt-2">
-                      {errors.title.message}
-                    </span>
-                  )}
-                </div>
-                <div className="flex flex-col gap-0.5">
-                  <Label className="text-xs md:text-sm">Description</Label>
+                </FormField>
+                <FormField label="Description" error={errors.description}>
                   <Textarea
                     className="resize-none text-sm min-h-[60px] md:min-h-20 max-h-32 overflow-y-auto border-b border-b-ring "
                     {...register("description")}
                   />
-                  {errors.description && (
-                    <span className="text-destructive text-[10px] md:text-xs mt-2">
-                      {errors.description.message}
-                    </span>
-                  )}
-                </div>
-                <div className="flex flex-col gap-0.5">
-                  <Label className="text-xs md:text-sm">Brand</Label>
+                </FormField>
+                <FormField label="Brand" error={errors.brand}>
                   <Input
                     {...register("brand")}
                     className="h-8 md:h-9 text-sm border-b border-b-ring rounded-none"
                   />
-                  {errors.brand && (
-                    <span className="text-destructive text-[10px] md:text-xs mt-2">
-                      {errors.brand.message}
-                    </span>
-                  )}
-                </div>
-                <div className="flex gap-1.5 md:gap-4">
-                  <div className="flex flex-col gap-0.5 flex-1">
-                    <Label className="text-xs md:text-sm">Product Number</Label>
+                </FormField>
+                <div className="flex gap-2 md:gap-4">
+                  <FormField
+                    label="Product Number"
+                    error={errors.serialNumber}
+                    className="flex-1"
+                  >
                     <Input
                       {...register("serialNumber")}
                       className="h-8 md:h-9 text-sm border-b border-b-ring rounded-none"
                     />
-                    {errors.serialNumber && (
-                      <span className="text-destructive text-[10px] md:text-xs mt-2">
-                        {errors.serialNumber.message}
-                      </span>
-                    )}
-                  </div>
+                  </FormField>
                 </div>
               </>
             )}
 
             {currentPage === 2 && (
               <>
-                <div className="flex gap-1.5 md:gap-4">
-                  <div className="flex flex-col gap-1 flex-1">
-                    <Label className="text-xs md:text-sm">Price</Label>
+                <div className="flex gap-2 md:gap-4">
+                  <FormField
+                    label="Price"
+                    error={errors.price}
+                    className="flex-1"
+                  >
                     <Input
                       type="number"
                       step="0.01"
                       {...register("price", { valueAsNumber: true })}
                       className="h-8 md:h-9 text-sm border-b border-b-ring rounded-none w-60 sm:w-full"
                     />
-                    {errors.price && (
-                      <span className="text-destructive text-[10px] md:text-xs mt-2">
-                        {errors.price.message}
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex flex-col gap-1 w-20 md:w-32">
-                    <Label className="text-xs md:text-sm">Currency</Label>
+                  </FormField>
+                  <FormField
+                    label="Currency"
+                    error={errors.currency}
+                    className="w-20 md:w-32"
+                  >
                     <NativeSelect
                       defaultValue=""
                       {...register("currency")}
@@ -232,16 +203,10 @@ export function CreateNewProduct() {
                         ₺ (TRY)
                       </NativeSelectOption>
                     </NativeSelect>
-                    {errors.currency && (
-                      <span className="text-destructive text-[10px] md:text-xs mt-2">
-                        {errors.currency.message}
-                      </span>
-                    )}
-                  </div>
+                  </FormField>
                 </div>
                 <div className="flex gap-3">
-                  <div className="flex flex-col gap-1">
-                    <Label className="text-xs md:text-sm">Tax Rate</Label>
+                  <FormField label="Tax Rate" error={errors.taxRate}>
                     <NativeSelect
                       defaultValue=""
                       {...register("taxRate")}
@@ -255,16 +220,8 @@ export function CreateNewProduct() {
                       <NativeSelectOption value="%18">%18</NativeSelectOption>
                       <NativeSelectOption value="%20">%20</NativeSelectOption>
                     </NativeSelect>
-                    {errors.taxRate && (
-                      <span className="text-destructive text-[10px] md:text-xs mt-2">
-                        {errors.taxRate.message}
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <Label className="text-xs md:text-sm">
-                      Images (Required)
-                    </Label>
+                  </FormField>
+                  <FormField label="Images (Required)">
                     <Input
                       type="file"
                       multiple
@@ -274,12 +231,12 @@ export function CreateNewProduct() {
                         const files = Array.from(e.target.files || []);
                         if (files.length > 0) {
                           setSelectedImages(files);
-                          setError(undefined);
+                          createOperation.setError(undefined);
                         } else {
                           setSelectedImages([]);
                         }
                       }}
-                      disabled={isUploadingImage || isSubmitting}
+                      disabled={createOperation.loading || isSubmitting}
                       className="h-8 md:h-9 text-sm min-w-59 sm:min-w-110 md:min-w-155 border-b border-b-ring rounded-none cursor-pointer"
                     />
                     {selectedImages.length > 0 && (
@@ -288,15 +245,14 @@ export function CreateNewProduct() {
                         {selectedImages.length > 1 ? "s" : ""}
                       </span>
                     )}
-                  </div>
+                  </FormField>
                 </div>
               </>
             )}
 
             {currentPage === 3 && (
               <>
-                <div className="flex flex-col gap-0.5">
-                  <Label className="text-xs md:text-sm">Category</Label>
+                <FormField label="Category" error={errors.category}>
                   <NativeSelect
                     defaultValue=""
                     {...register("category")}
@@ -311,14 +267,8 @@ export function CreateNewProduct() {
                       </NativeSelectOption>
                     ))}
                   </NativeSelect>
-                  {errors.category && (
-                    <span className="text-destructive text-[10px] md:text-xs mt-2">
-                      {errors.category.message}
-                    </span>
-                  )}
-                </div>
-                <div className="flex flex-col gap-0.5">
-                  <Label className="text-xs md:text-sm">Gender</Label>
+                </FormField>
+                <FormField label="Gender" error={errors.sex}>
                   <NativeSelect
                     defaultValue=""
                     {...register("sex")}
@@ -333,51 +283,36 @@ export function CreateNewProduct() {
                       </NativeSelectOption>
                     ))}
                   </NativeSelect>
-                  {errors.sex && (
-                    <span className="text-destructive text-[10px] md:text-xs mt-2">
-                      {errors.sex.message}
-                    </span>
-                  )}
-                </div>
-                <div className="flex flex-col gap-0.5">
-                  <Label className="text-xs md:text-sm">Stock</Label>
+                </FormField>
+                <FormField label="Stock" error={errors.stock}>
                   <Input
                     type="number"
                     {...register("stock", { valueAsNumber: true })}
                     className="h-8 md:h-9 text-sm border-b border-b-ring rounded-none"
                   />
-                  {errors.stock && (
-                    <span className="text-destructive text-[10px] md:text-xs mt-2">
-                      {errors.stock.message}
-                    </span>
-                  )}
-                </div>
-                <div className="flex flex-col gap-0.5">
-                  <Label className="text-xs md:text-sm">
-                    Discount (Optional %)
-                  </Label>
+                </FormField>
+                <FormField
+                  label="Discount (Optional %)"
+                  error={errors.discount}
+                >
                   <Input
                     type="number"
                     {...register("discount", { valueAsNumber: true })}
                     className="h-8 md:h-9 text-sm border-b border-b-ring rounded-none"
                   />
-                  {errors.discount && (
-                    <span className="text-destructive text-[10px] md:text-xs mt-1">
-                      {errors.discount.message}
-                    </span>
-                  )}
-                </div>
+                </FormField>
               </>
             )}
           </div>
         </CardContent>
-        {success && (
-          <Alert className="mx-3 mb-2 md:mx-4 md:mb-4">
-            <AlertTitle className="text-xs md:text-sm">
-              Product created successfully!
-            </AlertTitle>
-          </Alert>
-        )}
+        <SuccessAlert
+          message={
+            createOperation.success
+              ? "Product created successfully!"
+              : undefined
+          }
+          className="mx-3 mb-2 md:mx-4 md:mb-4 p-2 rounded-none"
+        />
 
         <CardFooter className="flex flex-col gap-2 md:gap-4 p-3 md:p-6">
           <Pagination className="flex justify-center">
@@ -415,23 +350,18 @@ export function CreateNewProduct() {
               </PaginationItem>
             </PaginationContent>
           </Pagination>
-          {error && (
-            <Alert variant="destructive">
-              <AlertTitle className="text-xs md:text-sm">{error}</AlertTitle>
-            </Alert>
-          )}
+          <ErrorAlert message={createOperation.error} />
           {currentPage === 3 && (
-            <Button
+            <LoadingButton
               type="submit"
-              disabled={isSubmitting || success || isUploadingImage}
+              loading={createOperation.loading || isSubmitting}
+              loadingText="CREATING..."
+              success={createOperation.success}
+              successText="CREATED!"
               className="w-full h-8 md:h-9 text-xs md:text-sm"
             >
-              {isSubmitting || isUploadingImage
-                ? "Creating..."
-                : success
-                ? "Created!"
-                : "Create"}
-            </Button>
+              CREATE
+            </LoadingButton>
           )}
         </CardFooter>
       </form>

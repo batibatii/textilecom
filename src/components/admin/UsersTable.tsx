@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState } from "react";
 import {
   Table,
   TableBody,
@@ -33,12 +33,16 @@ import { batchUpdateUserRoles } from "@/app/actions/admin/users/updateRoles";
 import { deleteUser } from "@/app/actions/admin/users/deleteUser";
 import { useAuth } from "@/contexts/AuthContext";
 import type { UserDashboardData } from "@/Types/userDashboardType";
-import type { SortField, SortDirection } from "@/Types/userTableTypes";
+import type { SortField } from "@/Types/userTableTypes";
 import { formatDate } from "@/lib/utils/dateFormatter";
 import { getSortIcon } from "@/lib/utils/tableSorting";
 import { useRouter } from "next/navigation";
 import { Download } from "lucide-react";
 import { SearchInput } from "@/components/product/filters/SearchInput";
+import { LoadingButton } from "@/components/ui/loading-button";
+import { useTableState } from "@/hooks/useTableState";
+import { useDialogState } from "@/hooks/useDialogState";
+import { useAsyncData } from "@/hooks/useAsyncData";
 
 interface UsersTableProps {
   users: UserDashboardData[];
@@ -53,99 +57,23 @@ export function UsersTable({ users }: UsersTableProps) {
   const [roleChanges, setRoleChanges] = useState<Map<string, string>>(
     new Map()
   );
-  const [loading, setLoading] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState<{
     id: string;
     email: string;
   } | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [sortField, setSortField] = useState<SortField | null>(null);
-  const [sortDirection, setSortDirection] = useState<SortDirection>(null);
+
+  const saveOperation = useAsyncData();
+  const deleteOperation = useAsyncData();
+  const deleteDialog = useDialogState();
 
   const isSuperAdmin = currentUser?.role === "superAdmin";
 
-  const filteredAndSortedUsers = useMemo(() => {
-    let result = [...localUsers];
-
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase().trim();
-      result = result.filter(
-        (user) =>
-          user.email.toLowerCase().includes(query) ||
-          user.role.toLowerCase().includes(query)
-      );
-    }
-
-    if (sortField && sortDirection) {
-      result.sort((a, b) => {
-        const aValue = a[sortField];
-        const bValue = b[sortField];
-
-        // Handle null values for lastLoginAt
-        if (sortField === "lastLoginAt") {
-          if (!aValue) return sortDirection === "asc" ? 1 : -1;
-          if (!bValue) return sortDirection === "asc" ? -1 : 1;
-        }
-
-        // Convert dates to timestamps for comparison
-        if (sortField === "createdAt" || sortField === "lastLoginAt") {
-          const aTime = new Date(aValue as string).getTime();
-          const bTime = new Date(bValue as string).getTime();
-          return sortDirection === "asc" ? aTime - bTime : bTime - aTime;
-        }
-
-        if (sortField === "email" || sortField === "role") {
-          const aStr = aValue as string;
-          const bStr = bValue as string;
-          return sortDirection === "asc"
-            ? aStr.localeCompare(bStr)
-            : bStr.localeCompare(aStr);
-        }
-
-        if (sortField === "orderCount") {
-          const aNum = aValue as number;
-          const bNum = bValue as number;
-          return sortDirection === "asc" ? aNum - bNum : bNum - aNum;
-        }
-
-        return 0;
-      });
-    }
-
-    return result;
-  }, [localUsers, searchQuery, sortField, sortDirection]);
-
-  const totalPages = Math.ceil(filteredAndSortedUsers.length / ITEMS_PER_PAGE);
-  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const endIndex = startIndex + ITEMS_PER_PAGE;
-  const paginatedUsers = filteredAndSortedUsers.slice(startIndex, endIndex);
-
-  const handleSort = useCallback(
-    (field: SortField) => {
-      if (sortField === field) {
-        // Toggle direction or reset
-        if (sortDirection === "asc") {
-          setSortDirection("desc");
-        } else if (sortDirection === "desc") {
-          setSortField(null);
-          setSortDirection(null);
-        }
-      } else {
-        setSortField(field);
-        setSortDirection("asc");
-      }
-      setCurrentPage(1);
-    },
-    [sortField, sortDirection]
-  );
-
-  const handleSearchChange = useCallback((query: string) => {
-    setSearchQuery(query);
-    setCurrentPage(1);
-  }, []);
+  const table = useTableState<UserDashboardData, SortField>({
+    data: localUsers,
+    itemsPerPage: ITEMS_PER_PAGE,
+    searchFields: ["email", "role"],
+  });
 
   const handleRoleChange = (userId: string, newRole: string) => {
     const newChanges = new Map(roleChanges);
@@ -172,51 +100,51 @@ export function UsersTable({ users }: UsersTableProps) {
   const handleSaveChanges = async () => {
     if (roleChanges.size === 0) return;
 
-    setLoading(true);
-    const updates = Array.from(roleChanges.entries()).map(([userId, role]) => ({
-      userId,
-      role: role as "customer" | "admin" | "superAdmin",
-    }));
+    await saveOperation.execute(async () => {
+      const updates = Array.from(roleChanges.entries()).map(
+        ([userId, role]) => ({
+          userId,
+          role: role as "customer" | "admin" | "superAdmin",
+        })
+      );
 
-    const result = await batchUpdateUserRoles(updates);
+      const result = await batchUpdateUserRoles(updates);
 
-    if (result.success) {
-      setRoleChanges(new Map());
-      router.refresh();
-    } else {
-      // Revert local changes on error
-      setLocalUsers(users);
-      alert(result.error || "Failed to update roles");
-    }
-
-    setLoading(false);
+      if (result.success) {
+        setRoleChanges(new Map());
+        router.refresh();
+      } else {
+        // Revert local changes on error
+        setLocalUsers(users);
+        throw new Error(result.error || "Failed to update roles");
+      }
+    });
   };
 
   const openDeleteDialog = (userId: string, userEmail: string) => {
     setUserToDelete({ id: userId, email: userEmail });
-    setDeleteDialogOpen(true);
+    deleteDialog.openDialog();
   };
 
   const handleDeleteConfirm = async () => {
     if (!userToDelete) return;
 
-    setLoading(true);
-    const result = await deleteUser(userToDelete.id);
+    await deleteOperation.execute(async () => {
+      const result = await deleteUser(userToDelete.id);
 
-    if (result.success) {
-      setLocalUsers((prev) => prev.filter((u) => u.id !== userToDelete.id));
-      setDeleteDialogOpen(false);
-      setUserToDelete(null);
-      router.refresh();
-    } else {
-      alert(result.error || "Failed to delete user");
-    }
-
-    setLoading(false);
+      if (result.success) {
+        setLocalUsers((prev) => prev.filter((u) => u.id !== userToDelete.id));
+        deleteDialog.closeDialog();
+        setUserToDelete(null);
+        router.refresh();
+      } else {
+        throw new Error(result.error || "Failed to delete user");
+      }
+    });
   };
 
   const handleDeleteCancel = () => {
-    setDeleteDialogOpen(false);
+    deleteDialog.closeDialog();
     setUserToDelete(null);
   };
 
@@ -256,8 +184,8 @@ export function UsersTable({ users }: UsersTableProps) {
         <div className="flex flex-col sm:flex-row justify-between gap-4 mb-4">
           <div className="w-full sm:w-96">
             <SearchInput
-              value={searchQuery}
-              onChange={handleSearchChange}
+              value={table.searchQuery}
+              onChange={table.handleSearchChange}
               placeholder="Search by email or role..."
             />
           </div>
@@ -272,9 +200,9 @@ export function UsersTable({ users }: UsersTableProps) {
           </Button>
         </div>
 
-        {searchQuery && (
+        {table.searchQuery && (
           <p className="text-sm text-muted-foreground">
-            Showing {filteredAndSortedUsers.length} of {localUsers.length} users
+            Showing {table.filteredData.length} of {localUsers.length} users
           </p>
         )}
 
@@ -284,33 +212,50 @@ export function UsersTable({ users }: UsersTableProps) {
               <TableRow>
                 <TableHead
                   className="text-xs sm:text-sm cursor-pointer hover:bg-muted/50"
-                  onClick={() => handleSort("email")}
+                  onClick={() => table.handleSort("email")}
                 >
-                  Email{getSortIcon(sortField, "email", sortDirection)}
+                  Email
+                  {getSortIcon(table.sortField, "email", table.sortDirection)}
                 </TableHead>
                 <TableHead
                   className="hidden md:table-cell cursor-pointer hover:bg-muted/50"
-                  onClick={() => handleSort("createdAt")}
+                  onClick={() => table.handleSort("createdAt")}
                 >
-                  Joined{getSortIcon(sortField, "createdAt", sortDirection)}
+                  Joined
+                  {getSortIcon(
+                    table.sortField,
+                    "createdAt",
+                    table.sortDirection
+                  )}
                 </TableHead>
                 <TableHead
                   className="hidden md:table-cell cursor-pointer hover:bg-muted/50"
-                  onClick={() => handleSort("lastLoginAt")}
+                  onClick={() => table.handleSort("lastLoginAt")}
                 >
-                  Last Login{getSortIcon(sortField, "lastLoginAt", sortDirection)}
+                  Last Login
+                  {getSortIcon(
+                    table.sortField,
+                    "lastLoginAt",
+                    table.sortDirection
+                  )}
                 </TableHead>
                 <TableHead
                   className="text-xs sm:text-sm cursor-pointer hover:bg-muted/50"
-                  onClick={() => handleSort("orderCount")}
+                  onClick={() => table.handleSort("orderCount")}
                 >
-                  Orders{getSortIcon(sortField, "orderCount", sortDirection)}
+                  Orders
+                  {getSortIcon(
+                    table.sortField,
+                    "orderCount",
+                    table.sortDirection
+                  )}
                 </TableHead>
                 <TableHead
                   className="text-xs sm:text-sm cursor-pointer hover:bg-muted/50"
-                  onClick={() => handleSort("role")}
+                  onClick={() => table.handleSort("role")}
                 >
-                  Role{getSortIcon(sortField, "role", sortDirection)}
+                  Role
+                  {getSortIcon(table.sortField, "role", table.sortDirection)}
                 </TableHead>
                 {isSuperAdmin && (
                   <TableHead className="hidden md:table-cell">
@@ -320,7 +265,7 @@ export function UsersTable({ users }: UsersTableProps) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {paginatedUsers.map((user) => (
+              {table.paginatedData.map((user) => (
                 <TableRow key={user.id}>
                   <TableCell className="font-medium text-xs sm:text-sm">
                     {user.email}
@@ -335,7 +280,9 @@ export function UsersTable({ users }: UsersTableProps) {
                     <button
                       onClick={() => setSelectedUserId(user.id)}
                       className="text-primary hover:underline text-xs sm:text-sm cursor-pointer"
-                      disabled={loading}
+                      disabled={
+                        saveOperation.loading || deleteOperation.loading
+                      }
                     >
                       {user.orderCount}
                     </button>
@@ -346,7 +293,9 @@ export function UsersTable({ users }: UsersTableProps) {
                       onChange={(e) =>
                         handleRoleChange(user.id, e.target.value)
                       }
-                      disabled={loading}
+                      disabled={
+                        saveOperation.loading || deleteOperation.loading
+                      }
                       className="w-[110px] sm:w-[140px] h-8 sm:h-9 text-xs sm:text-sm rounded-none"
                     >
                       <NativeSelectOption value="customer">
@@ -362,15 +311,19 @@ export function UsersTable({ users }: UsersTableProps) {
                   </TableCell>
                   {isSuperAdmin && (
                     <TableCell className="hidden md:table-cell">
-                      <Button
+                      <LoadingButton
                         variant="destructive"
                         size="sm"
                         onClick={() => openDeleteDialog(user.id, user.email)}
-                        disabled={loading || user.id === currentUser?.id}
+                        disabled={
+                          saveOperation.loading ||
+                          deleteOperation.loading ||
+                          user.id === currentUser?.id
+                        }
                         className="h-9 text-xs rounded-none"
                       >
                         DELETE
-                      </Button>
+                      </LoadingButton>
                     </TableCell>
                   )}
                 </TableRow>
@@ -379,16 +332,16 @@ export function UsersTable({ users }: UsersTableProps) {
           </Table>
         </div>
 
-        {totalPages > 1 && (
+        {table.totalPages > 1 && (
           <Pagination className="justify-center mt-6">
             <PaginationContent>
               <PaginationItem>
                 <PaginationPrevious
                   onClick={() =>
-                    setCurrentPage((prev) => Math.max(1, prev - 1))
+                    table.setCurrentPage(Math.max(1, table.currentPage - 1))
                   }
                   className={
-                    currentPage === 1
+                    table.currentPage === 1
                       ? "pointer-events-none opacity-50"
                       : "cursor-pointer"
                   }
@@ -396,16 +349,18 @@ export function UsersTable({ users }: UsersTableProps) {
               </PaginationItem>
               <PaginationItem>
                 <span className="text-sm text-muted-foreground px-4">
-                  Page {currentPage} of {totalPages}
+                  Page {table.currentPage} of {table.totalPages}
                 </span>
               </PaginationItem>
               <PaginationItem>
                 <PaginationNext
                   onClick={() =>
-                    setCurrentPage((prev) => Math.min(totalPages, prev + 1))
+                    table.setCurrentPage(
+                      Math.min(table.totalPages, table.currentPage + 1)
+                    )
                   }
                   className={
-                    currentPage === totalPages
+                    table.currentPage === table.totalPages
                       ? "pointer-events-none opacity-50"
                       : "cursor-pointer"
                   }
@@ -417,13 +372,14 @@ export function UsersTable({ users }: UsersTableProps) {
 
         {roleChanges.size > 0 && (
           <div className="flex justify-end">
-            <Button
+            <LoadingButton
               onClick={handleSaveChanges}
-              disabled={loading}
+              loading={saveOperation.loading}
+              loadingText="SAVING..."
               className="rounded-none text-xs"
             >
-              {loading ? "SAVING..." : `SAVE CHANGES (${roleChanges.size})`}
-            </Button>
+              SAVE CHANGES ({roleChanges.size})
+            </LoadingButton>
           </div>
         )}
       </div>
@@ -433,8 +389,8 @@ export function UsersTable({ users }: UsersTableProps) {
         onClose={() => setSelectedUserId(null)}
       />
 
-      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <DialogContent className="rounded-none">
+      <Dialog open={deleteDialog.open} onOpenChange={deleteDialog.setOpen}>
+        <DialogContent className="rounded-none p-6">
           <DialogHeader>
             <DialogTitle>Delete User</DialogTitle>
             <DialogDescription>
@@ -448,20 +404,21 @@ export function UsersTable({ users }: UsersTableProps) {
           <div className="flex items-center justify-end gap-4 mt-4">
             <Button
               onClick={handleDeleteCancel}
-              disabled={loading}
+              disabled={deleteOperation.loading}
               variant="outline"
               className="rounded-none"
             >
               CANCEL
             </Button>
-            <Button
+            <LoadingButton
               onClick={handleDeleteConfirm}
-              disabled={loading}
+              loading={deleteOperation.loading}
+              loadingText="DELETING"
               variant="destructive"
               className="rounded-none"
             >
-              {loading ? "DELETING" : "DELETE"}
-            </Button>
+              DELETE
+            </LoadingButton>
           </div>
         </DialogContent>
       </Dialog>

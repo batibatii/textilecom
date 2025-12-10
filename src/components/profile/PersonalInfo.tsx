@@ -6,7 +6,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Alert, AlertTitle } from "@/components/ui/alert";
 import type { User } from "@/contexts/AuthContext";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -14,6 +13,9 @@ import {
   type PersonalInfoData,
 } from "@/Types/profileValidation";
 import { updateProfile } from "@/app/actions/user/updateProfile";
+import { ErrorAlert } from "@/components/alert/ErrorAlert";
+import { SuccessAlert } from "@/components/alert/SuccessAlert";
+import { LoadingButton } from "@/components/ui/loading-button";
 
 interface PersonalInfoProps {
   user: User;
@@ -263,20 +265,17 @@ export function PersonalInfo({ user }: PersonalInfoProps) {
         )}
       </div>
 
-      <Button
+      <LoadingButton
         type="submit"
-        disabled={isSubmitting || success}
+        loading={isSubmitting}
+        loadingText="UPDATING..."
+        success={success}
+        successText="UPDATED!"
         onClick={handleButtonClick}
         className="w-full h-9 md:h-10 text-xs md:text-sm mt-4"
       >
-        {isSubmitting
-          ? "UPDATING..."
-          : success
-          ? "UPDATED!"
-          : isEditMode
-          ? "UPDATE INFORMATION"
-          : "EDIT"}
-      </Button>
+        {isEditMode ? "UPDATE INFORMATION" : "EDIT"}
+      </LoadingButton>
 
       {isEditMode && (
         <Button
@@ -290,19 +289,12 @@ export function PersonalInfo({ user }: PersonalInfoProps) {
         </Button>
       )}
 
-      {success && (
-        <Alert className="mt-2">
-          <AlertTitle className="text-sm">
-            Information updated successfully!
-          </AlertTitle>
-        </Alert>
-      )}
+      <SuccessAlert
+        message={success ? "Information updated successfully!" : undefined}
+        className="mt-2"
+      />
 
-      {error && (
-        <Alert variant="destructive" className="mt-2">
-          <AlertTitle className="text-sm">{error}</AlertTitle>
-        </Alert>
-      )}
+      <ErrorAlert message={error} className="mt-2" />
     </form>
   );
 }

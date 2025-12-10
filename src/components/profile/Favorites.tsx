@@ -8,6 +8,7 @@ import { useFavorites } from "@/contexts/FavoritesContext";
 import { useCart, type CartItem } from "@/contexts/CartContext";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { LoadingButton } from "@/components/ui/loading-button";
 import Image from "next/image";
 import {
   getCurrencySymbol,
@@ -15,6 +16,7 @@ import {
   getDisplayPrice,
   hasDiscount as checkHasDiscount,
 } from "@/lib/utils/productPrice";
+import { useAsyncData } from "@/hooks/useAsyncData";
 
 interface FavoritesProps {
   user: User;
@@ -22,31 +24,36 @@ interface FavoritesProps {
 
 export function Favorites({ user }: FavoritesProps) {
   const [favorites, setFavorites] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
   const { removeFromFavorites } = useFavorites();
   const { addItem } = useCart();
+  const fetchOperation = useAsyncData<Product[]>();
+  const deleteOperation = useAsyncData();
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   useEffect(() => {
-    const loadFavorites = async () => {
+    fetchOperation.execute(async () => {
       const result = await getFavorites(user.id);
       if (result.success) {
         setFavorites(result.favorites);
+        return result.favorites;
+      } else {
+        throw new Error("Failed to load favorites");
       }
-      setLoading(false);
-    };
-
-    loadFavorites();
+    });
   }, [user.id]);
 
   const handleRemove = async (productId: string) => {
-    const success = await removeFromFavorites(productId);
-    if (success) {
-      setFavorites((prev) => prev.filter((p) => p.id !== productId));
-    }
+    await deleteOperation.execute(async () => {
+      const success = await removeFromFavorites(productId);
+      if (success) {
+        setFavorites((prev) => prev.filter((p) => p.id !== productId));
+      } else {
+        throw new Error("Failed to remove from favorites");
+      }
+    });
   };
 
   const handleAddToCart = (product: Product) => {
@@ -79,7 +86,7 @@ export function Favorites({ user }: FavoritesProps) {
     addItem(cartItem);
   };
 
-  if (loading) {
+  if (fetchOperation.loading) {
     return (
       <div className="text-center py-8 text-sm text-muted-foreground">
         Loading favorites...
@@ -166,17 +173,19 @@ export function Favorites({ user }: FavoritesProps) {
                     onClick={() => handleAddToCart(product)}
                     variant="default"
                     className="w-full text-sm h-9"
+                    disabled={deleteOperation.loading}
                   >
                     ADD TO CART
                   </Button>
-                  <Button
+                  <LoadingButton
                     onClick={() => handleRemove(product.id)}
+                    loading={deleteOperation.loading}
+                    loadingText="DELETING..."
                     size="sm"
-                    className="w-full text-sm h-9                   
-                   bg-background text-foreground rounded-none border border-black hover:bg-destructive hover:text-background"
+                    className="w-full text-sm h-9 bg-background text-foreground rounded-none border border-black hover:bg-destructive hover:text-background"
                   >
                     DELETE
-                  </Button>
+                  </LoadingButton>
                 </div>
               </CardContent>
             </Card>

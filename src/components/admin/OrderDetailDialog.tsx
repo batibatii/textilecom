@@ -12,6 +12,7 @@ import type { Order } from "@/Types/orderValidation";
 import { formatDate } from "@/lib/utils/dateFormatter";
 import { getCurrencySymbol } from "@/lib/utils/productPrice";
 import Image from "next/image";
+import { useAsyncData } from "@/hooks/useAsyncData";
 
 interface OrderDetailDialogProps {
   orderId: string | null;
@@ -23,7 +24,7 @@ export function OrderDetailDialog({
   onClose,
 }: OrderDetailDialogProps) {
   const [order, setOrder] = useState<Order | null>(null);
-  const [loading, setLoading] = useState(false);
+  const fetchOperation = useAsyncData<Order>();
 
   useEffect(() => {
     if (!orderId) {
@@ -31,22 +32,27 @@ export function OrderDetailDialog({
       return;
     }
 
-    setLoading(true);
-    getOrderById(orderId)
-      .then((result) => {
+    const fetchOrder = async () => {
+      await fetchOperation.execute(async () => {
+        const result = await getOrderById(orderId);
         if (result.success && result.order) {
           setOrder(result.order);
+          return result.order;
+        } else {
+          throw new Error("Order not found");
         }
-      })
-      .finally(() => setLoading(false));
-  }, [orderId]);
+      });
+    };
+
+    fetchOrder();
+  }, [orderId, fetchOperation]);
 
   return (
     <Dialog open={!!orderId} onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl rounded-none p-8 max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-3xl rounded-none p-6 max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold">
-            {loading
+            {fetchOperation.loading
               ? "Loading Order..."
               : !order
               ? "Order Not Found"
@@ -54,7 +60,7 @@ export function OrderDetailDialog({
           </DialogTitle>
         </DialogHeader>
 
-        {loading ? (
+        {fetchOperation.loading ? (
           <div className="flex justify-center py-8 text-sm text-muted-foreground">
             Loading...
           </div>

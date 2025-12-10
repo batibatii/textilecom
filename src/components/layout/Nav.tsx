@@ -22,21 +22,21 @@ export const Navbar = React.memo(function Navbar() {
     <nav>
       <ul className="flex justify-center md:justify-end font-light text-[13px] md:text-sm md:font-extralight mt-2 mr-2 md:mt-10 md:mr-16">
         {!user && (
-          <li className="p-2">
+          <li className="p-3">
             <Link href="/user/signup">SIGN IN</Link>
           </li>
         )}
         {user && (user.role === "admin" || user.role === "superAdmin") && (
-          <li className="p-2">
+          <li className="p-3">
             <Link href="/admin">ADMIN PANEL</Link>
           </li>
         )}
         {user && (
-          <li className="p-2">
+          <li className="p-3">
             <Link href="/profile">PROFILE</Link>
           </li>
         )}
-        <li className="p-2 relative">
+        <li className="p-3 relative">
           <Link href="/cart">
             CART
             {cartCount > 0 && (
@@ -47,7 +47,7 @@ export const Navbar = React.memo(function Navbar() {
           </Link>
         </li>
         {user && (
-          <li className="p-2 cursor-pointer" onClick={handleLogout}>
+          <li className="p-3 cursor-pointer" onClick={handleLogout}>
             LOG OUT
           </li>
         )}

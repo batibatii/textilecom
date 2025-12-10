@@ -12,6 +12,7 @@ import {
   LoginAndSignUpType,
 } from "@/Types/authValidation";
 import { useState } from "react";
+import { LoadingButton } from "@/components/ui/loading-button";
 
 type SignUpProps = {
   onSignUp: (data: LoginAndSignUpType) => void | Promise<void>;
@@ -164,21 +165,25 @@ export function SignUp({
         </div>
 
         <div className="flex flex-col gap-4">
-          <Button
+          <LoadingButton
             type="submit"
-            disabled={signingIn || signingUp}
+            loading={signingIn}
+            loadingText="SIGNING IN..."
+            disabled={signingUp}
             className="hover:bg-primary/90 w-[97%]"
           >
-            {signingIn ? "SIGNING IN..." : "SIGN IN"}
-          </Button>
-          <Button
+            SIGN IN
+          </LoadingButton>
+          <LoadingButton
             type="button"
             onClick={handleSubmit(handleSignUpClick)}
-            disabled={signingIn || signingUp}
+            loading={signingUp}
+            loadingText="CREATING ACCOUNT..."
+            disabled={signingIn}
             className="bg-background text-foreground/70 border-foreground border hover:bg-background hover:font-bold w-[97%]"
           >
-            {signingUp ? "CREATING ACCOUNT..." : "SIGN UP"}
-          </Button>
+            SIGN UP
+          </LoadingButton>
         </div>
       </div>
 

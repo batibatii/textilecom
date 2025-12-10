@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState } from "react";
 import {
   Table,
   TableBody,
@@ -21,11 +21,15 @@ import {
   PaginationPrevious,
   PaginationNext,
 } from "@/components/ui/pagination";
-import { Alert, AlertTitle } from "@/components/ui/alert";
 import { updateOrderStatus } from "@/app/actions/admin/orders/updateOrderStatus";
+import { ErrorAlert } from "@/components/alert/ErrorAlert";
+import { SuccessAlert } from "@/components/alert/SuccessAlert";
+import { LoadingButton } from "@/components/ui/loading-button";
+import { useTableState } from "@/hooks/useTableState";
+import { useAsyncData } from "@/hooks/useAsyncData";
 import { OrderDetailDialog } from "./OrderDetailDialog";
 import type { OrderTableData } from "@/Types/orderTableTypes";
-import type { SortField, SortDirection } from "@/Types/orderTableTypes";
+import type { SortField } from "@/Types/orderTableTypes";
 import { formatDate } from "@/lib/utils/dateFormatter";
 import { getCurrencySymbol } from "@/lib/utils/productPrice";
 import { getSortIcon } from "@/lib/utils/tableSorting";
@@ -45,91 +49,15 @@ export function OrdersTable({ orders }: OrdersTableProps) {
   const [statusChanges, setStatusChanges] = useState<Map<string, string>>(
     new Map()
   );
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | undefined>();
-  const [success, setSuccess] = useState(false);
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [sortField, setSortField] = useState<SortField | null>(null);
-  const [sortDirection, setSortDirection] = useState<SortDirection>(null);
 
-  const filteredAndSortedOrders = useMemo(() => {
-    let result = [...localOrders];
+  const updateOperation = useAsyncData();
 
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase().trim();
-      result = result.filter(
-        (order) =>
-          order.orderNumber.toLowerCase().includes(query) ||
-          order.customerEmail.toLowerCase().includes(query)
-      );
-    }
-
-    if (sortField && sortDirection) {
-      result.sort((a, b) => {
-        const aValue = a[sortField];
-        const bValue = b[sortField];
-
-        if (sortField === "createdAt") {
-          const aTime = new Date(aValue as string).getTime();
-          const bTime = new Date(bValue as string).getTime();
-          return sortDirection === "asc" ? aTime - bTime : bTime - aTime;
-        }
-
-        if (
-          sortField === "orderNumber" ||
-          sortField === "customerEmail" ||
-          sortField === "status"
-        ) {
-          const aStr = aValue as string;
-          const bStr = bValue as string;
-          return sortDirection === "asc"
-            ? aStr.localeCompare(bStr)
-            : bStr.localeCompare(aStr);
-        }
-
-        if (sortField === "total") {
-          const aNum = aValue as number;
-          const bNum = bValue as number;
-          return sortDirection === "asc" ? aNum - bNum : bNum - aNum;
-        }
-
-        return 0;
-      });
-    }
-
-    return result;
-  }, [localOrders, searchQuery, sortField, sortDirection]);
-
-  const totalPages = Math.ceil(filteredAndSortedOrders.length / ITEMS_PER_PAGE);
-  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const endIndex = startIndex + ITEMS_PER_PAGE;
-  const paginatedOrders = filteredAndSortedOrders.slice(startIndex, endIndex);
-
-  const handleSort = useCallback(
-    (field: SortField) => {
-      if (sortField === field) {
-        // Toggle direction or reset
-        if (sortDirection === "asc") {
-          setSortDirection("desc");
-        } else if (sortDirection === "desc") {
-          setSortField(null);
-          setSortDirection(null);
-        }
-      } else {
-        setSortField(field);
-        setSortDirection("asc");
-      }
-      setCurrentPage(1);
-    },
-    [sortField, sortDirection]
-  );
-
-  const handleSearchChange = useCallback((query: string) => {
-    setSearchQuery(query);
-    setCurrentPage(1);
-  }, []);
+  const table = useTableState<OrderTableData, SortField>({
+    data: localOrders,
+    itemsPerPage: ITEMS_PER_PAGE,
+    searchFields: ["orderNumber", "customerEmail"],
+  });
 
   const handleStatusChange = (orderId: string, newStatus: string) => {
     const newChanges = new Map(statusChanges);
@@ -156,31 +84,31 @@ export function OrdersTable({ orders }: OrdersTableProps) {
   const handleApplyChanges = async () => {
     if (statusChanges.size === 0) return;
 
-    setLoading(true);
-    setError(undefined);
-    setSuccess(false);
+    await updateOperation.execute(async () => {
+      // Process each status change
+      const updates = Array.from(statusChanges.entries());
+      const results = await Promise.all(
+        updates.map(([orderId, status]) => updateOrderStatus(orderId, status))
+      );
 
-    // Process each status change
-    const updates = Array.from(statusChanges.entries());
-    const results = await Promise.all(
-      updates.map(([orderId, status]) => updateOrderStatus(orderId, status))
-    );
+      const allSucceeded = results.every((result) => result.success);
 
-    const allSucceeded = results.every((result) => result.success);
+      if (allSucceeded) {
+        setStatusChanges(new Map());
+        router.refresh();
+      } else {
+        // Revert local changes on error
+        setLocalOrders(orders);
+        const failedUpdate = results.find((r) => !r.success);
+        throw new Error(
+          failedUpdate?.error || "Failed to update order statuses"
+        );
+      }
+    });
 
-    if (allSucceeded) {
-      setStatusChanges(new Map());
-      setSuccess(true);
-      setTimeout(() => setSuccess(false), 3000);
-      router.refresh();
-    } else {
-      // Revert local changes on error
-      setLocalOrders(orders);
-      const failedUpdate = results.find((r) => !r.success);
-      setError(failedUpdate?.error || "Failed to update order statuses");
+    if (updateOperation.success) {
+      setTimeout(() => updateOperation.setSuccess(false), 3000);
     }
-
-    setLoading(false);
   };
 
   const handleExportCSV = () => {
@@ -226,8 +154,8 @@ export function OrdersTable({ orders }: OrdersTableProps) {
       <div className="flex flex-col sm:flex-row justify-between gap-4 mb-4">
         <div className="w-full sm:w-96">
           <SearchInput
-            value={searchQuery}
-            onChange={handleSearchChange}
+            value={table.searchQuery}
+            onChange={table.handleSearchChange}
             placeholder="Search by order number or customer email..."
           />
         </div>
@@ -242,26 +170,22 @@ export function OrdersTable({ orders }: OrdersTableProps) {
         </Button>
       </div>
 
-      {searchQuery && (
+      {table.searchQuery && (
         <p className="text-sm text-muted-foreground">
-          Showing {filteredAndSortedOrders.length} of {localOrders.length}{" "}
-          orders
+          Showing {table.filteredData.length} of {localOrders.length} orders
         </p>
       )}
 
-      {success && (
-        <Alert className="mt-2">
-          <AlertTitle className="text-sm">
-            Order statuses updated successfully!
-          </AlertTitle>
-        </Alert>
-      )}
+      <SuccessAlert
+        message={
+          updateOperation.success
+            ? "Order statuses updated successfully!"
+            : undefined
+        }
+        className="mt-2"
+      />
 
-      {error && (
-        <Alert variant="destructive" className="mt-2">
-          <AlertTitle className="text-sm">{error}</AlertTitle>
-        </Alert>
-      )}
+      <ErrorAlert message={updateOperation.error} className="mt-2" />
 
       <div className="overflow-x-auto">
         <Table>
@@ -269,45 +193,57 @@ export function OrdersTable({ orders }: OrdersTableProps) {
             <TableRow>
               <TableHead
                 className="text-xs sm:text-sm cursor-pointer hover:bg-muted/50"
-                onClick={() => handleSort("orderNumber")}
+                onClick={() => table.handleSort("orderNumber")}
               >
-                Order No{getSortIcon(sortField, "orderNumber", sortDirection)}
+                Order No
+                {getSortIcon(
+                  table.sortField,
+                  "orderNumber",
+                  table.sortDirection
+                )}
               </TableHead>
               <TableHead
                 className="hidden md:table-cell cursor-pointer hover:bg-muted/50"
-                onClick={() => handleSort("createdAt")}
+                onClick={() => table.handleSort("createdAt")}
               >
-                Order Date{getSortIcon(sortField, "createdAt", sortDirection)}
+                Order Date
+                {getSortIcon(table.sortField, "createdAt", table.sortDirection)}
               </TableHead>
               <TableHead
                 className="text-xs sm:text-sm cursor-pointer hover:bg-muted/50"
-                onClick={() => handleSort("customerEmail")}
+                onClick={() => table.handleSort("customerEmail")}
               >
                 Customer Email
-                {getSortIcon(sortField, "customerEmail", sortDirection)}
+                {getSortIcon(
+                  table.sortField,
+                  "customerEmail",
+                  table.sortDirection
+                )}
               </TableHead>
               <TableHead
                 className="text-xs sm:text-sm cursor-pointer hover:bg-muted/50"
-                onClick={() => handleSort("status")}
+                onClick={() => table.handleSort("status")}
               >
-                Order Status{getSortIcon(sortField, "status", sortDirection)}
+                Order Status
+                {getSortIcon(table.sortField, "status", table.sortDirection)}
               </TableHead>
               <TableHead
                 className="text-xs sm:text-sm cursor-pointer hover:bg-muted/50"
-                onClick={() => handleSort("total")}
+                onClick={() => table.handleSort("total")}
               >
-                Total{getSortIcon(sortField, "total", sortDirection)}
+                Total
+                {getSortIcon(table.sortField, "total", table.sortDirection)}
               </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {paginatedOrders.map((order) => (
+            {table.paginatedData.map((order) => (
               <TableRow key={order.id}>
                 <TableCell className="font-medium text-xs sm:text-sm">
                   <button
                     onClick={() => setSelectedOrderId(order.id)}
                     className="text-primary hover:underline cursor-pointer"
-                    disabled={loading}
+                    disabled={updateOperation.loading}
                   >
                     {order.orderNumber}
                   </button>
@@ -324,7 +260,7 @@ export function OrdersTable({ orders }: OrdersTableProps) {
                     onChange={(e) =>
                       handleStatusChange(order.id, e.target.value)
                     }
-                    disabled={loading}
+                    disabled={updateOperation.loading}
                     className="w-[110px] sm:w-[140px] h-8 sm:h-9 text-xs sm:text-sm rounded-none"
                   >
                     <NativeSelectOption value="processing">
@@ -345,14 +281,16 @@ export function OrdersTable({ orders }: OrdersTableProps) {
         </Table>
       </div>
 
-      {totalPages > 1 && (
+      {table.totalPages > 1 && (
         <Pagination className="justify-center mt-6">
           <PaginationContent>
             <PaginationItem>
               <PaginationPrevious
-                onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                onClick={() =>
+                  table.setCurrentPage(Math.max(1, table.currentPage - 1))
+                }
                 className={
-                  currentPage === 1
+                  table.currentPage === 1
                     ? "pointer-events-none opacity-50"
                     : "cursor-pointer"
                 }
@@ -360,16 +298,18 @@ export function OrdersTable({ orders }: OrdersTableProps) {
             </PaginationItem>
             <PaginationItem>
               <span className="text-sm text-muted-foreground px-4">
-                Page {currentPage} of {totalPages}
+                Page {table.currentPage} of {table.totalPages}
               </span>
             </PaginationItem>
             <PaginationItem>
               <PaginationNext
                 onClick={() =>
-                  setCurrentPage((prev) => Math.min(totalPages, prev + 1))
+                  table.setCurrentPage(
+                    Math.min(table.totalPages, table.currentPage + 1)
+                  )
                 }
                 className={
-                  currentPage === totalPages
+                  table.currentPage === table.totalPages
                     ? "pointer-events-none opacity-50"
                     : "cursor-pointer"
                 }
@@ -381,13 +321,14 @@ export function OrdersTable({ orders }: OrdersTableProps) {
 
       {statusChanges.size > 0 && (
         <div className="flex justify-end">
-          <Button
+          <LoadingButton
             onClick={handleApplyChanges}
-            disabled={loading}
+            loading={updateOperation.loading}
+            loadingText="APPLYING..."
             className="rounded-none text-xs"
           >
-            {loading ? "APPLYING..." : `APPLY CHANGES (${statusChanges.size})`}
-          </Button>
+            APPLY CHANGES ({statusChanges.size})
+          </LoadingButton>
         </div>
       )}
 

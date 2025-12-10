@@ -4,15 +4,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Product } from "@/Types/productValidation";
 import Image from "next/image";
 import { ProductDetailDialog } from "@/components/product/ProductDetailDialog";
-import {
-  getCurrencySymbol,
-  getDisplayPrice,
-  hasDiscount as checkHasDiscount,
-  formatPrice,
-} from "@/lib/utils/productPrice";
-import { useState } from "react";
+import { PriceDisplay } from "@/components/product/PriceDisplay";
 import { useFavorites } from "@/contexts/FavoritesContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { useDialogState } from "@/hooks/useDialogState";
 import {
   Dialog,
   DialogContent,
@@ -33,11 +28,8 @@ export function CustomerProductCard({
   product,
   priority = false,
 }: CustomerProductCardProps) {
-  const displayPrice = getDisplayPrice(product);
-  const hasDiscount = checkHasDiscount(product);
-  const currencySymbol = getCurrencySymbol(product.price.currency);
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [loginDialogOpen, setLoginDialogOpen] = useState(false);
+  const productDialog = useDialogState();
+  const loginDialog = useDialogState();
   const { user } = useAuth();
   const { addToFavorites, removeFromFavorites, isFavorited } = useFavorites();
 
@@ -47,7 +39,7 @@ export function CustomerProductCard({
     e.stopPropagation();
 
     if (!user) {
-      setLoginDialogOpen(true);
+      loginDialog.openDialog();
       return;
     }
 
@@ -60,10 +52,10 @@ export function CustomerProductCard({
 
   return (
     <>
-      <Card className="overflow-hidden transition-shadow shadow-none border-none p-0 pb-4 w-full max-w-md mx-auto">
+      <Card className="overflow-hidden transition-shadow shadow-none border-none p-4 w-full max-w-md mx-auto">
         <div
           className="relative w-full aspect-3/4 bg-muted cursor-pointer"
-          onClick={() => setDialogOpen(true)}
+          onClick={productDialog.openDialog}
         >
           {product.images && product.images.length > 0 ? (
             <Image
@@ -97,12 +89,12 @@ export function CustomerProductCard({
             </Badge>
           )}
         </div>
-        <div className="">
-          <CardHeader className="pt-2 pl-0 pr-0">
+        <div className="space-y-2 mt-2">
+          <CardHeader className="p-0">
             <div className="flex items-center justify-between gap-2 w-full">
               <CardTitle
                 className="font-light text-[12px] md:text-[13px] tracking-wider md:font-extralight cursor-pointer hover:underline"
-                onClick={() => setDialogOpen(true)}
+                onClick={productDialog.openDialog}
               >
                 {product.title.toUpperCase()}
               </CardTitle>
@@ -121,24 +113,16 @@ export function CustomerProductCard({
               </svg>
             </div>
           </CardHeader>
-          <CardContent className="pb-4 pl-0 pr-0 pt-0">
+          <CardContent className="p-0">
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2">
-                {hasDiscount && (
-                  <span className="font-light text-[11px] md:text-[12px] md:font-extralight text-muted-foreground line-through">
-                    {formatPrice(product.price.amount, product.price.currency)}
-                  </span>
-                )}
-                <span className="font-light text-[11px] md:text-[12px] md:font-extralight">
-                  {currencySymbol}
-                  {displayPrice}
-                </span>
+                <PriceDisplay
+                  product={product}
+                  priceSpanClassName="font-light text-[11px] md:text-[12px] md:font-extralight"
+                  priceClassName="font-light text-[11px] md:text-[12px] md:font-extralight text-muted-foreground line-through"
+                  discountClassName="text-[11px] md:text-[12px] font-semibold text-green-900 bg-green-50 px-2 py-0.5 rounded"
+                />
               </div>
-              {hasDiscount && (
-                <span className="text-[11px] md:text-[12px] font-semibold text-green-900 bg-green-50 px-2 py-0.5 rounded">
-                  -{product?.discount?.rate}%
-                </span>
-              )}
             </div>
           </CardContent>
         </div>
@@ -146,12 +130,12 @@ export function CustomerProductCard({
 
       <ProductDetailDialog
         product={product}
-        open={dialogOpen}
-        onOpenChange={setDialogOpen}
+        open={productDialog.open}
+        onOpenChange={productDialog.setOpen}
       />
 
-      <Dialog open={loginDialogOpen} onOpenChange={setLoginDialogOpen}>
-        <DialogContent className="rounded-none">
+      <Dialog open={loginDialog.open} onOpenChange={loginDialog.setOpen}>
+        <DialogContent className="rounded-none p-6">
           <DialogHeader>
             <DialogTitle>Login Required</DialogTitle>
             <DialogDescription>
@@ -161,7 +145,7 @@ export function CustomerProductCard({
           <div className="flex gap-2 justify-end">
             <Button
               variant="outline"
-              onClick={() => setLoginDialogOpen(false)}
+              onClick={loginDialog.closeDialog}
               className="rounded-none"
             >
               Cancel

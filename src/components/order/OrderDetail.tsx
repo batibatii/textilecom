@@ -41,7 +41,7 @@ export function OrderDetail({ order }: OrderDetailProps) {
             </div>
             <div className="text-right">
               <div
-                className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(
+                className={`inline-block px-3 py-1 rounded-none text-sm font-medium ${getStatusColor(
                   order.status
                 )}`}
               >

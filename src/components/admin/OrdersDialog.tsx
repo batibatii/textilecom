@@ -21,6 +21,7 @@ import { formatDate } from "@/lib/utils/dateFormatter";
 import { getCurrencySymbol } from "@/lib/utils/productPrice";
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
+import { useAsyncData } from "@/hooks/useAsyncData";
 
 interface OrdersDialogProps {
   userId: string | null;
@@ -29,7 +30,7 @@ interface OrdersDialogProps {
 
 export function OrdersDialog({ userId, onClose }: OrdersDialogProps) {
   const [orders, setOrders] = useState<Order[]>([]);
-  const [loading, setLoading] = useState(false);
+  const fetchOperation = useAsyncData<Order[]>();
 
   const handleExportCSV = () => {
     if (orders.length === 0) return;
@@ -66,19 +67,20 @@ export function OrdersDialog({ userId, onClose }: OrdersDialogProps) {
   useEffect(() => {
     if (!userId) return;
 
-    setLoading(true);
-    getOrdersForUser(userId)
-      .then((result) => {
-        if (result.success && result.orders) {
-          setOrders(result.orders);
-        }
-      })
-      .finally(() => setLoading(false));
+    fetchOperation.execute(async () => {
+      const result = await getOrdersForUser(userId);
+      if (result.success && result.orders) {
+        setOrders(result.orders);
+        return result.orders;
+      } else {
+        throw new Error("Failed to load orders");
+      }
+    });
   }, [userId]);
 
   return (
     <Dialog open={!!userId} onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl rounded-none p-10">
+      <DialogContent className="max-w-3xl rounded-none p-6">
         <DialogHeader>
           <div className="flex items-center justify-between">
             <DialogTitle>User Orders</DialogTitle>
@@ -96,7 +98,7 @@ export function OrdersDialog({ userId, onClose }: OrdersDialogProps) {
           </div>
         </DialogHeader>
 
-        {loading ? (
+        {fetchOperation.loading ? (
           <div className="flex justify-center py-8 text-sm text-muted-foreground">
             Loading...
           </div>

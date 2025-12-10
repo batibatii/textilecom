@@ -13,6 +13,7 @@ import { SearchInput } from "./filters/SearchInput";
 import { Button } from "@/components/ui/button";
 import { Filter } from "lucide-react";
 import { getFilteredProducts } from "@/app/actions/products/getFiltered";
+import { useAsyncData } from "@/hooks/useAsyncData";
 
 interface CustomerProductListProps {
   initialProducts: Product[];
@@ -32,11 +33,9 @@ export function CustomerProductList({
   filterOptions,
 }: CustomerProductListProps) {
   const [products, setProducts] = useState<Product[]>(initialProducts);
-  const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(
     initialProducts.length < totalProducts
   );
-  const [error, setError] = useState<string | null>(null);
   const [total, setTotal] = useState(totalProducts);
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -49,12 +48,10 @@ export function CustomerProductList({
   const [sortBy, setSortBy] = useState<SortOption>("newest");
 
   const observerTarget = useRef<HTMLDivElement>(null);
+  const fetchOperation = useAsyncData();
 
   const fetchProducts = async (offset: number, append: boolean = false) => {
-    setLoading(true);
-    setError(null);
-
-    try {
+    await fetchOperation.execute(async () => {
       const result = await getFilteredProducts(
         filters,
         sortBy,
@@ -77,14 +74,9 @@ export function CustomerProductList({
         setHasMore(result.hasMore);
         setTotal(result.total);
       } else {
-        setError(result.error.message);
+        throw new Error(result.error.message);
       }
-    } catch (err) {
-      setError("Failed to load products. Please try again.");
-      console.error("Error loading products:", err);
-    } finally {
-      setLoading(false);
-    }
+    });
   };
 
   useEffect(() => {
@@ -99,7 +91,7 @@ export function CustomerProductList({
   }, [filters, sortBy]);
 
   const loadMore = () => {
-    if (!loading && hasMore) {
+    if (!fetchOperation.loading && hasMore) {
       fetchProducts(products.length, true);
     }
   };
@@ -110,7 +102,7 @@ export function CustomerProductList({
 
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && hasMore && !loading) {
+        if (entries[0].isIntersecting && hasMore && !fetchOperation.loading) {
           loadMore();
         }
       },
@@ -126,7 +118,7 @@ export function CustomerProductList({
         observer.unobserve(currentTarget);
       }
     };
-  }, [hasMore, loading, products.length]);
+  }, [hasMore, fetchOperation.loading, products.length]);
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -201,7 +193,7 @@ export function CustomerProductList({
 
         {products.length > 0 ? (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-20">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
               {products.map((product, index) => (
                 <CustomerProductCard
                   key={`${product.id}-${index}`}
@@ -211,15 +203,15 @@ export function CustomerProductList({
               ))}
             </div>
 
-            {loading && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-20 mt-20">
+            {fetchOperation.loading && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 mt-6">
                 {Array.from({ length: 4 }).map((_, index) => (
                   <CustomerProductCardSkeleton key={`skeleton-${index}`} />
                 ))}
               </div>
             )}
 
-            {hasMore && !loading && (
+            {hasMore && !fetchOperation.loading && (
               <div ref={observerTarget} className="h-20" />
             )}
 
@@ -237,8 +229,8 @@ export function CustomerProductList({
               </div>
             )}
           </>
-        ) : loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-20">
+        ) : fetchOperation.loading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
             {Array.from({ length: 12 }).map((_, index) => (
               <CustomerProductCardSkeleton key={`skeleton-${index}`} />
             ))}
@@ -260,9 +252,11 @@ export function CustomerProductList({
           </div>
         )}
 
-        {error && (
+        {fetchOperation.error && (
           <div className="flex justify-center items-center py-8">
-            <p className="text-destructive text-center">{error}</p>
+            <p className="text-destructive text-center">
+              {fetchOperation.error}
+            </p>
           </div>
         )}
       </div>

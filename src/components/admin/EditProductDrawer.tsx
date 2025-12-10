@@ -27,6 +27,9 @@ import {
   NativeSelect,
   NativeSelectOption,
 } from "@/components/ui/native-select";
+import { FormField } from "@/components/form/FormField";
+import { ErrorAlert } from "@/components/alert/ErrorAlert";
+import { LoadingButton } from "@/components/ui/loading-button";
 import {
   PRODUCT_CATEGORIES,
   PRODUCT_SEX_OPTIONS,
@@ -352,100 +355,76 @@ export function EditProductDrawer({
                     {newImages.length} file(s) selected
                   </span>
                 )}
-                {uploadError && (
-                  <span className="text-destructive text-xs">
-                    {uploadError}
-                  </span>
-                )}
-                {deleteError && (
-                  <span className="text-destructive text-xs">
-                    {deleteError}
-                  </span>
-                )}
-                <Button
+                <ErrorAlert
+                  message={uploadError}
+                  className="text-xs p-3 pl-1"
+                />
+                <ErrorAlert
+                  message={deleteError}
+                  className="text-xs p-3 pl-1"
+                />
+                <LoadingButton
                   type="button"
                   variant="destructive"
-                  size="sm"
                   onClick={handleDeleteImage}
-                  disabled={isDeleting || productImages.length === 0}
+                  disabled={productImages.length === 0}
+                  loading={isDeleting}
+                  loadingText="DELETING..."
                   className="w-full h-9 text-xs font-light rounded-none"
                 >
-                  {isDeleting ? "DELETING..." : "DELETE SELECTED IMAGE"}
-                </Button>
+                  DELETE SELECTED IMAGE
+                </LoadingButton>
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-x-4 gap-y-3">
-              <div className="col-span-2 flex flex-col gap-0.5">
-                <Label className="text-xs">Title</Label>
+              <FormField
+                label="Title"
+                error={errors.title}
+                className="col-span-2"
+              >
                 <Input
                   {...register("title")}
                   className="h-8 text-sm border-b border-b-ring rounded-none"
                 />
-                {errors.title && (
-                  <span className="text-destructive text-[10px] mt-1">
-                    {errors.title.message}
-                  </span>
-                )}
-              </div>
+              </FormField>
 
-              <div className="col-span-2 flex flex-col gap-0.5">
-                <Label className="text-xs">Description</Label>
+              <FormField
+                label="Description"
+                error={errors.description}
+                className="col-span-2"
+              >
                 <Textarea
                   {...register("description")}
                   className="resize-none text-sm min-h-16 max-h-32 overflow-y-auto border-b border-b-ring"
                 />
-                {errors.description && (
-                  <span className="text-destructive text-[10px] mt-1">
-                    {errors.description.message}
-                  </span>
-                )}
-              </div>
+              </FormField>
 
-              <div className="flex flex-col gap-0.5">
-                <Label className="text-xs">Brand</Label>
+              <FormField label="Brand" error={errors.brand}>
                 <Input
                   {...register("brand")}
                   className="h-8 text-sm border-b border-b-ring rounded-none"
                 />
-                {errors.brand && (
-                  <span className="text-destructive text-[10px] mt-1">
-                    {errors.brand.message}
-                  </span>
-                )}
-              </div>
+              </FormField>
 
-              <div className="flex flex-col gap-0.5">
-                <Label className="text-xs">Product Number</Label>
+              <FormField label="Product Number" error={errors.serialNumber}>
                 <Input
                   {...register("serialNumber")}
                   className="h-8 text-sm border-b border-b-ring rounded-none"
                 />
-                {errors.serialNumber && (
-                  <span className="text-destructive text-[10px] mt-1">
-                    {errors.serialNumber.message}
-                  </span>
-                )}
-              </div>
+              </FormField>
 
-              <div className="flex flex-col gap-0.5">
-                <Label className="text-xs">Price</Label>
+              <FormField label="Price" error={errors.price}>
                 <Input
                   type="number"
                   step="0.01"
                   {...register("price", { valueAsNumber: true })}
                   className="h-8 text-sm border-b border-b-ring rounded-none"
                 />
-                {errors.price && (
-                  <span className="text-destructive text-[10px] mt-1">
-                    {errors.price.message}
-                  </span>
-                )}
-              </div>
+              </FormField>
 
               <div className="grid grid-cols-2 gap-4">
-                <div className="flex flex-col gap-0.5">
-                  <Label className="text-xs">Currency</Label>
+                <FormField label="Currency" error={errors.currency}>
                   <NativeSelect
                     defaultValue=""
                     {...register("currency")}
@@ -458,15 +437,9 @@ export function EditProductDrawer({
                     <NativeSelectOption value="EUR">€ (EUR)</NativeSelectOption>
                     <NativeSelectOption value="TRY">₺ (TRY)</NativeSelectOption>
                   </NativeSelect>
-                  {errors.currency && (
-                    <span className="text-destructive text-[10px] mt-1">
-                      {errors.currency.message}
-                    </span>
-                  )}
-                </div>
+                </FormField>
 
-                <div className="flex flex-col gap-0.5">
-                  <Label className="text-xs">Gender</Label>
+                <FormField label="Gender" error={errors.sex}>
                   <NativeSelect
                     defaultValue=""
                     {...register("sex")}
@@ -481,16 +454,10 @@ export function EditProductDrawer({
                       </NativeSelectOption>
                     ))}
                   </NativeSelect>
-                  {errors.sex && (
-                    <span className="text-destructive text-[10px] mt-1">
-                      {errors.sex.message}
-                    </span>
-                  )}
-                </div>
+                </FormField>
               </div>
 
-              <div className="flex flex-col gap-0.5">
-                <Label className="text-xs">Tax</Label>
+              <FormField label="Tax" error={errors.taxRate}>
                 <NativeSelect
                   defaultValue=""
                   {...register("taxRate")}
@@ -504,29 +471,17 @@ export function EditProductDrawer({
                   <NativeSelectOption value="%18">%18</NativeSelectOption>
                   <NativeSelectOption value="%20">%20</NativeSelectOption>
                 </NativeSelect>
-                {errors.taxRate && (
-                  <span className="text-destructive text-[10px] mt-1">
-                    {errors.taxRate.message}
-                  </span>
-                )}
-              </div>
+              </FormField>
 
-              <div className="flex flex-col gap-0.5">
-                <Label className="text-xs">Stock</Label>
+              <FormField label="Stock" error={errors.stock}>
                 <Input
                   type="number"
                   {...register("stock", { valueAsNumber: true })}
                   className="h-8 text-sm border-b border-b-ring rounded-none"
                 />
-                {errors.stock && (
-                  <span className="text-destructive text-[10px] mt-1">
-                    {errors.stock.message}
-                  </span>
-                )}
-              </div>
+              </FormField>
 
-              <div className="flex flex-col gap-0.5">
-                <Label className="text-xs">Category</Label>
+              <FormField label="Category" error={errors.category}>
                 <NativeSelect
                   defaultValue=""
                   {...register("category")}
@@ -541,35 +496,25 @@ export function EditProductDrawer({
                     </NativeSelectOption>
                   ))}
                 </NativeSelect>
-                {errors.category && (
-                  <span className="text-destructive text-[10px] mt-1">
-                    {errors.category.message}
-                  </span>
-                )}
-              </div>
+              </FormField>
 
-              <div className="flex flex-col gap-0.5">
-                <Label className="text-xs">Discount (%)</Label>
+              <FormField label="Discount (%)" error={errors.discount}>
                 <Input
                   type="number"
                   {...register("discount", { valueAsNumber: true })}
                   className="h-8 text-sm border-b border-b-ring rounded-none"
                 />
-                {errors.discount && (
-                  <span className="text-destructive text-[10px] mt-1">
-                    {errors.discount.message}
-                  </span>
-                )}
-              </div>
+              </FormField>
 
               <div className="col-span-2 flex flex-col gap-2 mt-4">
-                <Button
+                <LoadingButton
                   type="submit"
-                  disabled={isUploading}
+                  loading={isUploading}
+                  loadingText="UPLOADING..."
                   className="w-full h-9 text-xs font-light rounded-none"
                 >
-                  {isUploading ? "UPLOADING..." : "UPDATE PRODUCT"}
-                </Button>
+                  UPDATE PRODUCT
+                </LoadingButton>
                 <Button
                   type="button"
                   onClick={() => onOpenChange(false)}

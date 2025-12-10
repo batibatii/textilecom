@@ -8,31 +8,23 @@ import { Button } from "@/components/ui/button";
 import { getCurrencySymbol } from "@/lib/utils/productPrice";
 import Link from "next/link";
 import { TailChase } from "ldrs/react";
+import { useAsyncData } from "@/hooks/useAsyncData";
 
 export function OrderHistory() {
   const [orders, setOrders] = useState<Order[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const fetchOperation = useAsyncData<Order[]>();
 
   useEffect(() => {
-    async function fetchOrders() {
-      try {
-        const result = await getUserOrders();
+    fetchOperation.execute(async () => {
+      const result = await getUserOrders();
 
-        if (result.success && result.orders) {
-          setOrders(result.orders);
-        } else {
-          setError(result.error || "Failed to load orders");
-        }
-      } catch (err) {
-        console.error("Error fetching orders:", err);
-        setError("An error occurred while loading orders");
-      } finally {
-        setLoading(false);
+      if (result.success && result.orders) {
+        setOrders(result.orders);
+        return result.orders;
+      } else {
+        throw new Error(result.error || "Failed to load orders");
       }
-    }
-
-    fetchOrders();
+    });
   }, []);
 
   const getStatusColor = (status: string) => {
@@ -51,7 +43,7 @@ export function OrderHistory() {
     }
   };
 
-  if (loading) {
+  if (fetchOperation.loading) {
     return (
       <div className="flex justify-center items-center py-12">
         <TailChase size="40" speed="1.75" color="black" />
@@ -59,11 +51,11 @@ export function OrderHistory() {
     );
   }
 
-  if (error) {
+  if (fetchOperation.error) {
     return (
       <Card>
         <CardContent className="py-12 text-center">
-          <p className="text-muted-foreground">{error}</p>
+          <p className="text-muted-foreground">{fetchOperation.error}</p>
         </CardContent>
       </Card>
     );
