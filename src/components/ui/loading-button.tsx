@@ -1,8 +1,11 @@
 import * as React from "react";
 import { Button } from "@/components/ui/button";
+import { type VariantProps } from "class-variance-authority";
+import { buttonVariants } from "@/components/ui/button";
 
 export interface LoadingButtonProps
-  extends Omit<React.ComponentPropsWithoutRef<"button">, "children"> {
+  extends Omit<React.ComponentPropsWithoutRef<"button">, "children">,
+    VariantProps<typeof buttonVariants> {
   loading?: boolean;
   loadingText?: string;
   success?: boolean;
@@ -22,6 +25,8 @@ export const LoadingButton = React.forwardRef<
       successText,
       children,
       disabled,
+      variant,
+      size,
       ...props
     },
     ref
@@ -33,7 +38,13 @@ export const LoadingButton = React.forwardRef<
     };
 
     return (
-      <Button ref={ref} disabled={disabled || loading || success} {...props}>
+      <Button
+        ref={ref}
+        disabled={disabled || loading || success}
+        variant={variant}
+        size={size}
+        {...props}
+      >
         {getButtonText()}
       </Button>
     );
