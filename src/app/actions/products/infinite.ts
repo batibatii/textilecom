@@ -35,7 +35,9 @@ export async function getProductsInfinite(
       success: false,
       error: {
         code: firebaseError.code || "firestore/fetch-failed",
-        message: firebaseError.message || "Failed to load more products. Please try again.",
+        message:
+          firebaseError.message ||
+          "Failed to load more products. Please try again.",
       },
     };
   }

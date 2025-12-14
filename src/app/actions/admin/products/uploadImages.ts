@@ -3,6 +3,7 @@
 import { put } from "@vercel/blob";
 import { ImageFileSchema } from "@/Types/productValidation";
 import type { FirebaseError } from "@/lib/firebase/config";
+import { verifyUserRole } from "@/lib/auth/roleCheck";
 
 type ImageUploadResult =
   | { success: true; urls: string[] }
@@ -11,6 +12,17 @@ type ImageUploadResult =
 export async function uploadImages(
   formData: FormData
 ): Promise<ImageUploadResult> {
+  const roleCheck = await verifyUserRole(["admin", "superAdmin"]);
+  if (!roleCheck.success) {
+    return {
+      success: false,
+      error: {
+        code: "auth/unauthorized",
+        message: roleCheck.error || "Unauthorized",
+      },
+    };
+  }
+
   try {
     const imageFiles = formData.getAll("images") as File[];
 

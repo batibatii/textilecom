@@ -4,6 +4,15 @@ import { unstable_cache } from "next/cache";
 import { adminDb } from "../admin";
 import type { FirebaseError } from "../config";
 import { deleteProductImages } from "@/app/actions/admin/products/deleteImages";
+import { convertTaxRateToMultiplier } from "@/lib/utils/taxRate";
+import { Product } from "@/Types/productValidation";
+import {
+  sortProducts,
+  isApprovedProduct,
+  sortByNewest,
+  searchProductsForCustomer,
+} from "@/lib/utils/productFilters";
+import { SortOption } from "@/Types/filterTypes";
 
 export const createProduct = async (productData: {
   title: string;
@@ -15,6 +24,7 @@ export const createProduct = async (productData: {
   taxRate: string;
   images: string[];
   category: string;
+  sex: string;
   stock: number;
   discount?: number;
   createdBy: string;
@@ -36,9 +46,10 @@ export const createProduct = async (productData: {
       amount: productData.price,
       currency: productData.currency,
     },
-    taxRate: productData.taxRate,
+    taxRate: convertTaxRateToMultiplier(productData.taxRate),
     images: productData.images,
     category: productData.category,
+    sex: productData.sex,
     stock: productData.stock,
     draft: true,
     createdAt: new Date().toISOString(),
@@ -46,9 +57,10 @@ export const createProduct = async (productData: {
     createdBy: productData.createdBy,
   };
 
-  const product = productData.discount !== undefined && productData.discount !== null
-    ? { ...baseProduct, discount: { rate: productData.discount } }
-    : baseProduct;
+  const product =
+    productData.discount !== undefined && productData.discount !== null
+      ? { ...baseProduct, discount: { rate: productData.discount } }
+      : baseProduct;
 
   console.log("Product object before saving:", product);
 
@@ -92,33 +104,30 @@ const fetchAllProductsFromDB = async () => {
 
 export const getAllProducts = unstable_cache(
   fetchAllProductsFromDB,
-  ['products-list'],
+  ["products-list"],
   {
-    tags: ['products'],
+    tags: ["products"],
     revalidate: 60, // Cache for 60 seconds
   }
 );
 
 const fetchProductsWithLimit = async (limit: number, offset: number) => {
   try {
-
     const allProducts = await getAllProducts();
 
-    const approvedProducts = allProducts.filter((product) => (product as { draft?: boolean }).draft === false);
+    const approvedProducts = allProducts.filter(isApprovedProduct);
 
-    // Randomize products using Fisher-Yates shuffle algorithm
-    const shuffledProducts = [...approvedProducts];
-    for (let i = shuffledProducts.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [shuffledProducts[i], shuffledProducts[j]] = [shuffledProducts[j], shuffledProducts[i]];
-    }
+    const sortedProducts = sortByNewest(approvedProducts);
 
-    const fetchedProductsWithLimit = shuffledProducts.slice(offset, offset + limit);
+    const fetchedProductsWithLimit = sortedProducts.slice(
+      offset,
+      offset + limit
+    );
 
     return {
       products: fetchedProductsWithLimit,
-      hasMore: offset + limit < shuffledProducts.length,
-      total: shuffledProducts.length,
+      hasMore: offset + limit < sortedProducts.length,
+      total: sortedProducts.length,
     };
   } catch (error) {
     console.error("Error fetching products with limit:", error);
@@ -126,14 +135,16 @@ const fetchProductsWithLimit = async (limit: number, offset: number) => {
   }
 };
 
-export const getProductsWithLimit = unstable_cache(
-  async (limit: number, offset: number) => fetchProductsWithLimit(limit, offset),
-  ['products-withLimit'],
-  {
-    tags: ['products'],
-    revalidate: 60, 
-  }
-);
+export const getProductsWithLimit = async (limit: number, offset: number) => {
+  return unstable_cache(
+    async () => fetchProductsWithLimit(limit, offset),
+    ["products-withLimit", `${limit}`, `${offset}`],
+    {
+      tags: ["products"],
+      revalidate: 60,
+    }
+  )();
+};
 
 export const deleteProductFromDB = async (productId: string) => {
   try {
@@ -145,7 +156,8 @@ export const deleteProductFromDB = async (productId: string) => {
     const firebaseError = error as FirebaseError;
     throw {
       code: firebaseError.code || "firestore/delete-failed",
-      message: firebaseError.message || "Failed to delete product from database.",
+      message:
+        firebaseError.message || "Failed to delete product from database.",
     };
   }
 };
@@ -175,5 +187,61 @@ export const deleteProduct = async (productId: string, imageUrls: string[]) => {
       message:
         firebaseError.message || "Failed to delete product. Please try again.",
     };
+  }
+};
+
+export const getFilteredProductsFromDB = async (
+  filters: {
+    brands: string[];
+    categories: string[];
+    sex: string[];
+    searchQuery?: string;
+  },
+  sortBy: string,
+  limit: number,
+  offset: number
+) => {
+  try {
+    const allProducts = await getAllProducts();
+
+    let filteredProducts: Product[] = allProducts.filter(isApprovedProduct);
+
+    if (filters.searchQuery) {
+      filteredProducts = searchProductsForCustomer(
+        filteredProducts,
+        filters.searchQuery
+      );
+    }
+
+    if (filters.brands.length > 0) {
+      filteredProducts = filteredProducts.filter((product) =>
+        filters.brands.includes(product.brand)
+      );
+    }
+
+    if (filters.categories.length > 0) {
+      filteredProducts = filteredProducts.filter((product) =>
+        filters.categories.includes(product.category)
+      );
+    }
+
+    if (filters.sex.length > 0) {
+      filteredProducts = filteredProducts.filter(
+        (product) => product.sex && filters.sex.includes(product.sex)
+      );
+    }
+
+    filteredProducts = sortProducts(filteredProducts, sortBy as SortOption);
+
+    const paginatedProducts = filteredProducts.slice(offset, offset + limit);
+
+    return {
+      products: paginatedProducts,
+      hasMore: offset + limit < filteredProducts.length,
+      total: filteredProducts.length,
+    };
+  } catch (error) {
+    console.error("Error fetching filtered products:", error);
+    throw error;
   }
 };

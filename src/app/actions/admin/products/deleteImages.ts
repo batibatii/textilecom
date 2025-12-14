@@ -2,6 +2,7 @@
 
 import { del } from "@vercel/blob";
 import type { FirebaseError } from "@/lib/firebase/config";
+import { verifyUserRole } from "@/lib/auth/roleCheck";
 
 type ImageDeleteResult =
   | { success: true; deletedCount: number }
@@ -10,6 +11,17 @@ type ImageDeleteResult =
 export async function deleteProductImages(
   imageUrls: string[]
 ): Promise<ImageDeleteResult> {
+  const roleCheck = await verifyUserRole(["admin", "superAdmin"]);
+  if (!roleCheck.success) {
+    return {
+      success: false,
+      error: {
+        code: "auth/unauthorized",
+        message: roleCheck.error || "Unauthorized",
+      },
+    };
+  }
+
   try {
     if (!imageUrls || imageUrls.length === 0) {
       return { success: true, deletedCount: 0 };

@@ -5,9 +5,9 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { H1 } from "@/components/ui/headings";
-import { SignUp } from "@/components/SignUp";
+import { SignUp } from "@/components/auth/SignUp";
 import { LoginAndSignUpType } from "@/Types/authValidation";
-import { useAuth } from "@/app/AuthProvider";
+import { useAuth } from "@/contexts/AuthContext";
 import { getUIErrorFromFirebaseError } from "@/lib/firebase/auth";
 import type { FirebaseError } from "@/lib/firebase/config";
 
@@ -64,9 +64,7 @@ export default function SignUpPage() {
       <div className="lg:w-1/2 flex flex-col">
         <div className="text-start mt-12 w-[95%] lg:w-[60%] mx-auto lg:mx-0 lg:ml-[10%] pl-2">
           <Link href={"/"}>
-            <H1 className="tracking-wider text-2xl md:text-3xl">
-              TEXTILECOM
-            </H1>
+            <H1 className="tracking-wider text-2xl md:text-3xl">TEXTILECOM</H1>
           </Link>
         </div>
         <main className="pt-10 flex-1">

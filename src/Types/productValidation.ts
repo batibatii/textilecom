@@ -10,6 +10,8 @@ export const PRODUCT_CATEGORIES = [
   "Socks",
 ] as const;
 
+export const PRODUCT_SEX_OPTIONS = ["Men", "Women", "Unisex"] as const;
+
 export const ProductSchema = z.object({
   id: z.string(),
   title: z.string(),
@@ -23,6 +25,7 @@ export const ProductSchema = z.object({
   taxRate: z.string(),
   images: z.array(z.string()).min(1, "At least one image is required"),
   category: z.enum(PRODUCT_CATEGORIES),
+  sex: z.enum(PRODUCT_SEX_OPTIONS),
   stock: z.number(),
   draft: z.boolean(),
   discount: z
@@ -52,6 +55,9 @@ export const ProductFormSchema = z.object({
   currency: z.string().min(1, "Currency is required"),
   category: z.enum(PRODUCT_CATEGORIES, {
     message: "Please select a valid category",
+  }),
+  sex: z.enum(PRODUCT_SEX_OPTIONS, {
+    message: "Please select a valid gender",
   }),
   stock: z
     .union([

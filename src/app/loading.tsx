@@ -1,4 +1,4 @@
-import { CustomerProductGridSkeleton } from "@/components/CustomerProductGridSkeleton";
+import { CustomerProductGridSkeleton } from "@/components/product/skeletons/CustomerProductGridSkeleton";
 import { H1 } from "@/components/ui/headings";
 
 export default function Loading() {

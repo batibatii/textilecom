@@ -5,6 +5,8 @@ import { revalidateTag } from "next/cache";
 import type { FirebaseError } from "@/lib/firebase/config";
 import { syncProductToStripe } from "@/lib/stripe/products";
 import { Product } from "@/Types/productValidation";
+import { convertTaxRateToMultiplier } from "@/lib/utils/taxRate";
+import { verifyUserRole } from "@/lib/auth/roleCheck";
 
 export async function updateProduct(
   productId: string,
@@ -19,12 +21,24 @@ export async function updateProduct(
     };
     taxRate: string;
     category: string;
+    sex: string;
     stock: number;
     discount: { rate: number } | null;
     images: string[];
     updatedAt: string;
   }
 ) {
+  const roleCheck = await verifyUserRole(["admin", "superAdmin"]);
+  if (!roleCheck.success) {
+    return {
+      success: false,
+      error: {
+        code: "auth/unauthorized",
+        message: roleCheck.error || "Unauthorized",
+      },
+    };
+  }
+
   try {
     const productRef = adminDb.collection("products").doc(productId);
 
@@ -41,12 +55,17 @@ export async function updateProduct(
 
     const currentProduct = productDoc.data() as Product;
 
-    await productRef.update(updatedData);
+    const dataToUpdate = {
+      ...updatedData,
+      taxRate: convertTaxRateToMultiplier(updatedData.taxRate),
+    };
+
+    await productRef.update(dataToUpdate);
 
     if (!currentProduct.draft) {
       const updatedProduct: Product = {
         ...currentProduct,
-        ...updatedData,
+        ...dataToUpdate,
         id: productId,
       } as Product;
 

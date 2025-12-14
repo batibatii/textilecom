@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import { Playfair_Display, Merriweather } from "next/font/google";
 import "./globals.css";
-import { ConditionalNavbar } from "../components/ConditionalNavbar";
-import { AuthProvider } from "./AuthProvider";
-import { CartProvider } from "./CartProvider";
+import { ConditionalNavbar } from "@/components/layout/ConditionalNavbar";
+import { AuthProvider } from "@/contexts/AuthContext";
+import { FavoritesProvider } from "@/contexts/FavoritesContext";
+import { CartProvider } from "@/contexts/CartContext";
 
 const playfairDisplay = Playfair_Display({
   variable: "--font-playfair",
@@ -33,10 +34,12 @@ export default function RootLayout({
         className={`${playfairDisplay.variable} ${merriweather.variable} antialiased font-extralight`}
       >
         <AuthProvider>
-          <CartProvider>
-            <ConditionalNavbar />
-            {children}
-          </CartProvider>
+          <FavoritesProvider>
+            <CartProvider>
+              <ConditionalNavbar />
+              {children}
+            </CartProvider>
+          </FavoritesProvider>
         </AuthProvider>
       </body>
     </html>

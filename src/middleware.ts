@@ -13,8 +13,9 @@ export async function middleware(request: NextRequest) {
   const isAdminRoute = pathname.startsWith("/admin");
   const isCartRoute = pathname.startsWith("/cart");
   const isCheckoutRoute = pathname.startsWith("/checkout");
+  const isProfileRoute = pathname.startsWith("/profile");
 
-  if (isAdminRoute || isCartRoute || isCheckoutRoute) {
+  if (isAdminRoute || isCartRoute || isCheckoutRoute || isProfileRoute) {
     console.log(`[Middleware] Protecting route: ${pathname}`);
 
     const cookieStore = await cookies();
@@ -54,7 +55,6 @@ export async function middleware(request: NextRequest) {
 
       console.log(`[Middleware] Access granted to ${pathname}`);
       return NextResponse.next();
-    
     } catch (error) {
       console.log(`[Middleware] Verification failed:`, error);
 

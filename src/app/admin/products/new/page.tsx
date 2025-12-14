@@ -1,4 +1,4 @@
-import { CreateNewProduct } from "@/components/CreateNewProduct";
+import { CreateNewProduct } from "@/components/admin/CreateNewProduct";
 
 export default function CreateNewProductPage() {
   return (

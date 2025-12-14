@@ -1,22 +1,26 @@
 "use client";
 
-import { useCart } from "@/app/CartProvider";
+import { useCart } from "@/contexts/CartContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { H1 } from "@/components/ui/headings";
+import { ErrorAlert } from "@/components/alert/ErrorAlert";
 import {
   getCurrencySymbol,
   calculateDiscountedPrice,
-} from "@/lib/productPrice";
+} from "@/lib/utils/productPrice";
 import { handleCheckout } from "@/app/actions/checkout";
-import { useState } from "react";
 import Link from "next/link";
+import { AlertCircle } from "lucide-react";
+import { LoadingButton } from "@/components/ui/loading-button";
+import { useAsyncData } from "@/hooks/useAsyncData";
 
 export default function CheckoutPage() {
   const { items, getSubtotal } = useCart();
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { user } = useAuth();
+  const checkoutOperation = useAsyncData();
 
   const taxRate = 1.2; // 20% tax
 
@@ -28,10 +32,7 @@ export default function CheckoutPage() {
   const currency = items.length > 0 ? items[0].price.currency : "USD";
 
   const onCheckout = async () => {
-    setLoading(true);
-    setError(null);
-
-    try {
+    await checkoutOperation.execute(async () => {
       const result = await handleCheckout(
         items.map((item) => ({
           productId: item.productId,
@@ -50,15 +51,18 @@ export default function CheckoutPage() {
         // Redirect to Stripe Checkout
         window.location.href = result.sessionUrl;
       } else {
-        setError(result.error);
+        throw new Error(result.error);
       }
-    } catch (err) {
-      console.error("Checkout error:", err);
-      setError("An error occurred while processing your request");
-    } finally {
-      setLoading(false);
-    }
+    });
   };
+
+  // Check if user has an address (all users need address to checkout)
+  const hasAddress =
+    user?.address &&
+    user.address.line1 &&
+    user.address.city &&
+    user.address.postalCode &&
+    user.address.country;
 
   if (items.length === 0) {
     return (
@@ -77,13 +81,22 @@ export default function CheckoutPage() {
 
   return (
     <div className="container mx-auto px-4 py-8 mt-12 max-w-4xl">
-      <H1 className="mb-8 tracking-wide text-center lg:text-start">
-        CHECKOUT
-      </H1>
+      <H1 className="mb-8 tracking-wide text-center lg:text-start">CHECKOUT</H1>
 
-      {error && (
-        <Alert variant="destructive" className="mb-6">
-          <AlertDescription>{error}</AlertDescription>
+      <ErrorAlert message={checkoutOperation.error} className="mb-6" />
+
+      {!hasAddress && (
+        <Alert className="mb-6 border-amber-500 bg-amber-50">
+          <AlertCircle className="h-4 w-4 text-amber-600" />
+          <AlertDescription className="text-amber-900">
+            Please add your shipping address before checkout.{" "}
+            <Link
+              href="/profile"
+              className="font-medium underline hover:no-underline"
+            >
+              Go to Profile
+            </Link>
+          </AlertDescription>
         </Alert>
       )}
 
@@ -166,17 +179,18 @@ export default function CheckoutPage() {
                   </span>
                 </div>
               </div>
-              <Button
+              <LoadingButton
                 onClick={onCheckout}
-                disabled={loading}
-                className="w-full"
-                size="lg"
+                loading={checkoutOperation.loading}
+                loadingText="PROCESSING..."
+                disabled={!hasAddress}
+                className="w-full rounded-none"
               >
-                {loading ? "PROCESSING..." : "PROCEED TO PAYMENT"}
-              </Button>
+                {!hasAddress ? "ADD ADDRESS TO CHECKOUT" : "PROCEED TO PAYMENT"}
+              </LoadingButton>
               <Link href="/cart" className="block">
                 <Button variant="outline" className="w-full">
-                  Back to Cart
+                  BACK TO CART
                 </Button>
               </Link>
             </CardContent>
