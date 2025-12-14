@@ -65,25 +65,29 @@ describe("toISOString", () => {
 
   describe("when value is an invalid type", () => {
     it("should return null when value is a number", () => {
-      expect(toISOString(123456789 as any)).toBeNull();
+      expect(toISOString(123456789 as unknown as string)).toBeNull();
     });
 
     it("should return null when value is a boolean", () => {
-      expect(toISOString(true as any)).toBeNull();
+      expect(toISOString(true as unknown as string)).toBeNull();
     });
 
     it("should return null when value is an object without toDate method", () => {
       const obj = { someProperty: "value" };
-      expect(toISOString(obj as any)).toBeNull();
+      expect(
+        toISOString(obj as unknown as { toDate?: () => Date })
+      ).toBeNull();
     });
 
     it("should return null when value is an object with toDate but not a function", () => {
       const obj = { toDate: "not a function" };
-      expect(toISOString(obj as any)).toBeNull();
+      expect(
+        toISOString(obj as unknown as { toDate?: () => Date })
+      ).toBeNull();
     });
 
     it("should return null when value is an array", () => {
-      expect(toISOString([] as any)).toBeNull();
+      expect(toISOString([] as unknown as string)).toBeNull();
     });
   });
 
