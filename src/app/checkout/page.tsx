@@ -8,7 +8,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { H1 } from "@/components/ui/headings";
 import { ErrorAlert } from "@/components/alert/ErrorAlert";
 import {
-  getCurrencySymbol,
+  formatPrice,
   calculateDiscountedPrice,
 } from "@/lib/utils/productPrice";
 import { handleCheckout } from "@/app/actions/checkout";
@@ -134,13 +134,14 @@ export default function CheckoutPage() {
                     <div className="text-right ml-4">
                       {item.discount && item.discount.rate > 0 && (
                         <p className="text-xs text-muted-foreground line-through">
-                          {getCurrencySymbol(currency)}
-                          {(item.price.amount * item.quantity).toFixed(2)}
+                          {formatPrice(
+                            item.price.amount * item.quantity,
+                            currency
+                          )}
                         </p>
                       )}
                       <p className="font-medium">
-                        {getCurrencySymbol(currency)}
-                        {(itemPrice * item.quantity).toFixed(2)}
+                        {formatPrice(itemPrice * item.quantity, currency)}
                       </p>
                     </div>
                   </div>
@@ -159,23 +160,20 @@ export default function CheckoutPage() {
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Subtotal</span>
                 <span className="font-medium">
-                  {getCurrencySymbol(currency)}
-                  {subtotal.toFixed(2)}
+                  {formatPrice(subtotal, currency)}
                 </span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Tax</span>
                 <span className="font-medium">
-                  {getCurrencySymbol(currency)}
-                  {tax.toFixed(2)}
+                  {formatPrice(tax, currency)}
                 </span>
               </div>
               <div className="border-t pt-4">
                 <div className="flex justify-between text-lg font-bold">
                   <span>Total</span>
                   <span>
-                    {getCurrencySymbol(currency)}
-                    {total.toFixed(2)}
+                    {formatPrice(total, currency)}
                   </span>
                 </div>
               </div>

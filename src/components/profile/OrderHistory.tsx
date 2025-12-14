@@ -5,7 +5,7 @@ import { Order } from "@/Types/orderValidation";
 import { getUserOrders } from "@/app/actions/orders/getOrder";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { getCurrencySymbol } from "@/lib/utils/productPrice";
+import { formatPrice } from "@/lib/utils/productPrice";
 import Link from "next/link";
 import { TailChase } from "ldrs/react";
 import { useAsyncData } from "@/hooks/useAsyncData";
@@ -91,8 +91,7 @@ export function OrderHistory() {
               </div>
               <div className="text-left sm:text-right w-full sm:w-auto">
                 <p className="font-medium text-base md:text-lg">
-                  {getCurrencySymbol(order.totals.currency)}
-                  {order.totals.total.toFixed(2)}
+                  {formatPrice(order.totals.total, order.totals.currency)}
                 </p>
                 <div
                   className={`mt-1 inline-block px-2 py-1 rounded text-xs font-medium ${getStatusColor(

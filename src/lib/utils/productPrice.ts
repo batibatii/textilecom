@@ -1,31 +1,27 @@
 import { Product } from "@/Types/productValidation";
 import { CartItem } from "@/contexts/CartContext";
 
-export const getCurrencySymbol = (currency: string): string => {
-  const symbols: Record<string, string> = {
-    USD: "$",
-    EUR: "€",
-    TRY: "₺",
-  };
-  return symbols[currency] || currency;
-};
-
 export const getNumericPrice = (product: Product): number => {
   return product.discount
     ? product.price.amount * (1 - product.discount.rate / 100)
     : product.price.amount;
 };
 
-export const getDisplayPrice = (product: Product): string => {
-  return getNumericPrice(product).toFixed(2);
-};
-
 export const hasDiscount = (product: Product): boolean => {
   return !!(product.discount && product.discount.rate > 0);
 };
 
-export const formatPrice = (amount: number, currency: string): string => {
-  return `${getCurrencySymbol(currency)}${amount.toFixed(2)}`;
+export const formatPrice = (
+  amount: number,
+  currency: string,
+  locale: string = "en-US"
+): string => {
+  return new Intl.NumberFormat(locale, {
+    style: "currency",
+    currency: currency,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(amount);
 };
 
 export const calculateDiscountedPrice = (

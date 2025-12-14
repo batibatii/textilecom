@@ -7,7 +7,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { getOrderBySessionId } from "@/app/actions/orders/getOrder";
 import { Order } from "@/Types/orderValidation";
-import { getCurrencySymbol } from "@/lib/utils/productPrice";
+import { formatPrice } from "@/lib/utils/productPrice";
 import Image from "next/image";
 import { TailChase } from "ldrs/react";
 
@@ -286,8 +286,7 @@ export default function SuccessPage() {
 
                   <div className="text-right">
                     <p className="font-medium text-sm">
-                      {getCurrencySymbol(currency)}
-                      {item.total.toFixed(2)}
+                      {formatPrice(item.total, currency)}
                     </p>
                   </div>
                 </div>
@@ -300,23 +299,20 @@ export default function SuccessPage() {
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Subtotal</span>
                 <span className="font-medium">
-                  {getCurrencySymbol(currency)}
-                  {order.totals.subtotal.toFixed(2)}
+                  {formatPrice(order.totals.subtotal, currency)}
                 </span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Tax</span>
                 <span className="font-medium">
-                  {getCurrencySymbol(currency)}
-                  {order.totals.tax.toFixed(2)}
+                  {formatPrice(order.totals.tax, currency)}
                 </span>
               </div>
               <div className="border-t pt-2 mt-2">
                 <div className="flex justify-between text-lg font-bold">
                   <span>Total</span>
                   <span>
-                    {getCurrencySymbol(currency)}
-                    {order.totals.total.toFixed(2)}
+                    {formatPrice(order.totals.total, currency)}
                   </span>
                 </div>
               </div>
