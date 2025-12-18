@@ -70,12 +70,25 @@ export async function handleCheckout(
     const cartDataRef = adminDb.collection("checkout_sessions").doc();
     await cartDataRef.set({
       userId: userId,
-      items: items.map((item) => ({
-        productId: item.productId,
-        size: item.size,
-        stripePriceId: item.stripePriceId,
-        quantity: item.quantity,
-      })),
+      items: items.map((item) => {
+        const itemData: {
+          productId: string;
+          stripePriceId: string;
+          quantity: number;
+          size?: string;
+        } = {
+          productId: item.productId,
+          stripePriceId: item.stripePriceId,
+          quantity: item.quantity,
+        };
+
+        // Only include size if it's defined
+        if (item.size) {
+          itemData.size = item.size;
+        }
+
+        return itemData;
+      }),
       createdAt: new Date().toISOString(),
       expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // 24 hours
     });
