@@ -144,15 +144,15 @@ export function ProductDetailDialog({
 
             <div className="flex flex-col h-full">
               <div className="flex-1 flex flex-col gap-4 overflow-y-auto">
-                <div>
+                <DialogHeader>
                   <DialogTitle className="text-xl md:text-2xl font-light tracking-wide">
                     {product.title.toUpperCase()}
                   </DialogTitle>
 
-                  <p className="text-sm text-muted-foreground">
+                  <DialogDescription className="text-sm text-muted-foreground">
                     {product.serialNumber}
-                  </p>
-                </div>
+                  </DialogDescription>
+                </DialogHeader>
 
                 <p className="text-base font-medium">{product.brand}</p>
 

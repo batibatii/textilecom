@@ -52,11 +52,15 @@ export function CustomerProductCard({
 
   return (
     <>
-      <Card className="overflow-hidden transition-shadow shadow-none border-none p-4 w-full max-w-md mx-auto">
-        <div
-          className="relative w-full aspect-3/4 bg-muted cursor-pointer"
-          onClick={productDialog.openDialog}
-        >
+      <Card
+        asChild
+        className="overflow-hidden transition-shadow shadow-none border-none p-4 w-full max-w-md mx-auto"
+      >
+        <article data-testid="product-card">
+          <div
+            className="relative w-full aspect-3/4 bg-muted cursor-pointer"
+            onClick={productDialog.openDialog}
+          >
           {product.images && product.images.length > 0 ? (
             <Image
               src={product.images[0]}
@@ -126,6 +130,7 @@ export function CustomerProductCard({
             </div>
           </CardContent>
         </div>
+        </article>
       </Card>
 
       <ProductDetailDialog

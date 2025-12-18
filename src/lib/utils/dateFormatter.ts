@@ -1,3 +1,5 @@
+import { format } from "date-fns";
+
 // Helper function to convert Firestore Timestamp to ISO string
 export const toISOString = (
   value: { toDate?: () => Date } | string | null | undefined
@@ -16,18 +18,10 @@ export const toISOString = (
   return null;
 };
 
-export const formatDate = (
-  dateString: string | null,
-  locale: string = "en-US"
-): string => {
+export const formatDate = (dateString: string | null): string => {
   if (!dateString) return "Never";
   try {
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat(locale, {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    }).format(date);
+    return format(new Date(dateString), "MMM d, yyyy");
   } catch {
     return "Invalid date";
   }

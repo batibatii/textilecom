@@ -120,8 +120,8 @@ export default function SuccessPage() {
     return (
       <div className="container mx-auto px-4 py-16 max-w-4xl mt-12 md:mt-60">
         <Card>
-          <CardHeader className="text-center">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
+          <CardHeader className="text-center ">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100 ">
               <svg
                 className="h-8 w-8 text-green-600"
                 fill="none"
@@ -136,7 +136,9 @@ export default function SuccessPage() {
                 />
               </svg>
             </div>
-            <CardTitle className="text-2xl">Payment Successful!</CardTitle>
+            <CardTitle className="text-2xl pl-25 ">
+              Payment Successful!
+            </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="text-center space-y-3">
@@ -311,9 +313,7 @@ export default function SuccessPage() {
               <div className="border-t pt-2 mt-2">
                 <div className="flex justify-between text-lg font-bold">
                   <span>Total</span>
-                  <span>
-                    {formatPrice(order.totals.total, currency)}
-                  </span>
+                  <span>{formatPrice(order.totals.total, currency)}</span>
                 </div>
               </div>
             </div>
