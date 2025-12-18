@@ -2,6 +2,8 @@ import { listOrders } from "@/app/actions/admin/orders/listOrders";
 import { OrdersTable } from "@/components/admin/OrdersTable";
 import { H1 } from "@/components/ui/headings";
 
+export const dynamic = 'force-dynamic';
+
 export default async function OrdersPage() {
   const result = await listOrders();
 
