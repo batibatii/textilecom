@@ -52,11 +52,8 @@ export function CustomerProductCard({
 
   return (
     <>
-      <Card
-        asChild
-        className="overflow-hidden transition-shadow shadow-none border-none p-4 w-full max-w-md mx-auto"
-      >
-        <article data-testid="product-card">
+      <article data-testid="product-card">
+        <Card className="overflow-hidden transition-shadow shadow-none border-none p-4 w-full max-w-md mx-auto">
           <div
             className="relative w-full aspect-3/4 bg-muted cursor-pointer"
             onClick={productDialog.openDialog}
@@ -130,8 +127,8 @@ export function CustomerProductCard({
             </div>
           </CardContent>
         </div>
-        </article>
-      </Card>
+        </Card>
+      </article>
 
       <ProductDetailDialog
         product={product}

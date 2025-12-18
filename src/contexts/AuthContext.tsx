@@ -101,7 +101,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         } else {
           setUser(firebaseUser as User);
         }
-        
+
         updateUserLastLogin(firebaseUser.uid).catch((error) =>
           console.error("Failed to update last login:", error)
         );
