@@ -31,7 +31,7 @@ export const createUser = async (email: string, userId: string) => {
   return userData;
 };
 
-export const getUserData = async (userId: string) => {
+export const getUserData = async (userId: string): Promise<Record<string, unknown> | null> => {
   const userRef = adminDb.collection("users").doc(userId);
   const userSnap = await userRef.get();
 
