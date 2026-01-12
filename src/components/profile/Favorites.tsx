@@ -11,10 +11,9 @@ import { Button } from "@/components/ui/button";
 import { LoadingButton } from "@/components/ui/loading-button";
 import Image from "next/image";
 import {
-  getCurrencySymbol,
   formatPrice,
-  getDisplayPrice,
   hasDiscount as checkHasDiscount,
+  getNumericPrice,
 } from "@/lib/utils/productPrice";
 import { useAsyncData } from "@/hooks/useAsyncData";
 
@@ -113,9 +112,8 @@ export function Favorites({ user }: FavoritesProps) {
 
       <div className="flex flex-col md:flex-row gap-6 md:overflow-x-auto pb-4 md:flex-nowrap">
         {favorites.map((product) => {
-          const displayPrice = getDisplayPrice(product);
+          const numericPrice = getNumericPrice(product);
           const hasDiscount = checkHasDiscount(product);
-          const currencySymbol = getCurrencySymbol(product.price.currency);
 
           return (
             <Card
@@ -158,8 +156,7 @@ export function Favorites({ user }: FavoritesProps) {
                     </span>
                   )}
                   <span className="font-light text-sm">
-                    {currencySymbol}
-                    {displayPrice}
+                    {formatPrice(numericPrice, product.price.currency)}
                   </span>
                   {hasDiscount && (
                     <span className="text-xs font-semibold text-green-900 bg-green-50 px-2 py-0.5 rounded">

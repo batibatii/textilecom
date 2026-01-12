@@ -7,12 +7,23 @@ import { getCurrentUserId } from "@/lib/auth/session";
 
 export async function updateProfile(userId: string, formData: unknown) {
   const currentUserId = await getCurrentUserId();
-  if (!currentUserId || currentUserId !== userId) {
+
+  if (!currentUserId) {
+    return {
+      success: false,
+      error: {
+        code: "auth/unauthenticated",
+        message: "You must be logged in to update your profile",
+      },
+    };
+  }
+
+  if (currentUserId !== userId) {
     return {
       success: false,
       error: {
         code: "auth/unauthorized",
-        message: "Unauthorized",
+        message: "You can only update your own profile",
       },
     };
   }

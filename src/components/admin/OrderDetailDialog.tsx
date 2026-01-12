@@ -10,7 +10,7 @@ import {
 import { getOrderById } from "@/app/actions/admin/orders/getOrderById";
 import type { Order } from "@/Types/orderValidation";
 import { formatDate } from "@/lib/utils/dateFormatter";
-import { getCurrencySymbol } from "@/lib/utils/productPrice";
+import { formatPrice } from "@/lib/utils/productPrice";
 import Image from "next/image";
 import { useAsyncData } from "@/hooks/useAsyncData";
 
@@ -111,12 +111,11 @@ export function OrderDetailDialog({
                       </div>
                       <div className="text-right">
                         <p className="font-semibold">
-                          {getCurrencySymbol(item.price.currency)}
-                          {item.total.toFixed(2)}
+                          {formatPrice(item.total, item.price.currency)}
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          {getCurrencySymbol(item.price.currency)}
-                          {item.price.amount.toFixed(2)} each
+                          {formatPrice(item.price.amount, item.price.currency)}{" "}
+                          each
                         </p>
                       </div>
                     </div>
@@ -130,22 +129,22 @@ export function OrderDetailDialog({
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Subtotal</span>
                     <span>
-                      {getCurrencySymbol(order.totals.currency)}
-                      {order.totals.subtotal.toFixed(2)}
+                      {formatPrice(
+                        order.totals.subtotal,
+                        order.totals.currency
+                      )}
                     </span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Tax</span>
                     <span>
-                      {getCurrencySymbol(order.totals.currency)}
-                      {order.totals.tax.toFixed(2)}
+                      {formatPrice(order.totals.tax, order.totals.currency)}
                     </span>
                   </div>
                   <div className="flex justify-between text-lg font-bold border-t pt-2 mt-2">
                     <span>Total</span>
                     <span>
-                      {getCurrencySymbol(order.totals.currency)}
-                      {order.totals.total.toFixed(2)}
+                      {formatPrice(order.totals.total, order.totals.currency)}
                     </span>
                   </div>
                 </div>

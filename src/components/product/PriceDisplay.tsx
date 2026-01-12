@@ -1,7 +1,6 @@
 import { Product } from "@/Types/productValidation";
 import {
-  getCurrencySymbol,
-  getDisplayPrice,
+  getNumericPrice,
   hasDiscount as checkHasDiscount,
   formatPrice,
 } from "@/lib/utils/productPrice";
@@ -22,14 +21,12 @@ export function PriceDisplay({
   discountClassName = "text-sm font-semibold text-green-900 bg-green-50 px-2 py-1 rounded",
 }: PriceDisplayProps) {
   const hasDiscount = checkHasDiscount(product);
-  const currencySymbol = getCurrencySymbol(product.price.currency);
-  const displayPrice = getDisplayPrice(product);
+  const numericPrice = getNumericPrice(product);
 
   if (!hasDiscount) {
     return (
       <span className={priceSpanClassName}>
-        {currencySymbol}
-        {displayPrice}
+        {formatPrice(numericPrice, product.price.currency)}
       </span>
     );
   }
@@ -40,8 +37,7 @@ export function PriceDisplay({
         {formatPrice(product.price.amount, product.price.currency)}
       </span>
       <span className={priceSpanClassName}>
-        {currencySymbol}
-        {displayPrice}
+        {formatPrice(numericPrice, product.price.currency)}
       </span>
       {showDiscount && (
         <span className={discountClassName}>-{product?.discount?.rate}%</span>

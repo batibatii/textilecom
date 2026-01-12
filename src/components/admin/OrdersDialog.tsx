@@ -18,7 +18,7 @@ import {
 import { getOrdersForUser } from "@/app/actions/admin/users/getUserOrders";
 import type { Order } from "@/Types/orderValidation";
 import { formatDate } from "@/lib/utils/dateFormatter";
-import { getCurrencySymbol } from "@/lib/utils/productPrice";
+import { formatPrice } from "@/lib/utils/productPrice";
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 import { useAsyncData } from "@/hooks/useAsyncData";
@@ -130,8 +130,7 @@ export function OrdersDialog({ userId, onClose }: OrdersDialogProps) {
                       {order.status}
                     </TableCell>
                     <TableCell className="text-sm">
-                      {getCurrencySymbol(order.totals.currency)}
-                      {order.totals.total.toFixed(2)}
+                      {formatPrice(order.totals.total, order.totals.currency)}
                     </TableCell>
                   </TableRow>
                 ))}

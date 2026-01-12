@@ -50,7 +50,7 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
       try {
         setLoading(true);
         const userData = await getUserData(userId);
-        setFavorites(userData?.favorites || []);
+        setFavorites((userData?.favorites as string[] | undefined) || []);
       } catch (error) {
         console.error("Error loading favorites:", error);
         setFavorites([]);

@@ -2,7 +2,7 @@
 
 import { Order } from "@/Types/orderValidation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { getCurrencySymbol } from "@/lib/utils/productPrice";
+import { formatPrice } from "@/lib/utils/productPrice";
 import Image from "next/image";
 
 interface OrderDetailProps {
@@ -99,12 +99,10 @@ export function OrderDetail({ order }: OrderDetailProps) {
 
                 <div className="text-right">
                   <p className="font-medium">
-                    {getCurrencySymbol(currency)}
-                    {item.total.toFixed(2)}
+                    {formatPrice(item.total, currency)}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {getCurrencySymbol(currency)}
-                    {(item.total / item.quantity).toFixed(2)} each
+                    {formatPrice(item.total / item.quantity, currency)} each
                   </p>
                 </div>
               </div>
@@ -121,24 +119,19 @@ export function OrderDetail({ order }: OrderDetailProps) {
           <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">Subtotal</span>
             <span className="font-medium">
-              {getCurrencySymbol(currency)}
-              {order.totals.subtotal.toFixed(2)}
+              {formatPrice(order.totals.subtotal, currency)}
             </span>
           </div>
           <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">Tax</span>
             <span className="font-medium">
-              {getCurrencySymbol(currency)}
-              {order.totals.tax.toFixed(2)}
+              {formatPrice(order.totals.tax, currency)}
             </span>
           </div>
           <div className="border-t pt-2 mt-2">
             <div className="flex justify-between text-lg font-bold">
               <span>Total</span>
-              <span>
-                {getCurrencySymbol(currency)}
-                {order.totals.total.toFixed(2)}
-              </span>
+              <span>{formatPrice(order.totals.total, currency)}</span>
             </div>
           </div>
         </CardContent>

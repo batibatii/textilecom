@@ -7,7 +7,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { getOrderBySessionId } from "@/app/actions/orders/getOrder";
 import { Order } from "@/Types/orderValidation";
-import { getCurrencySymbol } from "@/lib/utils/productPrice";
+import { formatPrice } from "@/lib/utils/productPrice";
 import Image from "next/image";
 import { TailChase } from "ldrs/react";
 
@@ -120,8 +120,8 @@ export default function SuccessPage() {
     return (
       <div className="container mx-auto px-4 py-16 max-w-4xl mt-12 md:mt-60">
         <Card>
-          <CardHeader className="text-center">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
+          <CardHeader className="text-center ">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100 ">
               <svg
                 className="h-8 w-8 text-green-600"
                 fill="none"
@@ -136,7 +136,9 @@ export default function SuccessPage() {
                 />
               </svg>
             </div>
-            <CardTitle className="text-2xl">Payment Successful!</CardTitle>
+            <CardTitle className="text-2xl pl-25 ">
+              Payment Successful!
+            </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="text-center space-y-3">
@@ -286,8 +288,7 @@ export default function SuccessPage() {
 
                   <div className="text-right">
                     <p className="font-medium text-sm">
-                      {getCurrencySymbol(currency)}
-                      {item.total.toFixed(2)}
+                      {formatPrice(item.total, currency)}
                     </p>
                   </div>
                 </div>
@@ -300,24 +301,19 @@ export default function SuccessPage() {
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Subtotal</span>
                 <span className="font-medium">
-                  {getCurrencySymbol(currency)}
-                  {order.totals.subtotal.toFixed(2)}
+                  {formatPrice(order.totals.subtotal, currency)}
                 </span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Tax</span>
                 <span className="font-medium">
-                  {getCurrencySymbol(currency)}
-                  {order.totals.tax.toFixed(2)}
+                  {formatPrice(order.totals.tax, currency)}
                 </span>
               </div>
               <div className="border-t pt-2 mt-2">
                 <div className="flex justify-between text-lg font-bold">
                   <span>Total</span>
-                  <span>
-                    {getCurrencySymbol(currency)}
-                    {order.totals.total.toFixed(2)}
-                  </span>
+                  <span>{formatPrice(order.totals.total, currency)}</span>
                 </div>
               </div>
             </div>

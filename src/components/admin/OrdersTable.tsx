@@ -31,8 +31,9 @@ import { OrderDetailDialog } from "./OrderDetailDialog";
 import type { OrderTableData } from "@/Types/orderTableTypes";
 import type { SortField } from "@/Types/orderTableTypes";
 import { formatDate } from "@/lib/utils/dateFormatter";
-import { getCurrencySymbol } from "@/lib/utils/productPrice";
+import { formatPrice } from "@/lib/utils/productPrice";
 import { getSortIcon } from "@/lib/utils/tableSorting";
+import { formatOrderNumberShort } from "@/lib/utils/orderNumberFormatter";
 import { useRouter } from "next/navigation";
 import { Download } from "lucide-react";
 import { SearchInput } from "@/components/product/filters/SearchInput";
@@ -231,7 +232,7 @@ export function OrdersTable({ orders }: OrdersTableProps) {
                     className="text-primary hover:underline cursor-pointer"
                     disabled={updateOperation.loading}
                   >
-                    {order.orderNumber}
+                    {formatOrderNumberShort(order.orderNumber)}
                   </button>
                 </TableCell>
                 <TableCell className="hidden md:table-cell text-sm">
@@ -258,8 +259,7 @@ export function OrdersTable({ orders }: OrdersTableProps) {
                   </NativeSelect>
                 </TableCell>
                 <TableCell className="text-xs sm:text-sm">
-                  {getCurrencySymbol(order.currency)}
-                  {order.total.toFixed(2)}
+                  {formatPrice(order.total, order.currency)}
                 </TableCell>
               </TableRow>
             ))}

@@ -31,7 +31,7 @@ export const createUser = async (email: string, userId: string) => {
   return userData;
 };
 
-export const getUserData = async (userId: string) => {
+export const getUserData = async (userId: string): Promise<Record<string, unknown> | null> => {
   const userRef = adminDb.collection("users").doc(userId);
   const userSnap = await userRef.get();
 
@@ -43,7 +43,11 @@ export const getUserData = async (userId: string) => {
       data.createdAt = data.createdAt.toDate().toISOString();
     }
 
-    return data;
+    // Ensure the id field is always present and matches the document ID
+    return {
+      ...data,
+      id: userId,
+    };
   }
   return null;
 };
@@ -240,7 +244,7 @@ export const removeUserFavorite = async (userId: string, productId: string) => {
     const userRef = adminDb.collection("users").doc(userId);
 
     // Use arrayRemove to remove productId atomically
-    // Use set with merge to handle edge cases 
+    // Use set with merge to handle edge cases
     await userRef.set(
       {
         favorites: FieldValue.arrayRemove(productId),

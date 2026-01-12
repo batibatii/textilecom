@@ -66,7 +66,9 @@ export function PersonalInfo({ user }: PersonalInfoProps) {
   const onSubmit = async (data: PersonalInfoData) => {
     try {
       setError(undefined);
-      const result = await updateProfile(user.id, data);
+      // Use uid as fallback if id is not set (BaseUser extends FirebaseUser which has uid)
+      const userId = user.id || user.uid;
+      const result = await updateProfile(userId, data);
 
       if (result.success) {
         await refreshUser();

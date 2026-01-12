@@ -52,15 +52,46 @@ export async function handleCheckout(
     }
 
     // Create Stripe line items
-    const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] =
-      items.map((item) => ({
+    const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = items.map(
+      (item) => ({
         price: item.stripePriceId,
         quantity: item.quantity,
-      }));
+      })
+    );
 
     // Get origin for redirect URLs
     const headersList = await headers();
-    const origin = headersList.get("origin") || process.env.NEXT_PUBLIC_URL || "http://localhost:3000";
+    const origin =
+      headersList.get("origin") ||
+      process.env.NEXT_PUBLIC_URL ||
+      "http://localhost:3000";
+
+    // Store cart items in Firestore to avoid Stripe metadata 500-char limit
+    const cartDataRef = adminDb.collection("checkout_sessions").doc();
+    await cartDataRef.set({
+      userId: userId,
+      items: items.map((item) => {
+        const itemData: {
+          productId: string;
+          stripePriceId: string;
+          quantity: number;
+          size?: string;
+        } = {
+          productId: item.productId,
+          stripePriceId: item.stripePriceId,
+          quantity: item.quantity,
+        };
+
+        // Only include size if it's defined
+        if (item.size) {
+          itemData.size = item.size;
+        }
+
+        return itemData;
+      }),
+      createdAt: new Date().toISOString(),
+      expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // 24 hours
+    });
 
     // Create Stripe checkout session
     const stripeSession = await stripe.checkout.sessions.create({
@@ -71,13 +102,7 @@ export async function handleCheckout(
       metadata: {
         orderItemCount: items.length.toString(),
         userId: userId,
-        cartItems: JSON.stringify(
-          items.map((item) => ({
-            productId: item.productId,
-            size: item.size,
-            stripePriceId: item.stripePriceId,
-          }))
-        ),
+        checkoutSessionId: cartDataRef.id,
       },
     });
 

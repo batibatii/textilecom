@@ -2,6 +2,8 @@ import { getApprovedProducts } from "@/app/actions/admin/products/list";
 import { ProductList } from "@/components/product/ProductList";
 import { H1 } from "@/components/ui/headings";
 
+export const dynamic = 'force-dynamic';
+
 export default async function ApprovedProductsPage() {
   const result = await getApprovedProducts();
 

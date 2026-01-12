@@ -8,7 +8,6 @@ import { H1, H3 } from "@/components/ui/headings";
 import Image from "next/image";
 import Link from "next/link";
 import {
-  getCurrencySymbol,
   formatPrice,
   calculateDiscountedPrice,
 } from "@/lib/utils/productPrice";
@@ -133,8 +132,7 @@ export default function CartPage() {
                               </div>
                             )}
                             <p className="text-sm md:text-lg font-medium">
-                              {getCurrencySymbol(currency)}
-                              {(itemPrice * item.quantity).toFixed(2)}
+                              {formatPrice(itemPrice * item.quantity, currency)}
                             </p>
                           </div>
                           <button
@@ -165,23 +163,20 @@ export default function CartPage() {
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Subtotal</span>
                 <span className="font-medium">
-                  {getCurrencySymbol(currency)}
-                  {subtotal.toFixed(2)}
+                  {formatPrice(subtotal, currency)}
                 </span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Tax</span>
                 <span className="font-medium">
-                  {getCurrencySymbol(currency)}
-                  {tax.toFixed(2)}
+                  {formatPrice(tax, currency)}
                 </span>
               </div>
               <div className="border-t pt-4">
                 <div className="flex justify-between text-lg font-bold">
                   <span>Total</span>
                   <span>
-                    {getCurrencySymbol(currency)}
-                    {total.toFixed(2)}
+                    {formatPrice(total, currency)}
                   </span>
                 </div>
               </div>

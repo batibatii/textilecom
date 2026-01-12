@@ -1,6 +1,6 @@
 import { Product } from "@/Types/productValidation";
 import { ProductFilters, SortOption } from "@/Types/filterTypes";
-import { getNumericPrice } from "@/lib/utils/productPrice";
+import { getNumericPrice } from "./productPrice";
 
 export function isApprovedProduct(product: unknown): product is Product {
   return (product as { draft?: boolean }).draft === false;

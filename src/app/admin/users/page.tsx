@@ -2,6 +2,8 @@ import { getAllUsersWithOrderCounts } from "@/app/actions/admin/users/listUsers"
 import { UsersTable } from "@/components/admin/UsersTable";
 import { H1 } from "@/components/ui/headings";
 
+export const dynamic = 'force-dynamic';
+
 export default async function UsersPage() {
   const result = await getAllUsersWithOrderCounts();
 

@@ -23,7 +23,7 @@ export async function toggleFavorite(productId: string) {
 
     // Get current user data to check if product is already favorited
     const userData = await getUserData(userId);
-    const currentFavorites = userData?.favorites || [];
+    const currentFavorites = (userData?.favorites as string[] | undefined) || [];
     const isFavorited = currentFavorites.includes(productId);
 
     const result = isFavorited

@@ -5,7 +5,11 @@ export const toISOString = (
   value: { toDate?: () => Date } | string | null | undefined
 ): string | null => {
   if (!value) return null;
-  if (typeof value === "object" && value.toDate && typeof value.toDate === "function") {
+  if (
+    typeof value === "object" &&
+    value.toDate &&
+    typeof value.toDate === "function"
+  ) {
     return value.toDate().toISOString();
   }
   if (typeof value === "string") {
