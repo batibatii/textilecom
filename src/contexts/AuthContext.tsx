@@ -24,6 +24,7 @@ import {
   GoogleAuthProvider,
   signInWithPopup,
   deleteUser,
+  sendPasswordResetEmail,
 } from "firebase/auth";
 import { TailChase } from "ldrs/react";
 import "ldrs/react/TailChase.css";
@@ -80,6 +81,7 @@ type AuthContextType = {
   loginWithGoogle: () => Promise<void>;
   deleteAccount: () => Promise<void>;
   refreshUser: () => Promise<void>;
+  resetPassword: (email: string) => Promise<void>;
   error: FirebaseError | null;
 };
 
@@ -237,6 +239,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const resetPassword = async (email: string) => {
+    try {
+      setError(null);
+      await sendPasswordResetEmail(auth, email);
+    } catch (err) {
+      const firebaseError = err as FirebaseError;
+      setError(firebaseError);
+      throw firebaseError;
+    }
+  };
+
   if (initializing) {
     if (
       pathname === "/" ||
@@ -255,6 +268,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             logout,
             deleteAccount,
             refreshUser,
+            resetPassword,
           }}
         >
           {children}
@@ -281,6 +295,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         logout,
         deleteAccount,
         refreshUser,
+        resetPassword,
       }}
     >
       {children}

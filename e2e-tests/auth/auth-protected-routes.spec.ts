@@ -3,7 +3,7 @@ import {
   attemptProtectedRoute,
   login,
   waitForLoginSuccess,
-} from "./helpers/auth-helpers";
+} from "../helpers/auth-helpers";
 
 test.describe("Protected Routes", () => {
   test.describe("Unauthenticated Access", () => {

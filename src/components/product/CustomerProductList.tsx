@@ -11,7 +11,7 @@ import { FilterBadges } from "./filters/FilterBadges";
 import { MobileFilterDrawer } from "./filters/MobileFilterDrawer";
 import { SearchInput } from "./filters/SearchInput";
 import { Button } from "@/components/ui/button";
-import { Filter } from "lucide-react";
+import { Filter, Grid2x2, Square } from "lucide-react";
 import { getFilteredProducts } from "@/app/actions/products/getFiltered";
 import { useAsyncData } from "@/hooks/useAsyncData";
 
@@ -46,6 +46,7 @@ export function CustomerProductList({
     searchQuery: "",
   });
   const [sortBy, setSortBy] = useState<SortOption>("newest");
+  const [mobileViewMode, setMobileViewMode] = useState<"grid" | "list">("list");
 
   const observerTarget = useRef<HTMLDivElement>(null);
   const fetchOperation = useAsyncData();
@@ -182,29 +183,53 @@ export function CustomerProductList({
           <div className="flex-1">
             <ProductSorting sortBy={sortBy} onChange={setSortBy} />
           </div>
+
+          <Button
+            variant="outline"
+            size="sm"
+            className="rounded-none"
+            onClick={() =>
+              setMobileViewMode(mobileViewMode === "grid" ? "list" : "grid")
+            }
+          >
+            {mobileViewMode === "grid" ? (
+              <Square className="w-4 h-4" />
+            ) : (
+              <Grid2x2 className="w-4 h-4" />
+            )}
+          </Button>
         </div>
 
         <FilterBadges filters={filters} onRemove={handleRemoveFilter} />
 
-        <p className="text-sm text-muted-foreground mb-4">
+        <p className="text-sm text-muted-foreground mb-4 pl-4   ">
           {searchQuery && `Searching for "${searchQuery}" - `}
           Showing {products.length} of {total} products
         </p>
 
         {products.length > 0 ? (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+            <div
+              className={`grid ${
+                mobileViewMode === "grid" ? "grid-cols-2" : "grid-cols-1"
+              } sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6`}
+            >
               {products.map((product, index) => (
                 <CustomerProductCard
                   key={`${product.id}-${index}`}
                   product={product}
                   priority={index < 4}
+                  mobileViewMode={mobileViewMode}
                 />
               ))}
             </div>
 
             {fetchOperation.loading && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 mt-6">
+              <div
+                className={`grid ${
+                  mobileViewMode === "grid" ? "grid-cols-2" : "grid-cols-1"
+                } sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 mt-6`}
+              >
                 {Array.from({ length: 4 }).map((_, index) => (
                   <CustomerProductCardSkeleton key={`skeleton-${index}`} />
                 ))}
@@ -216,7 +241,7 @@ export function CustomerProductList({
             )}
 
             {!hasMore && products.length > 0 && (
-              <div className="flex flex-col justify-center items-center py-8 gap-4">
+              <div className="flex flex-col justify-center items-center py-8 gap-4 ">
                 <p className="text-muted-foreground text-center">
                   You&apos;ve reached the end!
                 </p>
@@ -230,7 +255,11 @@ export function CustomerProductList({
             )}
           </>
         ) : fetchOperation.loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+          <div
+            className={`grid ${
+              mobileViewMode === "grid" ? "grid-cols-2" : "grid-cols-1"
+            } sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6`}
+          >
             {Array.from({ length: 12 }).map((_, index) => (
               <CustomerProductCardSkeleton key={`skeleton-${index}`} />
             ))}

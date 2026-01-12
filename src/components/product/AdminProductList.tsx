@@ -23,7 +23,7 @@ import { FilterBadges } from "./filters/FilterBadges";
 import { MobileFilterDrawer } from "./filters/MobileFilterDrawer";
 import { SearchInput } from "./filters/SearchInput";
 import { Button } from "@/components/ui/button";
-import { Filter } from "lucide-react";
+import { Filter, Grid2x2, Square } from "lucide-react";
 
 interface ProductListProps {
   products: Product[];
@@ -41,6 +41,7 @@ export function ProductList({
     searchQuery: "",
   });
   const [sortBy, setSortBy] = useState<SortOption>("newest");
+  const [mobileViewMode, setMobileViewMode] = useState<"grid" | "list">("list");
   const router = useRouter();
   const productsPerPage = 12;
 
@@ -130,10 +131,35 @@ export function ProductList({
   };
 
   const getPageNumbers = () => {
-    const pages = [];
-    for (let i = 1; i <= totalPages; i++) {
-      pages.push(i);
+    const pages: (number | string)[] = [];
+
+    if (totalPages <= 3) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      // Always show first page
+      pages.push(1);
+
+      // Add ellipsis after first if current is far from start
+      if (currentPage > 2) {
+        pages.push("...");
+      }
+
+      // Show current page if it's not first or last
+      if (currentPage !== 1 && currentPage !== totalPages) {
+        pages.push(currentPage);
+      }
+
+      // Add ellipsis before last if current is far from end
+      if (currentPage < totalPages - 1) {
+        pages.push("...");
+      }
+
+      // Always show last page
+      pages.push(totalPages);
     }
+
     return pages;
   };
 
@@ -142,8 +168,8 @@ export function ProductList({
   };
 
   const renderPagination = () => (
-    <Pagination className="justify-end sm:pr-10 md:pr-0 ">
-      <PaginationContent>
+    <Pagination className="justify-center md:justify-end md:pr-10 lg:pr-0">
+      <PaginationContent className="gap-1">
         <PaginationItem>
           <PaginationPrevious
             onClick={handlePrevious}
@@ -154,15 +180,19 @@ export function ProductList({
             }
           />
         </PaginationItem>
-        {getPageNumbers().map((page) => (
-          <PaginationItem key={page}>
-            <PaginationLink
-              onClick={() => setCurrentPage(page)}
-              isActive={currentPage === page}
-              className="cursor-pointer"
-            >
-              {page}
-            </PaginationLink>
+        {getPageNumbers().map((page, index) => (
+          <PaginationItem key={`${page}-${index}`}>
+            {page === "..." ? (
+              <span className="px-2 md:px-4 py-2">...</span>
+            ) : (
+              <PaginationLink
+                onClick={() => setCurrentPage(page as number)}
+                isActive={currentPage === page}
+                className="cursor-pointer"
+              >
+                {page}
+              </PaginationLink>
+            )}
           </PaginationItem>
         ))}
         <PaginationItem>
@@ -265,6 +295,21 @@ export function ProductList({
           <div className="flex-1">
             <ProductSorting sortBy={sortBy} onChange={handleSortChange} />
           </div>
+
+          <Button
+            variant="outline"
+            size="sm"
+            className="rounded-none"
+            onClick={() =>
+              setMobileViewMode(mobileViewMode === "grid" ? "list" : "grid")
+            }
+          >
+            {mobileViewMode === "grid" ? (
+              <Square className="w-4 h-4" />
+            ) : (
+              <Grid2x2 className="w-4 h-4" />
+            )}
+          </Button>
         </div>
 
         <FilterBadges
@@ -280,8 +325,8 @@ export function ProductList({
           }}
         />
 
-        <div className="flex mb-5">
-          <p className="text-sm text-muted-foreground whitespace-nowrap mt-2">
+        <div className="flex flex-col md:flex mb-3 gap-2 md:gap-0">
+          <p className="text-sm text-muted-foreground md:whitespace-nowrap text-center md:text-start md:mt-2 pl-4">
             {filters.searchQuery && `Searching for "${filters.searchQuery}" - `}
             Showing {filteredAndSortedProducts.length} products
           </p>
@@ -289,7 +334,11 @@ export function ProductList({
         </div>
 
         {currentProducts.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+          <div
+            className={`grid ${
+              mobileViewMode === "grid" ? "grid-cols-2" : "grid-cols-1"
+            } sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6`}
+          >
             {currentProducts.map((product, index) => (
               <AdminProductCard
                 key={product.id}
@@ -298,6 +347,7 @@ export function ProductList({
                 onUpdate={handleProductUpdate}
                 priority={index < 4}
                 showMoveToDraft={showMoveToDraft}
+                mobileViewMode={mobileViewMode}
               />
             ))}
           </div>

@@ -21,12 +21,18 @@ export function ProfileContainer({ user }: ProfileContainerProps) {
   const searchParams = useSearchParams();
   const sectionParam = searchParams.get("section") as ProfileSection | null;
 
-  const [activeSection, setActiveSection] =
-    useState<ProfileSection>(sectionParam || "personal-info");
+  const [activeSection, setActiveSection] = useState<ProfileSection>(
+    sectionParam || "personal-info"
+  );
 
   // Update active section when URL changes
   useEffect(() => {
-    if (sectionParam && ["personal-info", "password", "favorites", "orders"].includes(sectionParam)) {
+    if (
+      sectionParam &&
+      ["personal-info", "password", "favorites", "orders"].includes(
+        sectionParam
+      )
+    ) {
       setActiveSection(sectionParam);
     }
   }, [sectionParam]);
@@ -52,7 +58,9 @@ export function ProfileContainer({ user }: ProfileContainerProps) {
           : "min-w-90 xs:w-147 sm:w-150 md:w-200 border shadow-sm"
       }`}
     >
-      <CardContent className={activeSection === "orders" ? "p-4 md:p-6" : "p-3 md:p-6"}>
+      <CardContent
+        className={activeSection === "orders" ? "p-4 md:p-6" : "p-3 md:p-6"}
+      >
         {renderContent()}
       </CardContent>
     </Card>
@@ -77,7 +85,7 @@ export function ProfileContainer({ user }: ProfileContainerProps) {
             onSectionChange={setActiveSection}
           />
         </div>
-        <Card className="border h-250 w-450 flex justify-center items-center shadow-md">
+        <Card className="border h-250 w-380 flex justify-center items-center shadow-md">
           {innerCard}
         </Card>
       </div>

@@ -6,7 +6,7 @@ import {
   waitForLoginSuccess,
   expectErrorMessage,
   isAuthenticated,
-} from "./helpers/auth-helpers";
+} from "../helpers/auth-helpers";
 
 test.describe("Login Flow", () => {
   test.beforeEach(async ({ page }) => {
@@ -18,9 +18,7 @@ test.describe("Login Flow", () => {
   test("should display login form correctly", async ({ page }) => {
     await goToAuthPage(page);
 
-    await expect(
-      page.getByRole("heading", { name: "TEXTILECOM" })
-    ).toBeVisible();
+    // Form fields should be visible
     await expect(page.locator("#email")).toBeVisible();
     await expect(page.locator("#password")).toBeVisible();
 

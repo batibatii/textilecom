@@ -6,7 +6,7 @@ import {
   waitForLoginSuccess,
   expectErrorMessage,
   isAuthenticated,
-} from "./helpers/auth-helpers";
+} from "../helpers/auth-helpers";
 
 test.describe("Signup Flow", () => {
   test.beforeEach(async ({ page }) => {

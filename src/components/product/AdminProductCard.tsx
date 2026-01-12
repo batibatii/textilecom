@@ -31,6 +31,7 @@ interface AdminProductCardProps {
   onUpdate?: () => void;
   priority?: boolean;
   showMoveToDraft?: boolean;
+  mobileViewMode?: "grid" | "list";
 }
 
 export function AdminProductCard({
@@ -39,6 +40,7 @@ export function AdminProductCard({
   onUpdate,
   priority = false,
   showMoveToDraft = false,
+  mobileViewMode = "list",
 }: AdminProductCardProps) {
   const { user } = useAuth();
   const deleteOperation = useAsyncData();
@@ -134,7 +136,7 @@ export function AdminProductCard({
   };
 
   return (
-    <Card className="overflow-hidden transition-shadow shadow-none border-none p-4 w-full max-w-md mx-auto">
+    <Card className="overflow-hidden transition-shadow shadow-none border-none pt-1 w-full max-w-md mx-auto flex flex-col h-full">
       <div
         className="relative w-full aspect-3/4 bg-muted cursor-pointer group"
         onClick={editDrawer.openDialog}
@@ -162,28 +164,24 @@ export function AdminProductCard({
             No Image
           </div>
         )}
-        <Badge
-          variant={product.draft ? "secondary" : "default"}
-          className="absolute top-2 left-2"
-        >
-          {product.draft ? "DRAFT" : "APPROVED"}
-        </Badge>
-        {product.stock === 0 && (
-          <Badge
-            variant="destructive"
-            className="absolute top-2 right-2 font-semibold"
-          >
-            OUT OF STOCK
+        <div className="absolute top-2 left-2 flex flex-col gap-1">
+          <Badge variant={product.draft ? "secondary" : "default"}>
+            {product.draft ? "DRAFT" : "APPROVED"}
           </Badge>
-        )}
-        {product.stock > 0 && product.stock <= 3 && (
-          <Badge
-            variant="secondary"
-            className="absolute top-2 right-2 bg-amber-500 text-white hover:bg-amber-600 font-semibold"
-          >
-            LOW STOCK
-          </Badge>
-        )}
+          {product.stock === 0 && (
+            <Badge variant="destructive" className="font-semibold">
+              OUT OF STOCK
+            </Badge>
+          )}
+          {product.stock > 0 && product.stock <= 3 && (
+            <Badge
+              variant="secondary"
+              className="bg-amber-500 text-white hover:bg-amber-600 font-semibold"
+            >
+              LOW STOCK
+            </Badge>
+          )}
+        </div>
       </div>
       <div className="flex justify-end mt-2">
         <Button
@@ -196,13 +194,13 @@ export function AdminProductCard({
           </span>
         </Button>
       </div>
-      <div className="space-y-2">
+      <div className="flex flex-col grow space-y-2">
         <CardHeader className="p-0">
           <CardTitle className="font-light text-[12px] md:text-[13px] tracking-wider md:font-extralight w-full truncate">
             {product.title.toUpperCase()}
           </CardTitle>
         </CardHeader>
-        <CardContent className="p-0">
+        <CardContent className="p-0 flex flex-col grow">
           <div className="flex items-center justify-between gap-2 ">
             <div className="flex items-center gap-2">
               <PriceDisplay
@@ -227,10 +225,18 @@ export function AdminProductCard({
             }
             className="mt-4"
           />
-          <div className="flex gap-2 mt-6">
+          <div
+            className={`flex ${
+              mobileViewMode === "grid" ? "flex-col sm:flex-row" : "flex-row"
+            } gap-2 mt-auto pt-6`}
+          >
             <LoadingButton
               size="sm"
-              className="flex-1 rounded-none"
+              className={`flex-1 rounded-none ${
+                mobileViewMode === "grid"
+                  ? "text-[10px] sm:text-xs p-1"
+                  : "text-xs"
+              }`}
               onClick={handleApprove}
               disabled={!product.draft}
               loading={approveOperation.loading}
@@ -247,7 +253,11 @@ export function AdminProductCard({
                 <DialogTrigger asChild className="flex-1">
                   <Button
                     size="sm"
-                    className="flex-1 bg-background text-foreground rounded-none border border-black hover:bg-amber-900 hover:text-background"
+                    className={`flex-1 bg-background text-foreground rounded-none border border-black hover:bg-amber-900 hover:text-background ${
+                      mobileViewMode === "grid"
+                        ? "text-[10px] sm:text-xs p-1"
+                        : "text-xs"
+                    }`}
                   >
                     MOVE TO DRAFT
                   </Button>
@@ -295,7 +305,11 @@ export function AdminProductCard({
                 <DialogTrigger asChild className="flex-1">
                   <Button
                     size="sm"
-                    className="flex-1 bg-background text-foreground rounded-none border border-black hover:bg-destructive hover:text-background"
+                    className={`flex-1 bg-background text-foreground rounded-none border border-black hover:bg-destructive hover:text-background ${
+                      mobileViewMode === "grid"
+                        ? "text-[10px] sm:text-xs"
+                        : "text-xs"
+                    }`}
                   >
                     DELETE
                   </Button>

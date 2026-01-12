@@ -170,6 +170,19 @@ export function ProductDetailDialog({
                     onClick={handleToggleFavorite}
                     stroke="#000000"
                     strokeWidth={isProductFavorited ? "0" : "16"}
+                    role="button"
+                    aria-label={
+                      isProductFavorited
+                        ? "Remove from favorites"
+                        : "Add to favorites"
+                    }
+                    tabIndex={0}
+                    onKeyDown={(e: React.KeyboardEvent<SVGSVGElement>) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        handleToggleFavorite(e as unknown as React.MouseEvent);
+                      }
+                    }}
                   >
                     <path d="M184,32H72A16,16,0,0,0,56,48V224a8,8,0,0,0,12.24,6.78L128,193.43l59.77,37.35A8,8,0,0,0,200,224V48A16,16,0,0,0,184,32Z"></path>
                   </svg>
@@ -194,12 +207,17 @@ export function ProductDetailDialog({
                                 ? "border-gray-900 border-2 bg-gray-100"
                                 : "border-gray-300 hover:border-gray-900"
                             }`}
+                            aria-pressed={selectedSize === size}
+                            aria-label={`Size ${size}`}
                           >
                             {size}
                           </button>
                         ))
                       ) : (
-                        <button className="px-4 h-12 border border-gray-900  transition-colors flex items-center justify-center text-sm font-medium cursor-pointer">
+                        <button
+                          className="px-4 h-12 border border-gray-900  transition-colors flex items-center justify-center text-sm font-medium cursor-pointer"
+                          aria-label="One size"
+                        >
                           One Size
                         </button>
                       )}
@@ -211,6 +229,7 @@ export function ProductDetailDialog({
                       onClick={decreaseQuantity}
                       disabled={quantity <= 1}
                       className="w-10 h-10 border border-gray-300 hover:border-gray-900 transition-colors flex items-center justify-center text-lg font-medium cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                      aria-label="Decrease quantity"
                     >
                       −
                     </button>
@@ -221,6 +240,7 @@ export function ProductDetailDialog({
                       onClick={increaseQuantity}
                       disabled={quantity >= product.stock}
                       className="w-10 h-10 border border-gray-300 hover:border-gray-900 transition-colors flex items-center justify-center text-lg font-medium cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                      aria-label="Increase quantity"
                     >
                       +
                     </button>
