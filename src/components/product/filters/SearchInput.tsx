@@ -46,6 +46,7 @@ export function SearchInput({
         onChange={(e) => setLocalValue(e.target.value)}
         placeholder={placeholder}
         className="pl-10 pr-10 rounded-none"
+        aria-label={placeholder}
       />
       {localValue && (
         <Button
@@ -53,6 +54,7 @@ export function SearchInput({
           size="sm"
           onClick={handleClear}
           className="absolute right-1 top-1/2 transform -translate-y-1/2 h-7 w-7 p-0"
+          aria-label="Clear search"
         >
           <X className="w-4 h-4" />
         </Button>

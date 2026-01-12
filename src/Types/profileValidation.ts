@@ -1,9 +1,13 @@
 import { z } from "zod";
 
 export const PersonalInfoSchema = z.object({
-  email: z.string().email("Invalid email address"),
-  phoneCountryCode: z.string().min(1, "Country code is required"),
-  phoneNumber: z.string().min(1, "Phone number is required"),
+  email: z.email("Invalid email address"),
+  phoneCountryCode: z
+    .string()
+    .regex(/^\+\d{1,4}$/, "Country code must start with + and contain 1-4 digits (e.g., +1, +31)"),
+  phoneNumber: z
+    .string()
+    .regex(/^\d{7,15}$/, "Phone number must be 7-15 digits only"),
   addressLine1: z.string().min(1, "Address is required"),
   addressLine2: z.string().optional(),
   city: z.string().min(1, "City is required"),

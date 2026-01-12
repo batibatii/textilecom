@@ -12,7 +12,7 @@ const merriweather = Merriweather({
   weight: ["300", "400", "700", "900"],
 });
 
-export default function SignupLayout({
+export default function LoginPageLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;

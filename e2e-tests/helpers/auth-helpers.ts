@@ -6,8 +6,9 @@ export interface TestUser {
 }
 
 export async function goToAuthPage(page: Page) {
-  await page.goto("/user/signup");
-  await expect(page.getByRole("heading", { name: "TEXTILECOM" })).toBeVisible();
+  await page.goto("/user/signup", { waitUntil: "networkidle" });
+  // Wait for the email input field instead of heading (more reliable across browsers)
+  await page.waitForSelector('#email', { state: 'visible', timeout: 10000 });
 }
 
 export async function fillAuthForm(

@@ -42,7 +42,7 @@ test.describe("Product to Cart Flow", () => {
     const quantityDisplay = dialog.getByText(/^\d+$/);
     await expect(quantityDisplay).toHaveText("1");
 
-    const plusButton = dialog.getByRole("button", { name: "+" });
+    const plusButton = dialog.getByRole("button", { name: "Increase quantity" });
     await plusButton.click();
     await expect(quantityDisplay).toHaveText("2");
 
@@ -175,14 +175,15 @@ test.describe("Product to Cart Flow", () => {
       const dialog = page.getByRole("dialog");
       await expect(dialog.getByText("LOW STOCK")).toBeVisible();
 
-      const plusButton = dialog.getByRole("button", { name: "+" });
+      const plusButton = dialog.getByRole("button", { name: "Increase quantity" });
       const quantityDisplay = dialog.getByText(/^\d+$/);
 
+      const totalClickCount = 20;
       let clicks = 0;
-      while ((await plusButton.isEnabled()) && clicks < 20) {
+      while ((await plusButton.isEnabled()) && clicks < totalClickCount) {
         await plusButton.click();
         clicks++;
-        await page.waitForTimeout(200);
+        await expect(plusButton).toBeDisabled();
       }
 
       await expect(plusButton).toBeDisabled();
@@ -218,8 +219,8 @@ test.describe("Product to Cart Flow", () => {
 
     await expect(dialog.locator("img")).toBeVisible();
 
-    await expect(dialog.getByRole("button", { name: "−" })).toBeVisible();
-    await expect(dialog.getByRole("button", { name: "+" })).toBeVisible();
+    await expect(dialog.getByRole("button", { name: "Decrease quantity" })).toBeVisible();
+    await expect(dialog.getByRole("button", { name: "Increase quantity" })).toBeVisible();
 
     await expect(
       page.getByRole("button", { name: /add to cart/i })

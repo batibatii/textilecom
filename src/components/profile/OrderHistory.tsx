@@ -94,7 +94,7 @@ export function OrderHistory() {
                   {formatPrice(order.totals.total, order.totals.currency)}
                 </p>
                 <div
-                  className={`mt-1 inline-block px-2 py-1 rounded text-xs font-medium ${getStatusColor(
+                  className={`mt-1 inline-block px-2 py-1 rounded-none text-xs font-medium ${getStatusColor(
                     order.status
                   )}`}
                 >

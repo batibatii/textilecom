@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertTitle } from "@/components/ui/alert";
 import Image from "next/image";
+import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -159,9 +160,12 @@ export function SignUp({
 
       <div className="flex flex-col gap-12">
         <div>
-          <span className="pl-1 font-light text-[12px] md:text-sm md:font-extralight">
+          <Link
+            href="/user/forgot-password"
+            className="pl-1 font-light text-[12px] md:text-sm md:font-extralight hover:underline hover:text-foreground/80 transition-colors"
+          >
             Forget your password?
-          </span>
+          </Link>
         </div>
 
         <div className="flex flex-col gap-4">
@@ -196,7 +200,7 @@ export function SignUp({
       <Button
         type="button"
         onClick={onGoogleLogin}
-        className="bg-background text-foreground/70 border-foreground border hover:text-foreground/50 w-[97%]"
+        className="bg-background text-foreground/70 border-foreground border hover:bg-background hover:font-bold  w-[97%]"
       >
         <Image
           src="/images/googleIconSmall.svg"
