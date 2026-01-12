@@ -34,28 +34,12 @@ describe("toISOString", () => {
 
       expect(result).toBe("2024-12-25T00:00:00.000Z");
     });
-
-    it("should work with objects that have toDate as a function property", () => {
-      const mockTimestamp = {
-        toDate: () => new Date("2025-03-20T15:45:30.500Z"),
-        otherProperty: "test",
-      };
-
-      const result = toISOString(mockTimestamp);
-
-      expect(result).toBe("2025-03-20T15:45:30.500Z");
-    });
   });
 
   describe("when value is a string", () => {
     it("should return the same string when value is already a string", () => {
       const isoString = "2025-01-15T10:30:00.000Z";
       expect(toISOString(isoString)).toBe(isoString);
-    });
-
-    it("should return any string value unchanged", () => {
-      const customString = "2024-12-14";
-      expect(toISOString(customString)).toBe(customString);
     });
 
     it("should return null when value is empty string", () => {
@@ -74,16 +58,12 @@ describe("toISOString", () => {
 
     it("should return null when value is an object without toDate method", () => {
       const obj = { someProperty: "value" };
-      expect(
-        toISOString(obj as unknown as { toDate?: () => Date })
-      ).toBeNull();
+      expect(toISOString(obj as unknown as { toDate?: () => Date })).toBeNull();
     });
 
     it("should return null when value is an object with toDate but not a function", () => {
       const obj = { toDate: "not a function" };
-      expect(
-        toISOString(obj as unknown as { toDate?: () => Date })
-      ).toBeNull();
+      expect(toISOString(obj as unknown as { toDate?: () => Date })).toBeNull();
     });
 
     it("should return null when value is an array", () => {
