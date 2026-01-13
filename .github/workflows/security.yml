@@ -73,22 +73,24 @@ jobs:
         with:
           category: "/language:javascript-typescript"
 
-  secret-scanning:
-    name: Secret Scanning
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+secret-scanning:
+  name: Secret Scanning
+  runs-on: ubuntu-latest
+  if: github.event_name == 'pull_request'
+  steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
 
-      - name: TruffleHog Secret Scan
-        uses: trufflesecurity/trufflehog@main
-        with:
-          path: ./
-          base: ${{ github.event.repository.default_branch }}
-          head: HEAD
-          extra_args: --debug --only-verified
+    - name: TruffleHog Secret Scan
+      if: github.event.pull_request.base.sha != github.event.pull_request.head.sha
+      uses: trufflesecurity/trufflehog@main
+      with:
+        base: ${{ github.event.pull_request.base.sha }}
+        head: ${{ github.event.pull_request.head.sha }}
+        extra_args: --debug --only-verified
+
 
   outdated-dependencies:
     name: Check Outdated Dependencies
