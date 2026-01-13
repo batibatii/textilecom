@@ -73,11 +73,10 @@ jobs:
         with:
           category: "/language:javascript-typescript"
 
-secret-scanning:
-  name: Secret Scanning
-  runs-on: ubuntu-latest
-  if: github.event_name == 'pull_request'
-  steps:
+  secret-scanning:
+    name: Secret Scanning
+    runs-on: ubuntu-latest
+    steps:
     - name: Checkout code
       uses: actions/checkout@v4
       with:
