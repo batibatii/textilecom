@@ -11,9 +11,12 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import {
-  NativeSelect,
-  NativeSelectOption,
-} from "@/components/ui/native-select";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -274,26 +277,24 @@ export function UsersTable({ users }: UsersTableProps) {
                     </button>
                   </TableCell>
                   <TableCell>
-                    <NativeSelect
+                    <Select
                       value={user.role}
-                      onChange={(e) =>
-                        handleRoleChange(user.id, e.target.value)
+                      onValueChange={(value) =>
+                        handleRoleChange(user.id, value)
                       }
                       disabled={
                         saveOperation.loading || deleteOperation.loading
                       }
-                      className="w-[110px] sm:w-[140px] h-8 sm:h-9 text-xs sm:text-sm rounded-none"
                     >
-                      <NativeSelectOption value="customer">
-                        Customer
-                      </NativeSelectOption>
-                      <NativeSelectOption value="admin">
-                        Admin
-                      </NativeSelectOption>
-                      <NativeSelectOption value="superAdmin">
-                        Super Admin
-                      </NativeSelectOption>
-                    </NativeSelect>
+                      <SelectTrigger className="w-[110px] sm:w-[140px] h-8 sm:h-9 text-xs sm:text-sm">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="customer">Customer</SelectItem>
+                        <SelectItem value="admin">Admin</SelectItem>
+                        <SelectItem value="superAdmin">Super Admin</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </TableCell>
                   {isSuperAdmin && (
                     <TableCell className="hidden md:table-cell">

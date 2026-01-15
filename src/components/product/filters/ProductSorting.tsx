@@ -2,9 +2,12 @@
 
 import { SortOption } from "@/Types/filterTypes";
 import {
-  NativeSelect,
-  NativeSelectOption,
-} from "@/components/ui/native-select";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 
 interface ProductSortingProps {
@@ -15,21 +18,18 @@ interface ProductSortingProps {
 export function ProductSorting({ sortBy, onChange }: ProductSortingProps) {
   return (
     <div className="space-y-3 p-4 border rounded-none">
-      <Label className="font-semibold text-sm">Sort By</Label>
-      <NativeSelect
-        value={sortBy}
-        onChange={(e) => onChange(e.target.value as SortOption)}
-        className="w-full h-9 text-sm rounded-none"
-      >
-        <NativeSelectOption value="newest">Newest First</NativeSelectOption>
-        <NativeSelectOption value="oldest">Oldest First</NativeSelectOption>
-        <NativeSelectOption value="price-asc">
-          Price: Low to High
-        </NativeSelectOption>
-        <NativeSelectOption value="price-desc">
-          Price: High to Low
-        </NativeSelectOption>
-      </NativeSelect>
+      <Label htmlFor="product-sort" className="font-semibold text-sm">Sort By</Label>
+      <Select value={sortBy} onValueChange={onChange}>
+        <SelectTrigger className="w-full h-9 text-sm">
+          <SelectValue placeholder="Select sort order" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="newest">Newest First</SelectItem>
+          <SelectItem value="oldest">Oldest First</SelectItem>
+          <SelectItem value="price-asc">Price: Low to High</SelectItem>
+          <SelectItem value="price-desc">Price: High to Low</SelectItem>
+        </SelectContent>
+      </Select>
     </div>
   );
 }

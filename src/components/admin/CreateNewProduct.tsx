@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Card,
@@ -15,9 +15,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  NativeSelect,
-  NativeSelectOption,
-} from "@/components/ui/native-select";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { FormField } from "@/components/form/FormField";
 import { ErrorAlert } from "@/components/alert/ErrorAlert";
 import { SuccessAlert } from "@/components/alert/SuccessAlert";
@@ -52,6 +55,7 @@ export function CreateNewProduct() {
     register,
     handleSubmit,
     reset,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<ProductFormData>({
     resolver: zodResolver(ProductFormSchema),
@@ -184,41 +188,43 @@ export function CreateNewProduct() {
                     error={errors.currency}
                     className="w-20 md:w-32"
                   >
-                    <NativeSelect
-                      defaultValue=""
-                      {...register("currency")}
-                      className="h-8 md:h-9 text-xs md:text-sm border border-b-ring rounded-none"
-                    >
-                      <NativeSelectOption value="" disabled>
-                        Select
-                      </NativeSelectOption>
-                      <NativeSelectOption value="USD">
-                        $ (USD)
-                      </NativeSelectOption>
-                      <NativeSelectOption value="EUR">
-                        € (EUR)
-                      </NativeSelectOption>
-                      <NativeSelectOption value="TRY">
-                        ₺ (TRY)
-                      </NativeSelectOption>
-                    </NativeSelect>
+                    <Controller
+                      name="currency"
+                      control={control}
+                      render={({ field }) => (
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <SelectTrigger className="h-8 md:h-9 text-xs md:text-sm border border-b-ring">
+                            <SelectValue placeholder="Select" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="USD">$ (USD)</SelectItem>
+                            <SelectItem value="EUR">€ (EUR)</SelectItem>
+                            <SelectItem value="TRY">₺ (TRY)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      )}
+                    />
                   </FormField>
                 </div>
                 <div className="flex gap-3">
                   <FormField label="Tax Rate" error={errors.taxRate}>
-                    <NativeSelect
-                      defaultValue=""
-                      {...register("taxRate")}
-                      className="h-8 md:h-9 text-xs md:text-sm border-b border-b-ring rounded-none"
-                    >
-                      <NativeSelectOption value="" disabled>
-                        Select
-                      </NativeSelectOption>
-                      <NativeSelectOption value="%1">%1</NativeSelectOption>
-                      <NativeSelectOption value="%8">%8</NativeSelectOption>
-                      <NativeSelectOption value="%18">%18</NativeSelectOption>
-                      <NativeSelectOption value="%20">%20</NativeSelectOption>
-                    </NativeSelect>
+                    <Controller
+                      name="taxRate"
+                      control={control}
+                      render={({ field }) => (
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <SelectTrigger className="h-8 md:h-9 text-xs md:text-sm border-b border-b-ring">
+                            <SelectValue placeholder="Select" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="%1">%1</SelectItem>
+                            <SelectItem value="%8">%8</SelectItem>
+                            <SelectItem value="%18">%18</SelectItem>
+                            <SelectItem value="%20">%20</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      )}
+                    />
                   </FormField>
                   <FormField label="Images (Required)">
                     <Input
@@ -252,36 +258,44 @@ export function CreateNewProduct() {
             {currentPage === 3 && (
               <>
                 <FormField label="Category" error={errors.category}>
-                  <NativeSelect
-                    defaultValue=""
-                    {...register("category")}
-                    className="h-8 md:h-9 text-xs md:text-sm border-b border-b-ring rounded-none"
-                  >
-                    <NativeSelectOption value="" disabled>
-                      Select a category
-                    </NativeSelectOption>
-                    {PRODUCT_CATEGORIES.map((category) => (
-                      <NativeSelectOption key={category} value={category}>
-                        {category}
-                      </NativeSelectOption>
-                    ))}
-                  </NativeSelect>
+                  <Controller
+                    name="category"
+                    control={control}
+                    render={({ field }) => (
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <SelectTrigger className="h-8 md:h-9 text-xs md:text-sm border-b border-b-ring">
+                          <SelectValue placeholder="Select a category" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {PRODUCT_CATEGORIES.map((category) => (
+                            <SelectItem key={category} value={category}>
+                              {category}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
                 </FormField>
                 <FormField label="Gender" error={errors.sex}>
-                  <NativeSelect
-                    defaultValue=""
-                    {...register("sex")}
-                    className="h-8 md:h-9 text-xs md:text-sm border-b border-b-ring rounded-none"
-                  >
-                    <NativeSelectOption value="" disabled>
-                      Select gender
-                    </NativeSelectOption>
-                    {PRODUCT_SEX_OPTIONS.map((sex) => (
-                      <NativeSelectOption key={sex} value={sex}>
-                        {sex}
-                      </NativeSelectOption>
-                    ))}
-                  </NativeSelect>
+                  <Controller
+                    name="sex"
+                    control={control}
+                    render={({ field }) => (
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <SelectTrigger className="h-8 md:h-9 text-xs md:text-sm border-b border-b-ring">
+                          <SelectValue placeholder="Select gender" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {PRODUCT_SEX_OPTIONS.map((sex) => (
+                            <SelectItem key={sex} value={sex}>
+                              {sex}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
                 </FormField>
                 <FormField label="Stock" error={errors.stock}>
                   <Input

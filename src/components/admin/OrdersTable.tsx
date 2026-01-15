@@ -11,9 +11,12 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import {
-  NativeSelect,
-  NativeSelectOption,
-} from "@/components/ui/native-select";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Pagination,
   PaginationContent,
@@ -242,21 +245,21 @@ export function OrdersTable({ orders }: OrdersTableProps) {
                   {order.customerEmail}
                 </TableCell>
                 <TableCell>
-                  <NativeSelect
+                  <Select
                     value={order.status}
-                    onChange={(e) =>
-                      handleStatusChange(order.id, e.target.value)
+                    onValueChange={(value) =>
+                      handleStatusChange(order.id, value)
                     }
                     disabled={updateOperation.loading}
-                    className="w-[110px] sm:w-[140px] h-8 sm:h-9 text-xs sm:text-sm rounded-none"
                   >
-                    <NativeSelectOption value="processing">
-                      Processing
-                    </NativeSelectOption>
-                    <NativeSelectOption value="completed">
-                      Completed
-                    </NativeSelectOption>
-                  </NativeSelect>
+                    <SelectTrigger className="w-[110px] sm:w-[140px] h-8 sm:h-9 text-xs sm:text-sm">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="processing">Processing</SelectItem>
+                      <SelectItem value="completed">Completed</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </TableCell>
                 <TableCell className="text-xs sm:text-sm">
                   {formatPrice(order.total, order.currency)}
