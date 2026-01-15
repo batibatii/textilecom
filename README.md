@@ -30,7 +30,7 @@
 
 ### Mobile View
 
-![TextileCom Homepage - Mobile](document-media/hero-mobile.jpg)
+<img src="document-media/hero-mobile.jpg" alt="TextileCom Homepage - Mobile" height="400">
 
 ---
 
@@ -75,6 +75,8 @@ This project showcases proficiency in:
 
 #### **Checkout & Payment**
 
+![Checkout and Payment Flow](document-media/checkout-and-payment.gif)
+
 - **Stripe Checkout Integration** - Secure, hosted payment flow
 - **Address Validation** - Required shipping address before checkout
 - **Multi-Currency Support** - USD, EUR, TRY pricing
@@ -93,9 +95,11 @@ This project showcases proficiency in:
 
 ---
 
-### 🎛️ Admin Dashboardx
+### 🎛️ Admin Dashboard
 
 #### **Product Management**
+
+![Product Management](document-media/product-management.gif)
 
 - **Full CRUD Operations** - Create, read, update, delete products
 - **Image Upload** - Bulk upload to Vercel Blob storage with CDN integration
@@ -111,6 +115,8 @@ This project showcases proficiency in:
 - **Status Tracking** - Monitor order fulfillment progress
 
 #### **User Management**
+
+![User Management](document-media/user-management.gif)
 
 - **User Directory** - View all registered users with creation dates
 - **Role Assignment** - Grant customer, admin, or superAdmin privileges
@@ -309,7 +315,7 @@ npx playwright test e2e-tests/product-to-cart.spec.ts
 
 **Lighthouse Scores:**
 
-![Lighthouse Performance Scores](screenshots/lightouse.png)
+![Lighthouse Performance Scores](document-media/lighthouse.png)
 
 ### **4. Security Best Practices**
 
