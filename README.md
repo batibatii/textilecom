@@ -15,7 +15,7 @@
 [![Security & Code Quality](https://github.com/batibatii/textilecom/actions/workflows/security.yml/badge.svg)](https://github.com/batibatii/textilecom/actions/workflows/security.yml)
 ![Deployed on](https://img.shields.io/badge/Deployed_on-Vercel-000000?logo=vercel&logoColor=white)
 
-**[Live Demo](https://textilecom.vercel.app/) | [Video Walkthrough (Desktop)](https://www.youtube.com/watch?v=MZkeSVyoWs8) | [Architecture Docs](./ARCHITECTURE.md) | [Backend Microservice](https://github.com/batibatii/textilecom-webhook-receiver)**
+**[Live Demo](https://textilecom.vercel.app/) | [Video Walkthrough (Desktop)](https://www.youtube.com/watch?v=MZkeSVyoWs8) | [Video Walkthrough (Mobile)](https://www.youtube.com/watch?v=aagoAHvw9hc) | [Architecture Docs](./ARCHITECTURE.md) | [Backend Microservice](https://github.com/batibatii/textilecom-webhook-receiver)**
 
 ### Desktop View
 
@@ -148,7 +148,6 @@ This project showcases proficiency in:
 - **[Jest 30](https://jestjs.io)** - Unit testing framework
 - **[Playwright 1.57](https://playwright.dev)** - End-to-end testing
 - **[GitHub Actions](https://github.com/features/actions)** - CI/CD pipeline automation
-- **[Turbopack](https://turbo.build/pack)** - Fast bundler for Next.js
 
 ---
 
