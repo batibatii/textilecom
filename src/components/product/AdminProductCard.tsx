@@ -253,7 +253,7 @@ export function AdminProductCard({
                 <DialogTrigger asChild className="flex-1">
                   <Button
                     size="sm"
-                    className={`flex-1 bg-background text-foreground rounded-none border border-black hover:bg-amber-900 hover:text-background ${
+                    className={`flex-1 bg-background text-foreground rounded-none border border-black hover:bg-amber-900 hover:text-background active:bg-amber-900 active:text-background ${
                       mobileViewMode === "grid"
                         ? "text-[10px] sm:text-xs p-1"
                         : "text-xs"
@@ -305,7 +305,7 @@ export function AdminProductCard({
                 <DialogTrigger asChild className="flex-1">
                   <Button
                     size="sm"
-                    className={`flex-1 bg-background text-foreground rounded-none border border-black hover:bg-destructive hover:text-background ${
+                    className={`flex-1 bg-background text-foreground rounded-none border border-black hover:bg-destructive hover:text-background active:bg-destructive active:text-background ${
                       mobileViewMode === "grid"
                         ? "text-[10px] sm:text-xs"
                         : "text-xs"

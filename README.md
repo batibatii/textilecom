@@ -15,7 +15,7 @@
 [![Security & Code Quality](https://github.com/batibatii/textilecom/actions/workflows/security.yml/badge.svg)](https://github.com/batibatii/textilecom/actions/workflows/security.yml)
 ![Deployed on](https://img.shields.io/badge/Deployed_on-Vercel-000000?logo=vercel&logoColor=white)
 
-**[Live Demo](https://textilecom.vercel.app/) | [Video Walkthrough](#) | [Architecture Docs](./ARCHITECTURE.md) | [Backend Microservice](../textilecom-express)**
+**[Live Demo](https://textilecom.vercel.app/) | [Video Walkthrough (Desktop)](https://www.youtube.com/watch?v=MZkeSVyoWs8) | [Architecture Docs](./ARCHITECTURE.md) | [Backend Microservice](https://github.com/batibatii/textilecom-webhook-receiver)**
 
 ### Desktop View
 
