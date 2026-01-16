@@ -1,28 +1,21 @@
 # TextileCom - Modern E-Commerce Platform
 
-> A full-stack, production-ready e-commerce application built with Next.js 15, React 19, TypeScript, Firebase, and Stripe
+> A full-stack e-commerce application built with Next.js 15, React 19, TypeScript, Firebase, and Stripe, following production best practices.
 
-## 🏗️ Tech Stack
+![Next.js](https://img.shields.io/badge/Next.js-15.5.7-black?logo=next.js&logoColor=white)
+![React](https://img.shields.io/badge/React-19.1.0-61DAFB?logo=react&logoColor=black)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-38B2AC?logo=tailwind-css&logoColor=white)
+![Firebase](https://img.shields.io/badge/Firebase-12.4.0-FFCA28?logo=firebase&logoColor=black)
+![Stripe](https://img.shields.io/badge/Stripe-19.3.0-008CDD?logo=stripe&logoColor=white)
+![Zod](https://img.shields.io/badge/Zod-4.1.12-3E67B1?logo=zod&logoColor=white)
+![React Hook Form](https://img.shields.io/badge/React_Hook_Form-7.65-EC5990?logo=reacthookform&logoColor=white)
+![Radix UI](https://img.shields.io/badge/Radix_UI-Components-161618?logo=radix-ui&logoColor=white)
+[![CI Pipeline](https://github.com/batibatii/textilecom/actions/workflows/ci.yml/badge.svg)](https://github.com/batibatii/textilecom/actions/workflows/ci.yml)
+[![Security & Code Quality](https://github.com/batibatii/textilecom/actions/workflows/security.yml/badge.svg)](https://github.com/batibatii/textilecom/actions/workflows/security.yml)
+![Deployed on](https://img.shields.io/badge/Deployed_on-Vercel-000000?logo=vercel&logoColor=white)
 
-![Next.js](https://img.shields.io/badge/Next.js-15.5.7-black?style=for-the-badge&logo=next.js&logoColor=white)
-![React](https://img.shields.io/badge/React-19.1.0-61DAFB?style=for-the-badge&logo=react&logoColor=black)
-![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
-![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
-
-![Firebase](https://img.shields.io/badge/Firebase-12.4.0-FFCA28?style=for-the-badge&logo=firebase&logoColor=black)
-![Stripe](https://img.shields.io/badge/Stripe-19.3.0-008CDD?style=for-the-badge&logo=stripe&logoColor=white)
-![Vercel](https://img.shields.io/badge/Vercel-Blob-000000?style=for-the-badge&logo=vercel&logoColor=white)
-
-![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-CI%2FCD-2088FF?style=for-the-badge&logo=github-actions&logoColor=white)
-![ESLint](https://img.shields.io/badge/ESLint-9-4B32C3?style=for-the-badge&logo=eslint&logoColor=white)
-![Jest](https://img.shields.io/badge/Jest-30-C21325?style=for-the-badge&logo=jest&logoColor=white)
-![Playwright](https://img.shields.io/badge/Playwright-1.57-2EAD33?style=for-the-badge&logo=playwright&logoColor=white)
-
-![Zod](https://img.shields.io/badge/Zod-4.1.12-3E67B1?style=for-the-badge&logo=zod&logoColor=white)
-![React Hook Form](https://img.shields.io/badge/React_Hook_Form-7.65-EC5990?style=for-the-badge&logo=reacthookform&logoColor=white)
-![Radix UI](https://img.shields.io/badge/Radix_UI-Components-161618?style=for-the-badge&logo=radix-ui&logoColor=white)
-
-**[Live Demo](https://textilecom.vercel.app/) | [Video Walkthrough](#) | [Architecture Docs](./ARCHITECTURE.md)**
+**[Live Demo](https://textilecom.vercel.app/) | [Video Walkthrough](#) | [Architecture Docs](./ARCHITECTURE.md) | [Backend Microservice](../textilecom-express)**
 
 ### Desktop View
 
@@ -108,6 +101,8 @@ This project showcases proficiency in:
 - **Rich Product Data** - Title, description, brand, serial number, pricing, tax rate, category, gender
 
 #### **Order Management**
+
+![Order Management](document-media/order-management.gif)
 
 - **Orders Dashboard** - Table view with search, filter, and pagination
 - **Order Details** - Full customer info, line items, totals, tax breakdowns
