@@ -179,7 +179,7 @@ export function Favorites({ user }: FavoritesProps) {
                     loading={deleteOperation.loading}
                     loadingText="DELETING..."
                     size="sm"
-                    className="w-full text-sm h-9 bg-background text-foreground rounded-none border border-black hover:bg-destructive hover:text-background"
+                    className="w-full text-sm h-9 bg-background text-foreground rounded-none border border-black hover:bg-destructive hover:text-background active:bg-destructive active:text-background"
                   >
                     DELETE
                   </LoadingButton>
