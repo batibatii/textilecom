@@ -29,7 +29,7 @@
 
 ## 🎯 Overview
 
-**TextileCom** is a feature-complete e-commerce platform for clothing and apparel that demonstrates modern full-stack development with type-safe architecture, seamless payment processing, and production-grade performance.
+**TextileCom** is a feature-complete e-commerce platform for clothing and apparel that demonstrates modern full-stack development with type-safe architecture, seamless payment processing, and performance.
 
 This project showcases proficiency in:
 
@@ -38,7 +38,7 @@ This project showcases proficiency in:
 - 🔐 **Authentication & Authorization** - Firebase Auth with role-based access control
 - ♿ **Accessibility-First Development** - WCAG 2.1 AA compliant with Radix UI primitives
 - ⚡ **Performance Optimization** - Infinite scroll, image optimization, caching strategies
-- 🧪 **Production-Ready Code** - TypeScript, Zod validation, Jest + Playwright testing
+- 🧪 **Testing & Validation** - TypeScript, Zod schemas, Jest + Playwright tests
 
 ---
 
